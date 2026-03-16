@@ -92,4 +92,4 @@ title: Карта связей
 </div>
 
 <script src="https://unpkg.com/force-graph"></script>
-<script src="/static/js/network.js?v=10"></script>
+<script src="./static/js/network.js?v=10"></script>
