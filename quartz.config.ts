@@ -1,5 +1,6 @@
 import { QuartzConfig } from "./quartz/cfg"
 import * as Plugin from "./quartz/plugins"
+import NetworkGraph from "./components/NetworkGraph"
 
 /**
  * Quartz 4 Configuration

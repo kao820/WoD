@@ -68,6 +68,18 @@ type TweenNode = {
   stop: () => void
 }
 
+function getNodeColor(node: NodeData): string {
+  const path = node.id.toLowerCase()
+
+  if (path.includes("персонажи")) return "#4f8cff"
+  if (path.includes("фракции")) return "#ff5c5c"
+  if (path.includes("локации")) return "#37c871"
+  if (path.includes("серии")) return "#ffd166"
+  if (path.includes("события")) return "#c77dff"
+
+  return "#888888"
+}
+
 async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const slug = simplifySlug(fullSlug)
   const visited = getVisited()
@@ -126,7 +138,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const wl: (SimpleSlug | "__SENTINEL")[] = [slug, "__SENTINEL"]
   if (depth >= 0) {
     while (depth >= 0 && wl.length > 0) {
-      // compute neighbours
       const cur = wl.shift()!
       if (cur === "__SENTINEL") {
         depth--
@@ -151,6 +162,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       tags: data.get(url)?.tags ?? [],
     }
   })
+
   const graphData: { nodes: NodeData[]; links: LinkData[] } = {
     nodes,
     links: links
@@ -164,7 +176,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const width = graph.offsetWidth
   const height = Math.max(graph.offsetHeight, 250)
 
-  // we virtualize the simulation and use pixi to actually render it
   const simulation: Simulation<NodeData, LinkData> = forceSimulation<NodeData>(graphData.nodes)
     .force("charge", forceManyBody().strength(-100 * repelForce))
     .force("center", forceCenter().strength(centerForce))
@@ -174,7 +185,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const radius = (Math.min(width, height) / 2) * 0.8
   if (enableRadial) simulation.force("radial", forceRadial(radius).strength(0.2))
 
-  // precompute style prop strings as pixi doesn't support css variables
   const cssVars = [
     "--secondary",
     "--tertiary",
@@ -185,6 +195,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     "--darkgray",
     "--bodyFont",
   ] as const
+
   const computedStyleMap = cssVars.reduce(
     (acc, key) => {
       acc[key] = getComputedStyle(document.documentElement).getPropertyValue(key)
@@ -193,16 +204,12 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     {} as Record<(typeof cssVars)[number], string>,
   )
 
-  // calculate color
-  const color = (d: NodeData) => {
-    const isCurrent = d.id === slug
-    if (isCurrent) {
-      return computedStyleMap["--secondary"]
-    } else if (visited.has(d.id) || d.id.startsWith("tags/")) {
-      return computedStyleMap["--tertiary"]
-    } else {
-      return computedStyleMap["--gray"]
+  const color = (node: NodeData) => {
+    if (node.id.startsWith("tags/")) {
+      return computedStyleMap["--light"]
     }
+
+    return getNodeColor(node)
   }
 
   function nodeRadius(d: NodeData) {
@@ -216,6 +223,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   let hoveredNeighbours: Set<string> = new Set()
   const linkRenderData: LinkRenderData[] = []
   const nodeRenderData: NodeRenderData[] = []
+
   function updateHoverInfo(newHoveredId: string | null) {
     hoveredNodeId = newHoveredId
 
@@ -256,8 +264,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     for (const l of linkRenderData) {
       let alpha = 1
 
-      // if we are hovering over a node, we want to highlight the immediate neighbours
-      // with full alpha and the rest with default alpha
       if (hoveredNodeId) {
         alpha = l.active ? 1 : 0.2
       }
@@ -323,7 +329,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
     for (const n of nodeRenderData) {
       let alpha = 1
 
-      // if we are hovering over a node, we want to highlight the immediate neighbours
       if (hoveredNodeId !== null && focusOnHover) {
         alpha = n.active ? 1 : 0.2
       }
@@ -391,6 +396,8 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
 
     let oldLabelOpacity = 0
     const isTagNode = nodeId.startsWith("tags/")
+    const nodeColor = color(n)
+
     const gfx = new Graphics({
       interactive: true,
       label: nodeId,
@@ -399,7 +406,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       cursor: "pointer",
     })
       .circle(0, 0, nodeRadius(n))
-      .fill({ color: isTagNode ? computedStyleMap["--light"] : color(n) })
+      .fill({ color: nodeColor })
       .on("pointerover", (e) => {
         updateHoverInfo(e.target.label)
         oldLabelOpacity = label.alpha
@@ -426,7 +433,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       simulationData: n,
       gfx,
       label,
-      color: color(n),
+      color: nodeColor,
       alpha: 1,
       active: false,
     }
@@ -479,7 +486,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
           event.subject.fy = null
           dragging = false
 
-          // if the time between mousedown and mouseup is short, we consider it a click
           if (Date.now() - dragStartTime < 500) {
             const node = graphData.nodes.find((n) => n.id === event.subject.id) as NodeData
             const targ = resolveRelative(fullSlug, node.id)
@@ -509,7 +515,6 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
           stage.scale.set(transform.k, transform.k)
           stage.position.set(transform.x, transform.y)
 
-          // zoom adjusts opacity of labels too
           const scale = transform.k * opacityScale
           let scaleOpacity = Math.max((scale - 1) / 3.75, 0)
           const activeNodes = nodeRenderData.filter((n) => n.active).flatMap((n) => n.label)
@@ -526,6 +531,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   let stopAnimation = false
   function animate(time: number) {
     if (stopAnimation) return
+
     for (const n of nodeRenderData) {
       const { x, y } = n.simulationData
       if (!x || !y) continue
