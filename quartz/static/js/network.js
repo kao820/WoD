@@ -5,7 +5,7 @@
 
   if (!graphEl || !controlsEl) return
 
-  const res = await fetch("/static/contentIndex.json")
+  const res = await fetch("/WoD/static/contentIndex.json")
   const index = await res.json()
 
   function getType(slug) {
