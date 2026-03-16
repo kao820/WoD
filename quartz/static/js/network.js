@@ -13,6 +13,17 @@
     let didInitialZoom = false
     let userMovedNode = false
 
+    // Determine whether the site is in dark mode by checking the `dark` class on the html element.
+    const isDarkMode = document.documentElement.classList.contains("dark")
+    const style = {
+      linkNormal: isDarkMode ? "rgba(200,200,200,0.2)" : "rgba(120,120,120,0.25)",
+      linkHighlight: isDarkMode ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)",
+      textNormal: isDarkMode ? "#f3f4f6" : "#222222",
+      textDim: isDarkMode ? "#9ca3af" : "#9ca3af",
+      nodeSelected: isDarkMode ? "#facc15" : "#111111",
+      nodeDim: isDarkMode ? "rgba(255,255,255,0.2)" : "#e5e7eb",
+    }
+
     fetch(new URL("static/contentIndex.json", window.location.href))
       .then((res) => res.json())
       .then((index) => {
@@ -215,9 +226,9 @@
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false)
 
             if (isSelected) {
-              ctx.fillStyle = "#111111"
+              ctx.fillStyle = style.nodeSelected
             } else if (isDimmed) {
-              ctx.fillStyle = "#e5e7eb"
+              ctx.fillStyle = style.nodeDim
             } else {
               ctx.fillStyle = node.color
             }
@@ -227,15 +238,15 @@
             const fontSize = Math.max(10 / globalScale, 4)
             if (globalScale >= 6 || isSelected) {
               ctx.font = `${fontSize}px Sans-Serif`
-              ctx.fillStyle = isDimmed ? "#9ca3af" : "#222222"
+              ctx.fillStyle = isDimmed ? style.textDim : style.textNormal
               ctx.fillText(node.label, node.x + 8, node.y + 3)
             }
           })
           .linkColor((link) => {
-            if (!state.selectedNodeId) return "rgba(120,120,120,0.25)"
+            if (!state.selectedNodeId) return style.linkNormal
             return highlightLinkKeys.has(linkKey(link))
-              ? "rgba(0,0,0,0.8)"
-              : "rgba(200,200,200,0.15)"
+              ? style.linkHighlight
+              : style.linkNormal
           })
           .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.5 : 1))
           .cooldownTicks(320)
