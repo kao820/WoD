@@ -15,13 +15,15 @@
 
     // Determine whether the site is in dark mode by checking the `dark` class on the html element.
     const isDarkMode = document.documentElement.classList.contains("dark")
+    // Colour palette tuned for dark/light modes. We use brighter colours for
+    // dark mode so text and lines remain readable against the dark background.
     const style = {
-      linkNormal: isDarkMode ? "rgba(200,200,200,0.2)" : "rgba(120,120,120,0.25)",
-      linkHighlight: isDarkMode ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)",
-      textNormal: isDarkMode ? "#f3f4f6" : "#222222",
-      textDim: isDarkMode ? "#9ca3af" : "#9ca3af",
+      linkNormal: isDarkMode ? "rgba(150,150,150,0.3)" : "rgba(120,120,120,0.25)",
+      linkHighlight: isDarkMode ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.8)",
+      textNormal: isDarkMode ? "#e5e7eb" : "#222222",
+      textDim: isDarkMode ? "#94a3b8" : "#9ca3af",
       nodeSelected: isDarkMode ? "#facc15" : "#111111",
-      nodeDim: isDarkMode ? "rgba(255,255,255,0.2)" : "#e5e7eb",
+      nodeDim: isDarkMode ? "rgba(255,255,255,0.3)" : "#e5e7eb",
     }
 
     fetch(new URL("static/contentIndex.json", window.location.href))
@@ -338,6 +340,12 @@
   }
 
   window.addEventListener("pageshow", initNetworkGraph)
+
+  // Quartz dispatches a custom "nav" event on SPA navigations. Listen for this
+  // event so we can re-initialize the graph when navigating between pages
+  // without requiring a full reload. See Quartz docs:
+  // https://quartz.jzhao.xyz/advanced/creating-components#scripts-and-interactivity
+  document.addEventListener("nav", initNetworkGraph)
 
   const observer = new MutationObserver(() => {
     if (document.getElementById("network-graph")) {
