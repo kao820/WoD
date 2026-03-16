@@ -7,15 +7,13 @@
     const searchEl = document.getElementById("network-search")
 
     if (!graphEl || !controlsEl) return
-
-    // не инициализируем повторно один и тот же DOM-узел
     if (initializedFor === graphEl) return
     initializedFor = graphEl
 
     let didInitialZoom = false
     let userMovedNode = false
 
-    fetch("/static/contentIndex.json")
+    fetch(new URL("static/contentIndex.json", window.location.href))
       .then((res) => res.json())
       .then((index) => {
         function getType(slug) {
@@ -198,7 +196,7 @@
         const graph = ForceGraph()(graphEl)
           .width(graphEl.clientWidth)
           .height(graphEl.clientHeight)
-          .backgroundColor("#ffffff")
+          .backgroundColor(getComputedStyle(graphEl).backgroundColor || "#111827")
           .nodeId("id")
           .nodeLabel((node) => `${node.label} (${node.type})`)
           .nodeVal((node) => {
@@ -322,17 +320,14 @@
       })
   }
 
-  // обычная загрузка
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initNetworkGraph)
   } else {
     initNetworkGraph()
   }
 
-  // если Quartz подменяет контент без полного reload
   window.addEventListener("pageshow", initNetworkGraph)
 
-  // запасной вариант: следим за появлением блока карты
   const observer = new MutationObserver(() => {
     if (document.getElementById("network-graph")) {
       initNetworkGraph()
