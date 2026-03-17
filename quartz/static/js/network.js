@@ -1,8 +1,6 @@
 (function () {
-  // Чтобы не инициализировать граф дважды
   let initializedFor = null;
 
-  // Основная функция инициализации
   function initNetworkGraph() {
     const graphEl = document.getElementById("network-graph");
     const controlsEl = document.getElementById("network-controls");
@@ -15,19 +13,26 @@
     let didInitialZoom = false;
     let userMovedNode = false;
 
-    // Определяем, активна ли тёмная тема
-    const isDarkMode = document.documentElement.classList.contains("dark");
-    // Параметры цвета для светлой и тёмной тем
-    const style = {
-      linkNormal: isDarkMode ? "rgba(200,200,200,0.35)" : "rgba(120,120,120,0.25)",
-      linkHighlight: isDarkMode ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.8)",
-      textNormal: isDarkMode ? "#f1f5f9" : "#222222",
-      textDim: isDarkMode ? "#cbd5e1" : "#9ca3af",
-      nodeSelected: isDarkMode ? "#fbbf24" : "#111111",
-      nodeDim: isDarkMode ? "rgba(255,255,255,0.35)" : "#e5e7eb",
-    };
+    // Возвращает объект с цветами в зависимости от сохранённой темы.
+    function computeStyle() {
+      const savedTheme = document.documentElement.getAttribute("saved-theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const isDarkMode = savedTheme === "dark" || (!savedTheme && prefersDark);
 
-    // Формируем базовый путь к статическим файлам для GitHub Pages
+      return {
+        linkNormal: isDarkMode ? "rgba(200,200,200,0.35)" : "rgba(120,120,120,0.25)",
+        linkHighlight: isDarkMode ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.8)",
+        textNormal: isDarkMode ? "#f1f5f9" : "#222222",
+        textDim: isDarkMode ? "#94a3af" : "#9ca3af",
+        nodeSelected: isDarkMode ? "#fbbf24" : "#111111",
+        nodeDim: isDarkMode ? "rgba(255,255,255,0.35)" : "#e5e7eb",
+      };
+    }
+
+    // текущая палитра
+    let style = computeStyle();
+
+    // вычисляем базовый путь для файла contentIndex.json
     const host = window.location.hostname;
     let basePath = "";
     if (host.endsWith("github.io")) {
@@ -36,11 +41,10 @@
     }
     const contentIndexUrl = `${basePath}/static/contentIndex.json`;
 
-    // Загружаем индекс контента и строим граф
     fetch(contentIndexUrl)
       .then((res) => res.json())
       .then((index) => {
-        // Функция для определения типа узла по его slug
+        // Определяем тип узла по его slug
         function getType(slug) {
           if (slug.startsWith("04-Персонажи/Игроки/")) return "player";
           if (slug.startsWith("04-Персонажи/НПС/Живы/")) return "npc_alive";
@@ -59,22 +63,34 @@
         // Цвет узла в зависимости от типа
         function getColor(type) {
           switch (type) {
-            case "player": return "#2563eb";
-            case "npc_alive": return "#60a5fa";
-            case "npc_dead": return "#9ca3af";
-            case "faction": return "#ef4444";
-            case "location": return "#22c55e";
-            case "episode": return "#f59e0b";
-            case "event": return "#a855f7";
-            case "season": return "#f97316";
-            case "chronicle": return "#06b6d4";
-            case "reference": return "#6b7280";
-            case "index": return "#111827";
-            default: return "#6b7280";
+            case "player":
+              return "#2563eb";
+            case "npc_alive":
+              return "#60a5fa";
+            case "npc_dead":
+              return "#9ca3af";
+            case "faction":
+              return "#ef4444";
+            case "location":
+              return "#22c55e";
+            case "episode":
+              return "#f59e0b";
+            case "event":
+              return "#a855f7";
+            case "season":
+              return "#f97316";
+            case "chronicle":
+              return "#06b6d4";
+            case "reference":
+              return "#6b7280";
+            case "index":
+              return "#111827";
+            default:
+              return "#6b7280";
           }
         }
 
-        // Собираем список узлов
+        // Формируем список узлов
         const rawNodes = [];
         const existingIds = new Set();
         for (const [slug, page] of Object.entries(index)) {
@@ -88,7 +104,7 @@
           });
         }
 
-        // Собираем список связей
+        // Формируем список связей
         const rawLinks = [];
         const seenLinks = new Set();
         for (const [slug, page] of Object.entries(index)) {
@@ -101,7 +117,7 @@
           }
         }
 
-        // Структура смежности для поиска соседних узлов
+        // Структура смежности
         const adjacency = new Map();
         rawNodes.forEach((n) => adjacency.set(n.id, new Set()));
         rawLinks.forEach((l) => {
@@ -109,7 +125,7 @@
           adjacency.get(l.target)?.add(l.source);
         });
 
-        // Первоначальное состояние фильтров и выделений
+        // Начальное состояние фильтров и выделений
         const state = {
           types: {
             player: true,
@@ -130,7 +146,7 @@
           isolatedMode: true,
         };
 
-        // Заполняем панель чекбоксов
+        // Заполняем панель фильтров
         controlsEl.innerHTML = `
           <label><input type="checkbox" data-type="player" checked> Игроки</label>
           <label><input type="checkbox" data-type="npc_alive" checked> НПС живые</label>
@@ -144,17 +160,18 @@
           <label><input type="checkbox" data-type="reference"> Справка</label>
         `;
 
-        // Текущие выделенные узлы и связи
+        // Наборы выделенных узлов и связей
         let highlightNodeIds = new Set();
         let highlightLinkKeys = new Set();
 
+        // Строка-ключ для связи
         function linkKey(link) {
           const s = typeof link.source === "object" ? link.source.id : link.source;
           const t = typeof link.target === "object" ? link.target.id : link.target;
           return `${s}→${t}`;
         }
 
-        // Пересчитываем выделения при клике или поиске
+        // Пересчитываем выделения узлов и связей
         function rebuildHighlights() {
           highlightNodeIds = new Set();
           highlightLinkKeys = new Set();
@@ -206,7 +223,7 @@
           };
         }
 
-        // Создаём граф через библиотеку force-graph
+        // Создаём граф
         const graph = ForceGraph()(graphEl)
           .width(graphEl.clientWidth)
           .height(graphEl.clientHeight)
@@ -221,7 +238,8 @@
           .nodeCanvasObject((node, ctx, globalScale) => {
             const isSelected = state.selectedNodeId === node.id;
             const isHighlighted = highlightNodeIds.has(node.id);
-            const isDimmed = !state.isolatedMode && state.selectedNodeId && !isHighlighted;
+            const isDimmed =
+              !state.isolatedMode && state.selectedNodeId && !isHighlighted;
 
             const radius = isSelected ? 5.2 : isHighlighted ? 4.2 : 2.8;
 
@@ -246,7 +264,9 @@
           })
           .linkColor((link) => {
             if (!state.selectedNodeId) return style.linkNormal;
-            return highlightLinkKeys.has(linkKey(link)) ? style.linkHighlight : style.linkNormal;
+            return highlightLinkKeys.has(linkKey(link))
+              ? style.linkHighlight
+              : style.linkNormal;
           })
           .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.5 : 1))
           .cooldownTicks(320)
@@ -261,8 +281,12 @@
               graph.zoom(2.2, 400);
             }, 50);
           })
-          .onNodeDrag(() => { userMovedNode = true; })
-          .onNodeDragEnd(() => { userMovedNode = true; })
+          .onNodeDrag(() => {
+            userMovedNode = true;
+          })
+          .onNodeDragEnd(() => {
+            userMovedNode = true;
+          })
           .onBackgroundClick(() => {
             state.selectedNodeId = null;
             rebuildHighlights();
@@ -291,17 +315,19 @@
         }
 
         // Чекбоксы фильтров
-        controlsEl.querySelectorAll("input[type=checkbox]").forEach((input) => {
-          input.addEventListener("change", (e) => {
-            const type = e.target.dataset.type;
-            state.types[type] = e.target.checked;
-            state.selectedNodeId = null;
-            rebuildHighlights();
-            render();
+        controlsEl
+          .querySelectorAll("input[type=checkbox]")
+          .forEach((input) => {
+            input.addEventListener("change", (e) => {
+              const type = e.target.dataset.type;
+              state.types[type] = e.target.checked;
+              state.selectedNodeId = null;
+              rebuildHighlights();
+              render();
+            });
           });
-        });
 
-        // Поле поиска
+        // Поиск
         if (searchEl) {
           searchEl.addEventListener("input", (e) => {
             state.search = e.target.value || "";
@@ -311,7 +337,7 @@
           });
         }
 
-        // Изменение размеров окна
+        // Масштабирование при изменении размеров
         window.addEventListener("resize", () => {
           graph.width(graphEl.clientWidth);
           graph.height(graphEl.clientHeight);
@@ -322,6 +348,12 @@
           }, 100);
         });
 
+        // Слушаем событие смены темы и обновляем палитру
+        document.addEventListener("themechange", () => {
+          style = computeStyle();
+          render();
+        });
+
         render();
       })
       .catch((err) => {
@@ -329,7 +361,7 @@
       });
   }
 
-  // Инициализация при различных событиях
+  // Инициализируем граф при загрузке DOM, при возврате на страницу и при SPA-навигации.
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initNetworkGraph);
   } else {
@@ -338,7 +370,7 @@
   window.addEventListener("pageshow", initNetworkGraph);
   document.addEventListener("nav", initNetworkGraph);
 
-  // На случай динамического появления #network-graph в DOM
+  // Отслеживаем появление элемента #network-graph динамически
   const observer = new MutationObserver(() => {
     if (document.getElementById("network-graph")) {
       initNetworkGraph();
