@@ -13,20 +13,31 @@
     let didInitialZoom = false
     let userMovedNode = false
 
-    // Determine whether the site is in dark mode by checking the `dark` class on the html element.
+    // Определяем, активен ли тёмный режим, по классу `dark` на html.
     const isDarkMode = document.documentElement.classList.contains("dark")
-    // Colour palette tuned for dark/light modes. We use brighter colours for
-    // dark mode so text and lines remain readable against the dark background.
+    // Подбор ярких/темных цветов для разных режимов. Значения можно менять на свой вкус.
     const style = {
-      linkNormal: isDarkMode ? "rgba(150,150,150,0.3)" : "rgba(120,120,120,0.25)",
-      linkHighlight: isDarkMode ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.8)",
-      textNormal: isDarkMode ? "#e5e7eb" : "#222222",
-      textDim: isDarkMode ? "#94a3b8" : "#9ca3af",
-      nodeSelected: isDarkMode ? "#facc15" : "#111111",
-      nodeDim: isDarkMode ? "rgba(255,255,255,0.3)" : "#e5e7eb",
+      linkNormal: isDarkMode ? "rgba(200,200,200,0.35)" : "rgba(120,120,120,0.25)",
+      linkHighlight: isDarkMode ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.8)",
+      textNormal: isDarkMode ? "#f1f5f9" : "#222222",
+      textDim: isDarkMode ? "#cbd5e1" : "#9ca3af",
+      nodeSelected: isDarkMode ? "#fbbf24" : "#111111",
+      nodeDim: isDarkMode ? "rgba(255,255,255,0.35)" : "#e5e7eb",
     }
 
-    fetch(new URL("static/contentIndex.json", window.location.href))
+    // Формируем корректный путь до contentIndex.json.
+    // На GitHub Pages используется подкаталог (например, /WoD/), поэтому берём
+    // первый сегмент пути как имя репозитория. В локальной разработке путь пустой.
+    const host = window.location.hostname
+    let basePath = ""
+    if (host.endsWith("github.io")) {
+      const segments = window.location.pathname.split("/")
+      const seg = segments.find((s) => s.length > 0)
+      basePath = seg ? `/${seg}` : ""
+    }
+    const contentIndexUrl = `${basePath}/static/contentIndex.json`
+
+    fetch(contentIndexUrl)
       .then((res) => res.json())
       .then((index) => {
         function getType(slug) {
@@ -61,6 +72,7 @@
           }
         }
 
+        // Строим список узлов
         const rawNodes = []
         const existingIds = new Set()
 
@@ -75,6 +87,7 @@
           })
         }
 
+        // Строим список ссылок между узлами
         const rawLinks = []
         const seenLinks = new Set()
 
@@ -87,13 +100,11 @@
             if (seenLinks.has(key)) continue
             seenLinks.add(key)
 
-            rawLinks.push({
-              source: slug,
-              target: link,
-            })
+            rawLinks.push({ source: slug, target: link })
           }
         }
 
+        // Матрица смежности для быстрой выборки соседей
         const adjacency = new Map()
         rawNodes.forEach((n) => adjacency.set(n.id, new Set()))
         rawLinks.forEach((l) => {
@@ -101,6 +112,7 @@
           adjacency.get(l.target)?.add(l.source)
         })
 
+        // Начальное состояние фильтров и выбора узлов
         const state = {
           types: {
             player: true,
@@ -121,6 +133,7 @@
           isolatedMode: true,
         }
 
+        // Заполняем панель фильтров
         controlsEl.innerHTML = `
           <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="player" checked> <span>Игроки</span></label>
           <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="npc_alive" checked> <span>НПС живые</span></label>
@@ -167,7 +180,6 @@
               .filter(([, value]) => value)
               .map(([type]) => type)
           )
-
           return rawNodes.filter((n) => activeTypes.has(n.type))
         }
 
@@ -297,6 +309,7 @@
           }, 120)
         }
 
+        // Обработчики для фильтров
         controlsEl.querySelectorAll("input[type=checkbox]").forEach((input) => {
           input.addEventListener("change", (e) => {
             const type = e.target.dataset.type
@@ -307,6 +320,7 @@
           })
         })
 
+        // Обработчик поиска
         if (searchEl) {
           searchEl.addEventListener("input", (e) => {
             state.search = e.target.value || ""
@@ -316,6 +330,7 @@
           })
         }
 
+        // Масштабирование при изменении размера окна
         window.addEventListener("resize", () => {
           graph.width(graphEl.clientWidth)
           graph.height(graphEl.clientHeight)
@@ -333,20 +348,20 @@
       })
   }
 
+  // Инициализируем граф, когда DOM загружен или сразу, если страница уже готова.
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initNetworkGraph)
   } else {
     initNetworkGraph()
   }
 
+  // На событие pageshow также нужно реагировать (например, при back/forward в браузере).
   window.addEventListener("pageshow", initNetworkGraph)
 
-  // Quartz dispatches a custom "nav" event on SPA navigations. Listen for this
-  // event so we can re-initialize the graph when navigating between pages
-  // without requiring a full reload. See Quartz docs:
-  // https://quartz.jzhao.xyz/advanced/creating-components#scripts-and-interactivity
+  // Слушаем пользовательское событие nav (для SPA-навигации в Quartz).
   document.addEventListener("nav", initNetworkGraph)
 
+  // Как запасной вариант отслеживаем появление элемента #network-graph через MutationObserver.
   const observer = new MutationObserver(() => {
     if (document.getElementById("network-graph")) {
       initNetworkGraph()
