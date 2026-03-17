@@ -29,6 +29,40 @@
       };
     }
 
+    // Внутри initNetworkGraph() после инициализации graphEl
+const fullBtn = document.getElementById('network-fullscreen-btn');
+if (fullBtn && graphEl) {
+  fullBtn.addEventListener('click', () => {
+    // Если граф уже развёрнут — ничего не делаем
+    if (document.fullscreenElement) return;
+
+    // Запрашиваем полноэкранный режим для контейнера графа
+    graphEl.requestFullscreen().then(() => {
+      // После перехода в полноэкранный режим растягиваем граф
+      graphEl.style.height = '100vh';
+      graphEl.style.width = '100vw';
+      setTimeout(() => {
+        // Перерисовываем граф после изменения размера
+        graph.width(graphEl.clientWidth);
+        graph.height(graphEl.clientHeight);
+        graph.zoomToFit(200, 100);
+      }, 100);
+    });
+  });
+}
+
+// Отслеживаем выход из полноэкранного режима, чтобы вернуть размеры
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && graphEl) {
+    // Возвращаем исходные размеры
+    graphEl.style.height = '';
+    graphEl.style.width = '';
+    graph.width(graphEl.clientWidth);
+    graph.height(graphEl.clientHeight);
+    graph.zoomToFit(200, 100);
+  }
+});
+
     // текущая палитра
     let style = computeStyle();
 
