@@ -16,9 +16,10 @@
       const savedTheme = document.documentElement.getAttribute("saved-theme");
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const isDarkMode = savedTheme === "dark" || (!savedTheme && prefersDark);
+
       return {
-        linkNormal: isDarkMode ? "rgba(200,200,200,0.35)" : "rgba(120,120,120,0.25)",
-        linkHighlight: isDarkMode ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.8)",
+        linkNormal: isDarkMode ? "rgba(200,200,200,0.28)" : "rgba(120,120,120,0.22)",
+        linkHighlight: isDarkMode ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.82)",
         textNormal: isDarkMode ? "#f1f5f9" : "#222222",
         textDim: isDarkMode ? "#94a3af" : "#9ca3af",
         nodeSelected: isDarkMode ? "#fbbf24" : "#111111",
@@ -73,6 +74,7 @@
 
         const rawNodes = [];
         const existingIds = new Set();
+
         for (const [slug, page] of Object.entries(index)) {
           existingIds.add(slug);
           const type = getType(slug);
@@ -86,12 +88,16 @@
 
         const rawLinks = [];
         const seenLinks = new Set();
+
         for (const [slug, page] of Object.entries(index)) {
           for (const link of page.links || []) {
             if (!existingIds.has(link) || slug === link) continue;
-            const key = `${slug}→${link}`;
-            if (seenLinks.has(key)) continue;
-            seenLinks.add(key);
+
+            const directKey = `${slug}→${link}`;
+            const reverseKey = `${link}→${slug}`;
+            if (seenLinks.has(directKey) || seenLinks.has(reverseKey)) continue;
+
+            seenLinks.add(directKey);
             rawLinks.push({ source: slug, target: link });
           }
         }
@@ -148,13 +154,17 @@
         function rebuildHighlights() {
           highlightNodeIds = new Set();
           highlightLinkKeys = new Set();
+
           if (!state.selectedNodeId) return;
+
           highlightNodeIds.add(state.selectedNodeId);
           const neighbors = adjacency.get(state.selectedNodeId) || new Set();
           neighbors.forEach((n) => highlightNodeIds.add(n));
+
           for (const l of rawLinks) {
             if (l.source === state.selectedNodeId || l.target === state.selectedNodeId) {
               highlightLinkKeys.add(`${l.source}→${l.target}`);
+              highlightLinkKeys.add(`${l.target}→${l.source}`);
             }
           }
         }
@@ -165,14 +175,17 @@
               .filter(([, value]) => value)
               .map(([type]) => type)
           );
+
           return rawNodes.filter((n) => activeTypes.has(n.type));
         }
 
         function getVisibleGraph() {
           let nodes = getBaseFilteredNodes();
+
           if (state.search.trim()) {
             const q = state.search.trim().toLowerCase();
             const foundNode = nodes.find((n) => n.label.toLowerCase().includes(q));
+
             if (foundNode) {
               const neighbors = adjacency.get(foundNode.id) || new Set();
               nodes = nodes.filter((n) => n.id === foundNode.id || neighbors.has(n.id));
@@ -180,20 +193,62 @@
               nodes = [];
             }
           }
+
           if (state.selectedNodeId && state.isolatedMode) {
             const neighbors = adjacency.get(state.selectedNodeId) || new Set();
-            nodes = nodes.filter(
-              (n) => n.id === state.selectedNodeId || neighbors.has(n.id)
-            );
+            nodes = nodes.filter((n) => n.id === state.selectedNodeId || neighbors.has(n.id));
           }
+
           const visibleIds = new Set(nodes.map((n) => n.id));
           const links = rawLinks.filter(
             (l) => visibleIds.has(l.source) && visibleIds.has(l.target)
           );
+
           return {
             nodes: nodes.map((n) => ({ ...n })),
             links: links.map((l) => ({ ...l })),
           };
+        }
+
+        function applyForces() {
+          const chargeForce = graph.d3Force("charge");
+          if (chargeForce) chargeForce.strength(-240);
+
+          const linkForce = graph.d3Force("link");
+          if (linkForce) {
+            linkForce.distance((link) => {
+              const sourceId = typeof link.source === "object" ? link.source.id : link.source;
+              const targetId = typeof link.target === "object" ? link.target.id : link.target;
+
+              const sourceNode = rawNodes.find((n) => n.id === sourceId);
+              const targetNode = rawNodes.find((n) => n.id === targetId);
+
+              const important =
+                sourceNode?.type === "faction" ||
+                targetNode?.type === "faction" ||
+                sourceNode?.type === "location" ||
+                targetNode?.type === "location";
+
+              return important ? 120 : 92;
+            });
+            linkForce.strength(0.55);
+          }
+
+          const collideForce = graph.d3Force("collide");
+          if (collideForce) {
+            collideForce.radius((node) => {
+              if (state.selectedNodeId === node.id) return 34;
+              if (highlightNodeIds.has(node.id)) return 26;
+              return 20;
+            });
+            collideForce.strength(0.95);
+            collideForce.iterations(2);
+          }
+
+          const centerForce = graph.d3Force("center");
+          if (centerForce) {
+            centerForce.strength?.(0.06);
+          }
         }
 
         const graph = ForceGraph()(graphEl)
@@ -202,18 +257,18 @@
           .backgroundColor(getComputedStyle(graphEl).backgroundColor || "#111827")
           .nodeId("id")
           .nodeLabel((node) => `${node.label} (${node.type})`)
+          .nodeRelSize(4)
           .nodeVal((node) => {
-            if (state.selectedNodeId === node.id) return 5.2;
-            if (highlightNodeIds.has(node.id)) return 4.2;
-            return 2.8;
+            if (state.selectedNodeId === node.id) return 6.5;
+            if (highlightNodeIds.has(node.id)) return 5.2;
+            return 3.6;
           })
           .nodeCanvasObject((node, ctx, globalScale) => {
             const isSelected = state.selectedNodeId === node.id;
             const isHighlighted = highlightNodeIds.has(node.id);
-            const isDimmed =
-              !state.isolatedMode && state.selectedNodeId && !isHighlighted;
+            const isDimmed = !state.isolatedMode && state.selectedNodeId && !isHighlighted;
 
-            const radius = isSelected ? 5.2 : isHighlighted ? 4.2 : 2.8;
+            const radius = isSelected ? 6.5 : isHighlighted ? 5.2 : 3.6;
 
             ctx.beginPath();
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
@@ -227,11 +282,19 @@
             }
             ctx.fill();
 
-            const fontSize = Math.max(10 / globalScale, 4);
-            if (globalScale >= 4 || isSelected) {
+            const showLabel =
+              globalScale >= 1.9 ||
+              isSelected ||
+              isHighlighted ||
+              radius >= 5;
+
+            if (showLabel) {
+              const fontSize = Math.max(12 / globalScale, 5.2);
               ctx.font = `${fontSize}px Sans-Serif`;
               ctx.fillStyle = isDimmed ? style.textDim : style.textNormal;
-              ctx.fillText(node.label, node.x + 8, node.y + 3);
+              ctx.textAlign = "left";
+              ctx.textBaseline = "middle";
+              ctx.fillText(node.label, node.x + radius + 5, node.y);
             }
           })
           .linkColor((link) => {
@@ -240,17 +303,19 @@
               ? style.linkHighlight
               : style.linkNormal;
           })
-          .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.5 : 1))
-          .cooldownTicks(240)
-          .d3AlphaDecay(0.03)
-          .d3VelocityDecay(0.4)
+          .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.3 : 0.9))
+          .cooldownTicks(320)
+          .d3AlphaDecay(0.02)
+          .d3VelocityDecay(0.28)
           .onNodeClick((node) => {
             state.selectedNodeId = node.id;
             rebuildHighlights();
+            applyForces();
             render();
+
             setTimeout(() => {
               graph.centerAt(node.x, node.y, 400);
-              graph.zoom(2.2, 400);
+              graph.zoom(2.6, 400);
             }, 50);
           })
           .onNodeDrag(() => {
@@ -262,28 +327,39 @@
           .onBackgroundClick(() => {
             state.selectedNodeId = null;
             rebuildHighlights();
+            applyForces();
             render();
+
             setTimeout(() => {
-              if (!userMovedNode) graph.zoomToFit(500, 140);
+              if (!userMovedNode) graph.zoomToFit(500, 90);
             }, 50);
           })
           .onEngineStop(() => {
             if (!didInitialZoom && !state.selectedNodeId && !userMovedNode) {
               didInitialZoom = true;
-              graph.zoomToFit(500, 140);
+              graph.zoomToFit(700, 90);
             }
           });
+
+        graph.d3Force("charge");
+        graph.d3Force("link");
+        graph.d3Force("center");
+        graph.d3Force("collide");
+
+        applyForces();
 
         function render() {
           rebuildHighlights();
           const visible = getVisibleGraph();
           graph.graphData(visible);
+          applyForces();
+
           setTimeout(() => {
             if (!didInitialZoom && !state.selectedNodeId && !userMovedNode) {
-              graph.zoomToFit(500, 140);
+              graph.zoomToFit(700, 90);
               didInitialZoom = true;
             }
-          }, 120);
+          }, 140);
         }
 
         controlsEl.querySelectorAll("input[type=checkbox]").forEach((input) => {
@@ -292,6 +368,7 @@
             state.types[type] = e.target.checked;
             state.selectedNodeId = null;
             rebuildHighlights();
+            applyForces();
             render();
           });
         });
@@ -301,6 +378,7 @@
             state.search = e.target.value || "";
             state.selectedNodeId = null;
             rebuildHighlights();
+            applyForces();
             render();
           });
         }
@@ -308,9 +386,11 @@
         window.addEventListener("resize", () => {
           graph.width(graphEl.clientWidth);
           graph.height(graphEl.clientHeight);
+          applyForces();
+
           setTimeout(() => {
             if (!state.selectedNodeId && !userMovedNode) {
-              graph.zoomToFit(500, 140);
+              graph.zoomToFit(500, 90);
             }
           }, 100);
         });
@@ -332,6 +412,7 @@
   } else {
     initNetworkGraph();
   }
+
   window.addEventListener("pageshow", initNetworkGraph);
   document.addEventListener("nav", initNetworkGraph);
 

@@ -1,19 +1,21 @@
 ---
-title: Карта связи
+title: Карта связей
 ---
 
 <style>
   .network-shell {
-    max-width: 920px;
+    max-width: 1040px;
     margin: 0 auto;
     padding: 8px 24px 20px 24px;
     box-sizing: border-box;
     position: relative;
     z-index: 2;
   }
+
   .network-toolbar {
     margin: 10px 0 14px 0;
   }
+
   .network-search {
     display: block;
     width: 100%;
@@ -24,6 +26,7 @@ title: Карта связи
     font-size: 14px;
     box-sizing: border-box;
   }
+
   .network-controls {
     display: grid;
     grid-template-columns: 1fr;
@@ -34,6 +37,7 @@ title: Карта связи
     position: relative;
     z-index: 3;
   }
+
   .network-controls label {
     display: flex;
     align-items: center;
@@ -43,12 +47,14 @@ title: Карта связи
     user-select: none;
     min-width: 0;
   }
+
   .network-controls input {
     margin: 0;
     flex: 0 0 auto;
   }
+
   .network-graph {
-    height: 380px;
+    height: 500px;
     width: 100%;
     border: 1px solid #ddd;
     border-radius: 12px;
@@ -56,11 +62,13 @@ title: Карта связи
     overflow: hidden;
     box-sizing: border-box;
   }
+
   @media (min-width: 760px) {
     .network-controls {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+
   @media (min-width: 1040px) {
     .network-controls {
       grid-template-columns: repeat(3, minmax(0, 1fr));
