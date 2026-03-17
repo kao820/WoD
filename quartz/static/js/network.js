@@ -1,11 +1,11 @@
 (function () {
+  // предотвращаем повторную инициализацию графа
   let initializedFor = null;
 
   function initNetworkGraph() {
     const graphEl = document.getElementById("network-graph");
     const controlsEl = document.getElementById("network-controls");
     const searchEl = document.getElementById("network-search");
-
     if (!graphEl || !controlsEl) return;
     if (initializedFor === graphEl) return;
     initializedFor = graphEl;
@@ -13,12 +13,11 @@
     let didInitialZoom = false;
     let userMovedNode = false;
 
-    // Возвращает объект с цветами в зависимости от сохранённой темы.
+    // Определяем тёмную тему через атрибут saved-theme или prefers-color-scheme
     function computeStyle() {
       const savedTheme = document.documentElement.getAttribute("saved-theme");
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const isDarkMode = savedTheme === "dark" || (!savedTheme && prefersDark);
-
       return {
         linkNormal: isDarkMode ? "rgba(200,200,200,0.35)" : "rgba(120,120,120,0.25)",
         linkHighlight: isDarkMode ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.8)",
@@ -29,44 +28,9 @@
       };
     }
 
-    // Внутри initNetworkGraph() после инициализации graphEl
-const fullBtn = document.getElementById('network-fullscreen-btn');
-if (fullBtn && graphEl) {
-  fullBtn.addEventListener('click', () => {
-    // Если граф уже развёрнут — ничего не делаем
-    if (document.fullscreenElement) return;
-
-    // Запрашиваем полноэкранный режим для контейнера графа
-    graphEl.requestFullscreen().then(() => {
-      // После перехода в полноэкранный режим растягиваем граф
-      graphEl.style.height = '100vh';
-      graphEl.style.width = '100vw';
-      setTimeout(() => {
-        // Перерисовываем граф после изменения размера
-        graph.width(graphEl.clientWidth);
-        graph.height(graphEl.clientHeight);
-        graph.zoomToFit(200, 100);
-      }, 100);
-    });
-  });
-}
-
-// Отслеживаем выход из полноэкранного режима, чтобы вернуть размеры
-document.addEventListener('fullscreenchange', () => {
-  if (!document.fullscreenElement && graphEl) {
-    // Возвращаем исходные размеры
-    graphEl.style.height = '';
-    graphEl.style.width = '';
-    graph.width(graphEl.clientWidth);
-    graph.height(graphEl.clientHeight);
-    graph.zoomToFit(200, 100);
-  }
-});
-
-    // текущая палитра
     let style = computeStyle();
 
-    // вычисляем базовый путь для файла contentIndex.json
+    // Формируем базовый путь для статических файлов на GitHub Pages
     const host = window.location.hostname;
     let basePath = "";
     if (host.endsWith("github.io")) {
@@ -78,7 +42,7 @@ document.addEventListener('fullscreenchange', () => {
     fetch(contentIndexUrl)
       .then((res) => res.json())
       .then((index) => {
-        // Определяем тип узла по его slug
+        // Определяем тип узла по slug
         function getType(slug) {
           if (slug.startsWith("04-Персонажи/Игроки/")) return "player";
           if (slug.startsWith("04-Персонажи/НПС/Живы/")) return "npc_alive";
@@ -94,37 +58,25 @@ document.addEventListener('fullscreenchange', () => {
           return "other";
         }
 
-        // Цвет узла в зависимости от типа
+        // Цвет узла
         function getColor(type) {
           switch (type) {
-            case "player":
-              return "#2563eb";
-            case "npc_alive":
-              return "#60a5fa";
-            case "npc_dead":
-              return "#9ca3af";
-            case "faction":
-              return "#ef4444";
-            case "location":
-              return "#22c55e";
-            case "episode":
-              return "#f59e0b";
-            case "event":
-              return "#a855f7";
-            case "season":
-              return "#f97316";
-            case "chronicle":
-              return "#06b6d4";
-            case "reference":
-              return "#6b7280";
-            case "index":
-              return "#111827";
-            default:
-              return "#6b7280";
+            case "player": return "#2563eb";
+            case "npc_alive": return "#60a5fa";
+            case "npc_dead": return "#9ca3af";
+            case "faction": return "#ef4444";
+            case "location": return "#22c55e";
+            case "episode": return "#f59e0b";
+            case "event": return "#a855f7";
+            case "season": return "#f97316";
+            case "chronicle": return "#06b6d4";
+            case "reference": return "#6b7280";
+            case "index": return "#111827";
+            default: return "#6b7280";
           }
         }
 
-        // Формируем список узлов
+        // Строим список узлов
         const rawNodes = [];
         const existingIds = new Set();
         for (const [slug, page] of Object.entries(index)) {
@@ -138,7 +90,7 @@ document.addEventListener('fullscreenchange', () => {
           });
         }
 
-        // Формируем список связей
+        // Строим список ссылок
         const rawLinks = [];
         const seenLinks = new Set();
         for (const [slug, page] of Object.entries(index)) {
@@ -151,7 +103,7 @@ document.addEventListener('fullscreenchange', () => {
           }
         }
 
-        // Структура смежности
+        // Матрица смежности
         const adjacency = new Map();
         rawNodes.forEach((n) => adjacency.set(n.id, new Set()));
         rawLinks.forEach((l) => {
@@ -159,7 +111,7 @@ document.addEventListener('fullscreenchange', () => {
           adjacency.get(l.target)?.add(l.source);
         });
 
-        // Начальное состояние фильтров и выделений
+        // Начальное состояние
         const state = {
           types: {
             player: true,
@@ -194,18 +146,17 @@ document.addEventListener('fullscreenchange', () => {
           <label><input type="checkbox" data-type="reference"> Справка</label>
         `;
 
-        // Наборы выделенных узлов и связей
+        // Выделенные узлы и ссылки
         let highlightNodeIds = new Set();
         let highlightLinkKeys = new Set();
 
-        // Строка-ключ для связи
         function linkKey(link) {
           const s = typeof link.source === "object" ? link.source.id : link.source;
           const t = typeof link.target === "object" ? link.target.id : link.target;
           return `${s}→${t}`;
         }
 
-        // Пересчитываем выделения узлов и связей
+        // Пересчёт выделений
         function rebuildHighlights() {
           highlightNodeIds = new Set();
           highlightLinkKeys = new Set();
@@ -236,7 +187,9 @@ document.addEventListener('fullscreenchange', () => {
             const foundNode = nodes.find((n) => n.label.toLowerCase().includes(q));
             if (foundNode) {
               const neighbors = adjacency.get(foundNode.id) || new Set();
-              nodes = nodes.filter((n) => n.id === foundNode.id || neighbors.has(n.id));
+              nodes = nodes.filter(
+                (n) => n.id === foundNode.id || neighbors.has(n.id)
+              );
             } else {
               nodes = [];
             }
@@ -257,11 +210,13 @@ document.addEventListener('fullscreenchange', () => {
           };
         }
 
-        // Создаём граф
+        // Инициализация графа force-graph
         const graph = ForceGraph()(graphEl)
           .width(graphEl.clientWidth)
           .height(graphEl.clientHeight)
-          .backgroundColor(getComputedStyle(graphEl).backgroundColor || "#111827")
+          .backgroundColor(
+            getComputedStyle(graphEl).backgroundColor || "#111827"
+          )
           .nodeId("id")
           .nodeLabel((node) => `${node.label} (${node.type})`)
           .nodeVal((node) => {
@@ -274,12 +229,9 @@ document.addEventListener('fullscreenchange', () => {
             const isHighlighted = highlightNodeIds.has(node.id);
             const isDimmed =
               !state.isolatedMode && state.selectedNodeId && !isHighlighted;
-
             const radius = isSelected ? 5.2 : isHighlighted ? 4.2 : 2.8;
-
             ctx.beginPath();
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
-
             if (isSelected) {
               ctx.fillStyle = style.nodeSelected;
             } else if (isDimmed) {
@@ -288,7 +240,6 @@ document.addEventListener('fullscreenchange', () => {
               ctx.fillStyle = node.color;
             }
             ctx.fill();
-
             const fontSize = Math.max(10 / globalScale, 4);
             if (globalScale >= 6 || isSelected) {
               ctx.font = `${fontSize}px Sans-Serif`;
@@ -348,7 +299,7 @@ document.addEventListener('fullscreenchange', () => {
           }, 120);
         }
 
-        // Чекбоксы фильтров
+        // Фильтры типов
         controlsEl
           .querySelectorAll("input[type=checkbox]")
           .forEach((input) => {
@@ -371,7 +322,7 @@ document.addEventListener('fullscreenchange', () => {
           });
         }
 
-        // Масштабирование при изменении размеров
+        // Масштабирование при resize
         window.addEventListener("resize", () => {
           graph.width(graphEl.clientWidth);
           graph.height(graphEl.clientHeight);
@@ -382,20 +333,51 @@ document.addEventListener('fullscreenchange', () => {
           }, 100);
         });
 
-        // Слушаем событие смены темы и обновляем палитру
+        // Обновление стиля при смене темы
         document.addEventListener("themechange", () => {
           style = computeStyle();
           render();
         });
 
         render();
+
+        // === полноэкранный режим ===
+        const fullBtn = document.getElementById("network-fullscreen-btn");
+        if (fullBtn) {
+          fullBtn.addEventListener("click", () => {
+            // если уже в полноэкранном режиме — ничего не делаем
+            if (document.fullscreenElement) return;
+            // запрашиваем полноэкранный режим для контейнера графа
+            graphEl.requestFullscreen().then(() => {
+              // растягиваем граф на весь экран
+              graphEl.style.width = "100vw";
+              graphEl.style.height = "100vh";
+              setTimeout(() => {
+                graph.width(graphEl.clientWidth);
+                graph.height(graphEl.clientHeight);
+                graph.zoomToFit(200, 100);
+              }, 100);
+            });
+          });
+        }
+        // при выходе из полноэкранного режима возвращаем размеры
+        document.addEventListener("fullscreenchange", () => {
+          if (!document.fullscreenElement) {
+            graphEl.style.width = "";
+            graphEl.style.height = "";
+            graph.width(graphEl.clientWidth);
+            graph.height(graphEl.clientHeight);
+            graph.zoomToFit(200, 100);
+          }
+        });
+        // === конец полноэкранного режима ===
       })
       .catch((err) => {
         console.error("Ошибка инициализации карты связей:", err);
       });
   }
 
-  // Инициализируем граф при загрузке DOM, при возврате на страницу и при SPA-навигации.
+  // Инициализируем граф при различных событиях
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initNetworkGraph);
   } else {
@@ -404,7 +386,7 @@ document.addEventListener('fullscreenchange', () => {
   window.addEventListener("pageshow", initNetworkGraph);
   document.addEventListener("nav", initNetworkGraph);
 
-  // Отслеживаем появление элемента #network-graph динамически
+  // Подстраховка на случай динамического появления графа
   const observer = new MutationObserver(() => {
     if (document.getElementById("network-graph")) {
       initNetworkGraph();
