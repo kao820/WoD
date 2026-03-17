@@ -1,4 +1,7 @@
-title: Карта связей
+---
+title: Карта связи
+---
+
 <style>
   .network-shell {
     max-width: 920px;
@@ -66,7 +69,6 @@ title: Карта связей
 </style>
 
 <div class="network-shell">
-  <!-- Панель поиска и фильтров -->
   <div class="network-toolbar">
     <input id="network-search" class="network-search" type="text" placeholder="Поиск по узлам..." />
   </div>
@@ -74,6 +76,5 @@ title: Карта связей
   <div id="network-graph" class="network-graph"></div>
 </div>
 
-<!-- Подключаем библиотеку force-graph и наш скрипт network.js -->
 <script src="https://unpkg.com/force-graph"></script>
 <script src="static/js/network.js"></script>

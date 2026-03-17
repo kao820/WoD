@@ -1,5 +1,4 @@
 (function () {
-  // предотвращаем повторную инициализацию графа
   let initializedFor = null;
 
   function initNetworkGraph() {
@@ -13,7 +12,6 @@
     let didInitialZoom = false;
     let userMovedNode = false;
 
-    // Определяем тёмную тему через атрибут saved-theme или prefers-color-scheme
     function computeStyle() {
       const savedTheme = document.documentElement.getAttribute("saved-theme");
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -30,7 +28,6 @@
 
     let style = computeStyle();
 
-    // Формируем базовый путь для статических файлов на GitHub Pages
     const host = window.location.hostname;
     let basePath = "";
     if (host.endsWith("github.io")) {
@@ -74,7 +71,6 @@
           }
         }
 
-        // Строим список узлов
         const rawNodes = [];
         const existingIds = new Set();
         for (const [slug, page] of Object.entries(index)) {
@@ -88,7 +84,6 @@
           });
         }
 
-        // Строим список ссылок
         const rawLinks = [];
         const seenLinks = new Set();
         for (const [slug, page] of Object.entries(index)) {
@@ -101,7 +96,6 @@
           }
         }
 
-        // Матрица смежности
         const adjacency = new Map();
         rawNodes.forEach((n) => adjacency.set(n.id, new Set()));
         rawLinks.forEach((l) => {
@@ -109,7 +103,6 @@
           adjacency.get(l.target)?.add(l.source);
         });
 
-        // Начальное состояние
         const state = {
           types: {
             player: true,
@@ -130,7 +123,6 @@
           isolatedMode: true,
         };
 
-        // Заполняем панель фильтров
         controlsEl.innerHTML = `
           <label><input type="checkbox" data-type="player" checked> Игроки</label>
           <label><input type="checkbox" data-type="npc_alive" checked> НПС живые</label>
@@ -204,7 +196,6 @@
           };
         }
 
-        // Инициализация графа force-graph
         const graph = ForceGraph()(graphEl)
           .width(graphEl.clientWidth)
           .height(graphEl.clientHeight)
@@ -223,8 +214,10 @@
               !state.isolatedMode && state.selectedNodeId && !isHighlighted;
 
             const radius = isSelected ? 5.2 : isHighlighted ? 4.2 : 2.8;
+
             ctx.beginPath();
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+
             if (isSelected) {
               ctx.fillStyle = style.nodeSelected;
             } else if (isDimmed) {
@@ -233,8 +226,9 @@
               ctx.fillStyle = node.color;
             }
             ctx.fill();
+
             const fontSize = Math.max(10 / globalScale, 4);
-            if (globalScale >= 6 || isSelected) {
+            if (globalScale >= 4 || isSelected) {
               ctx.font = `${fontSize}px Sans-Serif`;
               ctx.fillStyle = isDimmed ? style.textDim : style.textNormal;
               ctx.fillText(node.label, node.x + 8, node.y + 3);
@@ -247,9 +241,9 @@
               : style.linkNormal;
           })
           .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.5 : 1))
-          .cooldownTicks(320)
-          .d3AlphaDecay(0.018)
-          .d3VelocityDecay(0.45)
+          .cooldownTicks(240)
+          .d3AlphaDecay(0.03)
+          .d3VelocityDecay(0.4)
           .onNodeClick((node) => {
             state.selectedNodeId = node.id;
             rebuildHighlights();
@@ -292,7 +286,6 @@
           }, 120);
         }
 
-        // Фильтры типов
         controlsEl.querySelectorAll("input[type=checkbox]").forEach((input) => {
           input.addEventListener("change", (e) => {
             const type = e.target.dataset.type;
@@ -303,7 +296,6 @@
           });
         });
 
-        // Поиск
         if (searchEl) {
           searchEl.addEventListener("input", (e) => {
             state.search = e.target.value || "";
@@ -313,7 +305,6 @@
           });
         }
 
-        // Масштабирование при resize
         window.addEventListener("resize", () => {
           graph.width(graphEl.clientWidth);
           graph.height(graphEl.clientHeight);
@@ -324,7 +315,6 @@
           }, 100);
         });
 
-        // Обновление стиля при смене темы
         document.addEventListener("themechange", () => {
           style = computeStyle();
           render();
@@ -337,7 +327,6 @@
       });
   }
 
-  // Инициализируем граф при различных событиях
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initNetworkGraph);
   } else {
@@ -346,7 +335,6 @@
   window.addEventListener("pageshow", initNetworkGraph);
   document.addEventListener("nav", initNetworkGraph);
 
-  // Подстраховка на случай динамического появления графа
   const observer = new MutationObserver(() => {
     if (document.getElementById("network-graph")) {
       initNetworkGraph();
