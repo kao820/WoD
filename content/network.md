@@ -1,8 +1,59 @@
 title: Карта связей
 <style>
-  /* ... существующие стили ... */
-
-  /* Кнопка полноэкранного режима */
+  .network-shell {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 8px 24px 20px 24px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+  }
+  .network-toolbar {
+    margin: 10px 0 14px 0;
+  }
+  .network-search {
+    display: block;
+    width: 100%;
+    max-width: 360px;
+    padding: 10px 12px;
+    border: 1px solid #cfcfcf;
+    border-radius: 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  .network-controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px 12px;
+    margin: 0 0 14px 0;
+    font-size: 14px;
+    line-height: 1.35;
+    position: relative;
+    z-index: 3;
+  }
+  .network-controls label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    min-width: 0;
+  }
+  .network-controls input {
+    margin: 0;
+    flex: 0 0 auto;
+  }
+  .network-graph {
+    height: 380px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background: transparent;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  /* Кнопка разворачивания графа */
   .network-fullscreen-btn {
     position: absolute;
     right: 12px;
@@ -21,12 +72,21 @@ title: Карта связей
     width: 18px;
     height: 18px;
   }
+  @media (min-width: 760px) {
+    .network-controls {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1040px) {
+    .network-controls {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
 </style>
 
 <div class="network-shell">
-  <!-- Кнопка полноэкранного режима -->
+  <!-- Кнопка для разворачивания графа -->
   <button id="network-fullscreen-btn" class="network-fullscreen-btn" aria-label="Развернуть граф">
-    <!-- SVG-иконка (скопирована из стандартного графа) -->
     <svg viewBox="0 0 55 55" fill="currentColor">
       <path d="M49,0c-3.309,0-6,2.691-6,6c0,1.035,0.263,2.009,0.726,2.86l-9.829,9.829C32.542,17.634,30.846,17,29,17
                s-3.542,0.634-4.898,1.688l-7.669-7.669C16.785,10.424,17,9.74,17,9c0-2.206-1.794-4-4-4S9,6.794,9,9s1.794,4,4,4
@@ -39,7 +99,6 @@ title: Карта связей
     </svg>
   </button>
 
-  <!-- существующее содержимое -->
   <div class="network-toolbar">
     <input id="network-search" class="network-search" type="text" placeholder="Поиск по узлам..." />
   </div>
@@ -47,5 +106,6 @@ title: Карта связей
   <div id="network-graph" class="network-graph"></div>
 </div>
 
+<!-- Подключаем библиотеку force-graph и наш скрипт network.js -->
 <script src="https://unpkg.com/force-graph"></script>
 <script src="static/js/network.js"></script>
