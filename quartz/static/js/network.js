@@ -62,7 +62,7 @@
           if (slug.startsWith("03-Серии/")) return "episode";
           if (slug.startsWith("07-События/")) return "event";
           if (slug.startsWith("02-Сезоны/")) return "season";
-          if (slug.startsWith("01-Хроники/")) return "chronicle";
+          if (slug.startsWith("01-Хронология/")) return "timeline";
           if (slug.startsWith("08-Справка/")) return "reference";
           if (slug === "index") return "index";
           return "other";
@@ -78,7 +78,7 @@
             case "episode": return "#f59e0b";
             case "event": return "#a855f7";
             case "season": return "#f97316";
-            case "chronicle": return "#06b6d4";
+            case "timeline": return "#06b6d4";
             case "reference": return "#6b7280";
             case "index": return "#111827";
             default: return "#6b7280";
@@ -132,7 +132,7 @@
             episode: true,
             event: true,
             season: true,
-            chronicle: true,
+            timeline: true,
             reference: true,
             index: false,
             other: false,
@@ -151,7 +151,7 @@
           <label><input type="checkbox" data-type="episode" checked> Серии</label>
           <label><input type="checkbox" data-type="event" checked> События</label>
           <label><input type="checkbox" data-type="season" checked> Сезоны</label>
-          <label><input type="checkbox" data-type="chronicle" checked> Хроники</label>
+          <label><input type="checkbox" data-type="timeline" checked> Хронология</label>
           <label><input type="checkbox" data-type="reference" checked> Справка</label>
         `;
 
@@ -182,13 +182,16 @@
           }
         }
 
-        function getBaseFilteredNodes() {
-          const activeTypes = new Set(
+        function getActiveTypes() {
+          return new Set(
             Object.entries(state.types)
               .filter(([, value]) => value)
               .map(([type]) => type)
           );
+        }
 
+        function getBaseFilteredNodes() {
+          const activeTypes = getActiveTypes();
           return rawNodes.filter((n) => activeTypes.has(n.type));
         }
 
@@ -223,9 +226,40 @@
           };
         }
 
+        function getForceProfile() {
+          const activeTypes = [...getActiveTypes()];
+          const structuralOnly =
+            activeTypes.length > 0 &&
+            activeTypes.every((type) => ["episode", "season", "timeline"].includes(type));
+
+          if (structuralOnly) {
+            return {
+              charge: -90,
+              baseDistance: 62,
+              importantDistance: 76,
+              linkStrength: 1.15,
+              collideRadius: 12,
+              collideStrength: 0.9,
+              centerStrength: 0.12,
+            };
+          }
+
+          return {
+            charge: -230,
+            baseDistance: 92,
+            importantDistance: 118,
+            linkStrength: 0.58,
+            collideRadius: 18,
+            collideStrength: 0.95,
+            centerStrength: 0.05,
+          };
+        }
+
         function applyForces() {
+          const profile = getForceProfile();
+
           const chargeForce = graph.d3Force("charge");
-          if (chargeForce) chargeForce.strength(-230);
+          if (chargeForce) chargeForce.strength(profile.charge);
 
           const linkForce = graph.d3Force("link");
           if (linkForce) {
@@ -242,27 +276,35 @@
                 sourceNode?.type === "location" ||
                 targetNode?.type === "location" ||
                 sourceNode?.type === "episode" ||
-                targetNode?.type === "episode";
+                targetNode?.type === "episode" ||
+                sourceNode?.type === "season" ||
+                targetNode?.type === "season" ||
+                sourceNode?.type === "timeline" ||
+                targetNode?.type === "timeline";
 
-              return important ? 118 : 92;
+              return important ? profile.importantDistance : profile.baseDistance;
             });
-            linkForce.strength(0.58);
+            linkForce.strength(profile.linkStrength);
           }
 
           const collideForce = graph.d3Force("collide");
           if (collideForce) {
             collideForce.radius((node) => {
-              if (state.selectedNodeId === node.id) return 28;
-              if (highlightNodeIds.has(node.id)) return 23;
-              return 18;
+              const base =
+                state.selectedNodeId === node.id
+                  ? 28
+                  : highlightNodeIds.has(node.id)
+                  ? 23
+                  : profile.collideRadius;
+              return base;
             });
-            collideForce.strength(0.95);
+            collideForce.strength(profile.collideStrength);
             collideForce.iterations(2);
           }
 
           const centerForce = graph.d3Force("center");
           if (centerForce && typeof centerForce.strength === "function") {
-            centerForce.strength(0.05);
+            centerForce.strength(profile.centerStrength);
           }
         }
 
@@ -280,7 +322,7 @@
           .height(graphEl.clientHeight)
           .backgroundColor(getComputedStyle(graphEl).backgroundColor || "#111827")
           .nodeId("id")
-          .nodeLabel((node) => `${node.label} (${node.type})`)
+          .nodeLabel((node) => `${node.label}`)
           .nodeRelSize(4)
           .nodeVal((node) => {
             if (state.selectedNodeId === node.id) return 6.2;
