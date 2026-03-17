@@ -1,9 +1,3 @@
----
-title: Мир Тьмы — MISFITS
----
+# Мир Тьмы LRS
 
-# Мир Тьмы — MISFITS
-
-Вики кампаний по системе **Werewolf The Apocalypse**.
-
----
+Вики кампаний в **Мире Тьмы**, которые проводились на калане LivingRoomStudio
