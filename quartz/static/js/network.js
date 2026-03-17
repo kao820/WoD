@@ -10,14 +10,30 @@
     if (initializedFor === graphEl) return;
     initializedFor = graphEl;
 
-    let didInitialZoom = false;
-    let userMovedNode = false;
     let graph = null;
+    let userMovedNode = false;
+    let didInitialFit = false;
+    let initialFitTimer = null;
+    let resizeFitTimer = null;
 
-    const INITIAL_FIT_PADDING = 28;
-    const RESET_FIT_PADDING = 28;
-    const RESIZE_FIT_PADDING = 30;
-    const CLICK_ZOOM = 2.25;
+    const INITIAL_FIT_PADDING = 20;
+    const RESET_FIT_PADDING = 24;
+    const RESIZE_FIT_PADDING = 26;
+    const CLICK_ZOOM = 2.2;
+
+    function clearInitialFitTimer() {
+      if (initialFitTimer) {
+        clearTimeout(initialFitTimer);
+        initialFitTimer = null;
+      }
+    }
+
+    function clearResizeFitTimer() {
+      if (resizeFitTimer) {
+        clearTimeout(resizeFitTimer);
+        resizeFitTimer = null;
+      }
+    }
 
     function computeStyle() {
       const savedTheme = document.documentElement.getAttribute("saved-theme");
@@ -219,7 +235,7 @@
 
         function applyForces() {
           const chargeForce = graph.d3Force("charge");
-          if (chargeForce) chargeForce.strength(-260);
+          if (chargeForce) chargeForce.strength(-230);
 
           const linkForce = graph.d3Force("link");
           if (linkForce) {
@@ -238,9 +254,9 @@
                 sourceNode?.type === "episode" ||
                 targetNode?.type === "episode";
 
-              return important ? 125 : 98;
+              return important ? 118 : 92;
             });
-            linkForce.strength(0.55);
+            linkForce.strength(0.58);
           }
 
           const collideForce = graph.d3Force("collide");
@@ -256,7 +272,7 @@
 
           const centerForce = graph.d3Force("center");
           if (centerForce && typeof centerForce.strength === "function") {
-            centerForce.strength(0.06);
+            centerForce.strength(0.05);
           }
         }
 
@@ -267,6 +283,17 @@
           requestAnimationFrame(() => {
             graph.zoomToFit(ms, padding);
           });
+        }
+
+        function scheduleInitialFit() {
+          if (didInitialFit) return;
+          clearInitialFitTimer();
+
+          initialFitTimer = setTimeout(() => {
+            if (didInitialFit || state.selectedNodeId || userMovedNode) return;
+            fitGraph(650, INITIAL_FIT_PADDING);
+            didInitialFit = true;
+          }, 450);
         }
 
         graph = ForceGraph()(graphEl)
@@ -304,13 +331,13 @@
             let showLabel = false;
 
             if (!hasSelection) {
-              showLabel = globalScale >= 1.22;
+              showLabel = globalScale >= 1.2;
             } else if (isSelected) {
               showLabel = globalScale >= 1.0;
             } else if (isHighlighted) {
-              showLabel = globalScale >= 1.12;
+              showLabel = globalScale >= 1.1;
             } else {
-              showLabel = globalScale >= 1.24;
+              showLabel = globalScale >= 1.22;
             }
 
             if (showLabel) {
@@ -328,11 +355,12 @@
               ? style.linkHighlight
               : style.linkNormal;
           })
-          .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.15 : 0.82))
-          .cooldownTicks(280)
-          .d3AlphaDecay(0.025)
-          .d3VelocityDecay(0.3)
+          .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.1 : 0.82))
+          .cooldownTicks(220)
+          .d3AlphaDecay(0.03)
+          .d3VelocityDecay(0.34)
           .onNodeClick((node) => {
+            clearInitialFitTimer();
             state.selectedNodeId = node.id;
             rebuildHighlights();
             applyForces();
@@ -344,9 +372,11 @@
             }, 50);
           })
           .onNodeDrag(() => {
+            clearInitialFitTimer();
             userMovedNode = true;
           })
           .onNodeDragEnd(() => {
+            clearInitialFitTimer();
             userMovedNode = true;
           })
           .onBackgroundClick(() => {
@@ -360,12 +390,6 @@
                 fitGraph(650, RESET_FIT_PADDING);
               }
             }, 50);
-          })
-          .onEngineStop(() => {
-            if (!didInitialZoom && !state.selectedNodeId && !userMovedNode) {
-              didInitialZoom = true;
-              fitGraph(700, INITIAL_FIT_PADDING);
-            }
           });
 
         graph.d3Force("charge");
@@ -417,15 +441,16 @@
         }
 
         window.addEventListener("resize", () => {
+          clearResizeFitTimer();
           graph.width(graphEl.clientWidth);
           graph.height(graphEl.clientHeight);
           applyForces();
 
-          setTimeout(() => {
+          resizeFitTimer = setTimeout(() => {
             if (!state.selectedNodeId && !userMovedNode) {
-              fitGraph(500, RESIZE_FIT_PADDING);
+              fitGraph(450, RESIZE_FIT_PADDING);
             }
-          }, 120);
+          }, 180);
         });
 
         document.addEventListener("themechange", () => {
@@ -434,6 +459,7 @@
         });
 
         render();
+        scheduleInitialFit();
       })
       .catch((err) => {
         console.error("Ошибка инициализации карты связей:", err);
