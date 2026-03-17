@@ -4,11 +4,13 @@
 
   function initNetworkGraph() {
     const graphEl = document.getElementById("network-graph");
-    const controlsEl = document.getElementById("network-controls");
-    const forcesLayoutEl = document.getElementById("network-forces-layout");
+    const topLayoutEl = document.getElementById("network-top-layout");
     const searchEl = document.getElementById("network-search");
+    const fitButton = document.getElementById("network-fit-button");
+    const resetButton = document.getElementById("network-reset-button");
+    const resetColorsButton = document.getElementById("network-reset-colors-button");
 
-    if (!graphEl || !controlsEl || !forcesLayoutEl) return;
+    if (!graphEl || !topLayoutEl || !searchEl || !fitButton || !resetButton || !resetColorsButton) return;
     if (initializedGraphEl === graphEl) return;
     initializedGraphEl = graphEl;
 
@@ -71,7 +73,7 @@
       },
       {
         key: "linkDistance",
-        label: "Расстояние между узлами",
+        label: "Расстояние узлов",
         min: 20,
         max: 180,
         step: 1,
@@ -122,12 +124,11 @@
     };
 
     const ui = {
+      controlsEl: null,
+      forcesLayoutEl: null,
       settingInputs: {},
       settingValues: {},
       settingsGridEl: null,
-      fitButton: null,
-      resetButton: null,
-      resetColorsButton: null,
     };
 
     function clearResizeFitTimer() {
@@ -181,8 +182,46 @@
       };
     }
 
+    function buildTopPanels() {
+      topLayoutEl.replaceChildren();
+
+      const controlsPanel = document.createElement("div");
+      controlsPanel.className = "network-panel";
+
+      const controlsTitle = document.createElement("div");
+      controlsTitle.className = "network-panel-title";
+      controlsTitle.textContent = "Группировка и цвета";
+
+      const controlsEl = document.createElement("div");
+      controlsEl.id = "network-controls";
+      controlsEl.className = "network-controls-grid";
+
+      controlsPanel.appendChild(controlsTitle);
+      controlsPanel.appendChild(controlsEl);
+
+      const settingsPanel = document.createElement("div");
+      settingsPanel.className = "network-panel";
+
+      const settingsTitle = document.createElement("div");
+      settingsTitle.className = "network-panel-title";
+      settingsTitle.textContent = "Настройки графа";
+
+      const forcesLayoutEl = document.createElement("div");
+      forcesLayoutEl.id = "network-forces-layout";
+      forcesLayoutEl.className = "network-forces-layout";
+
+      settingsPanel.appendChild(settingsTitle);
+      settingsPanel.appendChild(forcesLayoutEl);
+
+      topLayoutEl.appendChild(controlsPanel);
+      topLayoutEl.appendChild(settingsPanel);
+
+      ui.controlsEl = controlsEl;
+      ui.forcesLayoutEl = forcesLayoutEl;
+    }
+
     function buildControls() {
-      controlsEl.replaceChildren();
+      ui.controlsEl.replaceChildren();
 
       CONTROL_COLUMNS.forEach((column) => {
         const columnEl = document.createElement("div");
@@ -237,12 +276,12 @@
           columnEl.appendChild(rowEl);
         });
 
-        controlsEl.appendChild(columnEl);
+        ui.controlsEl.appendChild(columnEl);
       });
     }
 
     function buildForcesPanel() {
-      forcesLayoutEl.replaceChildren();
+      ui.forcesLayoutEl.replaceChildren();
       ui.settingInputs = {};
       ui.settingValues = {};
 
@@ -281,32 +320,8 @@
         ui.settingValues[item.key] = valueEl;
       });
 
-      const actionsEl = document.createElement("div");
-      actionsEl.className = "network-settings-actions";
-
-      const fitButton = document.createElement("button");
-      fitButton.type = "button";
-      fitButton.textContent = "Вписать в область";
-
-      const resetButton = document.createElement("button");
-      resetButton.type = "button";
-      resetButton.textContent = "Сбросить настройки";
-
-      const resetColorsButton = document.createElement("button");
-      resetColorsButton.type = "button";
-      resetColorsButton.textContent = "Сбросить цвета";
-
-      actionsEl.appendChild(fitButton);
-      actionsEl.appendChild(resetButton);
-      actionsEl.appendChild(resetColorsButton);
-
-      forcesLayoutEl.appendChild(settingsGridEl);
-      forcesLayoutEl.appendChild(actionsEl);
-
+      ui.forcesLayoutEl.appendChild(settingsGridEl);
       ui.settingsGridEl = settingsGridEl;
-      ui.fitButton = fitButton;
-      ui.resetButton = resetButton;
-      ui.resetColorsButton = resetColorsButton;
     }
 
     function updateSettingLabels() {
@@ -617,6 +632,7 @@
           buildControls();
         }
 
+        buildTopPanels();
         buildControls();
         buildForcesPanel();
         applyPresetForActiveTypes();
@@ -715,7 +731,7 @@
         syncSettingInputs();
         render();
 
-        controlsEl.addEventListener("click", (event) => {
+        ui.controlsEl.addEventListener("click", (event) => {
           const target = event.target;
           if (!(target instanceof HTMLElement)) return;
 
@@ -739,7 +755,7 @@
           }, 100);
         });
 
-        controlsEl.addEventListener("input", (event) => {
+        ui.controlsEl.addEventListener("input", (event) => {
           const target = event.target;
           if (!(target instanceof HTMLInputElement)) return;
           if (target.type !== "color") return;
@@ -777,16 +793,16 @@
           refreshGraphWithCurrentSettings(false);
         });
 
-        ui.fitButton.addEventListener("click", () => {
+        fitButton.addEventListener("click", () => {
           fitGraph(600, RESET_FIT_PADDING);
         });
 
-        ui.resetButton.addEventListener("click", () => {
+        resetButton.addEventListener("click", () => {
           applyPresetForActiveTypes();
           refreshGraphWithCurrentSettings(true);
         });
 
-        ui.resetColorsButton.addEventListener("click", () => {
+        resetColorsButton.addEventListener("click", () => {
           themeDefaultColors = getThemeDefaultColors();
 
           Object.keys(colorMap).forEach((key) => {
@@ -798,20 +814,18 @@
           graph.graphData(graph.graphData());
         });
 
-        if (searchEl) {
-          searchEl.addEventListener("input", (event) => {
-            state.search = event.target.value || "";
-            state.selectedNodeId = null;
-            rebuildHighlights();
-            render();
+        searchEl.addEventListener("input", (event) => {
+          state.search = event.target.value || "";
+          state.selectedNodeId = null;
+          rebuildHighlights();
+          render();
 
-            setTimeout(() => {
-              if (!userMovedNode) {
-                fitGraph(650, RESET_FIT_PADDING);
-              }
-            }, 100);
-          });
-        }
+          setTimeout(() => {
+            if (!userMovedNode) {
+              fitGraph(650, RESET_FIT_PADDING);
+            }
+          }, 100);
+        });
 
         window.addEventListener("resize", () => {
           const currentGraphEl = document.getElementById("network-graph");

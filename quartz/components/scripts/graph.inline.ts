@@ -69,15 +69,11 @@ type TweenNode = {
 }
 
 function getNodeColor(node: NodeData): string {
-  const path = node.id.toLowerCase()
+  const savedTheme = document.documentElement.getAttribute("saved-theme")
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+  const isDark = savedTheme === "dark" || (!savedTheme && prefersDark)
 
-  if (path.includes("персонажи")) return "#4f8cff"
-  if (path.includes("фракции")) return "#ff5c5c"
-  if (path.includes("локации")) return "#37c871"
-  if (path.includes("серии")) return "#ffd166"
-  if (path.includes("события")) return "#c77dff"
-
-  return "#888888"
+  return isDark ? "#94a3b8" : "#94a3af"
 }
 
 async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {

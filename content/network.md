@@ -5,21 +5,25 @@ title: Карта связей
 <style>
   .network-shell {
     width: 100%;
-    max-width: 1400px;
+    max-width: 1440px;
     margin: 0 auto;
-    padding: 8px 24px 24px;
+    padding: 8px 18px 24px;
     box-sizing: border-box;
   }
 
   .network-toolbar {
+    display: grid;
+    grid-template-columns: minmax(240px, 520px) repeat(3, max-content);
+    gap: 8px;
+    align-items: center;
     margin: 10px 0 14px;
   }
 
   .network-search {
     display: block;
     width: 100%;
-    max-width: 380px;
-    padding: 10px 12px;
+    min-width: 0;
+    padding: 9px 12px;
     border: 1px solid #cfcfcf;
     border-radius: 10px;
     font-size: 14px;
@@ -28,26 +32,48 @@ title: Карта связей
     color: inherit;
   }
 
+  .network-toolbar-button {
+    border: 1px solid #cfcfcf;
+    border-radius: 10px;
+    background: transparent;
+    padding: 9px 14px;
+    font-size: 14px;
+    line-height: 1.2;
+    color: inherit;
+    cursor: pointer;
+    box-sizing: border-box;
+    white-space: nowrap;
+  }
+
+  .network-top-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(300px, 0.82fr);
+    gap: 16px;
+    align-items: start;
+    margin-bottom: 14px;
+  }
+
   .network-panel {
-    margin: 0 0 14px;
+    margin: 0;
     border: 1px solid #ddd;
     border-radius: 12px;
-    padding: 14px;
+    padding: 14px 14px 12px;
     box-sizing: border-box;
     overflow: hidden;
+    min-width: 0;
   }
 
   .network-panel-title {
-    font-weight: 600;
-    margin: 0 0 12px;
-    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    font-size: 15px;
     line-height: 1.2;
   }
 
   .network-controls-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px 28px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 14px;
     align-items: start;
     width: 100%;
   }
@@ -55,23 +81,23 @@ title: Карта связей
   .network-controls-column {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
     min-width: 0;
     width: 100%;
   }
 
   .network-control-row {
     display: grid;
-    grid-template-columns: 24px minmax(0, 1fr) 28px;
+    grid-template-columns: 18px minmax(0, 1fr) 20px;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     min-width: 0;
     width: 100%;
   }
 
   .network-toggle {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border: 1px solid #8d99a6;
     border-radius: 6px;
     background: transparent;
@@ -89,10 +115,10 @@ title: Карта связей
   .network-toggle.is-on::after {
     content: "";
     position: absolute;
-    left: 6px;
+    left: 5px;
     top: 2px;
-    width: 5px;
-    height: 10px;
+    width: 4px;
+    height: 9px;
     border: solid #ffffff;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
@@ -100,8 +126,8 @@ title: Карта связей
 
   .network-control-label {
     min-width: 0;
-    font-size: 14px;
-    line-height: 1.2;
+    font-size: 12px;
+    line-height: 1.15;
     cursor: pointer;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -111,15 +137,16 @@ title: Карта связей
 
   .network-color-picker {
     position: relative;
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     justify-self: end;
+    flex: 0 0 auto;
   }
 
   .network-color-dot {
     display: block;
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     border-radius: 999px;
     border: 1px solid rgba(0, 0, 0, 0.22);
     box-sizing: border-box;
@@ -147,17 +174,14 @@ title: Карта связей
   }
 
   .network-forces-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px 20px;
-    align-items: start;
+    display: block;
     width: 100%;
   }
 
   .network-settings-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 14px;
     width: 100%;
   }
 
@@ -170,15 +194,15 @@ title: Карта связей
   }
 
   .network-setting label {
-    font-size: 14px;
-    line-height: 1.25;
+    font-size: 12px;
+    line-height: 1.15;
   }
 
   .network-setting-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 56px;
+    grid-template-columns: minmax(0, 1fr) 40px;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
   }
 
@@ -188,31 +212,11 @@ title: Карта связей
   }
 
   .network-setting-value {
-    min-width: 56px;
+    min-width: 40px;
     text-align: right;
-    font-size: 13px;
+    font-size: 12px;
     color: #666;
     white-space: nowrap;
-  }
-
-  .network-settings-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-width: 0;
-  }
-
-  .network-settings-actions button {
-    border: 1px solid #cfcfcf;
-    border-radius: 10px;
-    background: transparent;
-    padding: 9px 12px;
-    font-size: 14px;
-    cursor: pointer;
-    text-align: left;
-    color: inherit;
-    width: 100%;
-    box-sizing: border-box;
   }
 
   .network-graph {
@@ -226,17 +230,21 @@ title: Карта связей
     box-sizing: border-box;
   }
 
-  @media (min-width: 760px) {
-    .network-controls-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+  @media (max-width: 1100px) {
+    .network-toolbar {
+      grid-template-columns: 1fr;
     }
 
-    .network-forces-layout {
-      grid-template-columns: minmax(0, 2fr) 260px;
+    .network-top-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .network-controls-grid {
+      grid-template-columns: 1fr;
     }
 
     .network-settings-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 1fr;
     }
   }
 </style>
@@ -250,17 +258,12 @@ title: Карта связей
       placeholder="Поиск по узлам..."
       autocomplete="off"
     />
+    <button id="network-fit-button" class="network-toolbar-button" type="button">Вписать в область</button>
+    <button id="network-reset-button" class="network-toolbar-button" type="button">Сбросить настройки</button>
+    <button id="network-reset-colors-button" class="network-toolbar-button" type="button">Сбросить цвета</button>
   </div>
 
-  <section class="network-panel">
-    <div class="network-panel-title">Группировка и цвета</div>
-    <div id="network-controls" class="network-controls-grid"></div>
-  </section>
-
-  <section class="network-panel">
-    <div class="network-panel-title">Настройки графа</div>
-    <div id="network-forces-layout" class="network-forces-layout"></div>
-  </section>
+  <div id="network-top-layout" class="network-top-layout"></div>
 
   <div id="network-graph" class="network-graph"></div>
 </div>
