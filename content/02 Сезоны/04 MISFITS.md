@@ -3,17 +3,6 @@ tags:
   - оборотни
 type: сезон
 ---
-
-# MISFITS — Сезон 1
-
----
-type: season
-chronicle: [[04 Werewolf The Apocalypse]]
-season: 1
-status: complete
-location: [[Нью-Йорк]]
----
-
 ## Кратко
 
 Первый сезон посвящён становлению стаи после смерти [[Грегори Пирс]], хранителя каэрна в [[Окленд-Гарденс]].

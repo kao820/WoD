@@ -1,7 +1,7 @@
 ---
 tags:
   - вампиры
-type: episode
+type: эпизод
 season:
   - "[[07 Рубикон]]"
 ---
