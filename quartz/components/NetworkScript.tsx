@@ -1,10 +1,10 @@
 import type { QuartzComponentConstructor } from "./types"
 
 /*
- * Loads network.js early in the <head> so it is available when the DOM
- * finishes loading. This fixes the issue where the graph doesn't appear
- * on first page load unless the page is refreshed. The script is only
- * injected once; subsequent SPA navigations rely on this loaded copy.
+ * Загрузчик скриптов карты. Этот компонент вставляет два скрипта:
+ * - сначала библиотеку force-graph,
+ * - затем наш кастомный скрипт network.js.
+ * Оба загружаются последовательно и только один раз, даже при SPA‑навигации.
  */
 export default (() => {
   function NetworkScript() {
@@ -12,33 +12,33 @@ export default (() => {
   }
 
   NetworkScript.beforeDOMLoaded = `
-    (function() {
-      if (!window.networkScriptLoaded) {
-        var existing = document.querySelector('script[src*="static/js/network.js"]');
-        if (!existing) {
-          var script = document.createElement('script');
-          // Compute an absolute path to network.js so it loads correctly on GitHub Pages
-          // project sites (e.g. /WoD/) and during local development.
-          var host = window.location.hostname;
-          var path = 'static/js/network.js';
-          if (host.endsWith('github.io')) {
-            var segs = window.location.pathname.split('/').filter(function(s) { return s.length > 0; });
-            var base = segs.length > 0 ? '/' + segs[0] : '';
-            path = base + '/static/js/network.js';
-          } else {
-            // Prefix with / for other environments to make it root-relative
-            if (!path.startsWith('/')) {
-              path = '/' + path;
-            }
-          }
-          script.src = path;
-          script.defer = true;
-          document.head.appendChild(script);
-        }
-        window.networkScriptLoaded = true;
+    ;(function() {
+      if (window.__networkScriptsLoaded) return;
+
+      function addScript(src, callback) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.onload = callback || function() {};
+        s.async = false;
+        s.defer = false;
+        document.head.appendChild(s);
       }
+
+      // Определяем базовый путь к файлам в статике (например, /WoD) для GitHub Pages
+      var host = window.location.hostname;
+      var basePath = '';
+      if (host.endsWith('github.io')) {
+        var segs = window.location.pathname.split('/').filter(Boolean);
+        basePath = segs.length > 0 ? '/' + segs[0] : '';
+      }
+
+      // Сначала загружаем force-graph, затем network.js
+      addScript('https://unpkg.com/force-graph', function() {
+        addScript(basePath + '/static/js/network.js');
+      });
+
+      window.__networkScriptsLoaded = true;
     })();
   `
-
   return NetworkScript
 }) satisfies QuartzComponentConstructor
