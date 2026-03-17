@@ -42,7 +42,6 @@
     fetch(contentIndexUrl)
       .then((res) => res.json())
       .then((index) => {
-        // Определяем тип узла по slug
         function getType(slug) {
           if (slug.startsWith("04-Персонажи/Игроки/")) return "player";
           if (slug.startsWith("04-Персонажи/НПС/Живы/")) return "npc_alive";
@@ -58,7 +57,6 @@
           return "other";
         }
 
-        // Цвет узла
         function getColor(type) {
           switch (type) {
             case "player": return "#2563eb";
@@ -146,7 +144,6 @@
           <label><input type="checkbox" data-type="reference"> Справка</label>
         `;
 
-        // Выделенные узлы и ссылки
         let highlightNodeIds = new Set();
         let highlightLinkKeys = new Set();
 
@@ -156,7 +153,6 @@
           return `${s}→${t}`;
         }
 
-        // Пересчёт выделений
         function rebuildHighlights() {
           highlightNodeIds = new Set();
           highlightLinkKeys = new Set();
@@ -187,9 +183,7 @@
             const foundNode = nodes.find((n) => n.label.toLowerCase().includes(q));
             if (foundNode) {
               const neighbors = adjacency.get(foundNode.id) || new Set();
-              nodes = nodes.filter(
-                (n) => n.id === foundNode.id || neighbors.has(n.id)
-              );
+              nodes = nodes.filter((n) => n.id === foundNode.id || neighbors.has(n.id));
             } else {
               nodes = [];
             }
@@ -214,9 +208,7 @@
         const graph = ForceGraph()(graphEl)
           .width(graphEl.clientWidth)
           .height(graphEl.clientHeight)
-          .backgroundColor(
-            getComputedStyle(graphEl).backgroundColor || "#111827"
-          )
+          .backgroundColor(getComputedStyle(graphEl).backgroundColor || "#111827")
           .nodeId("id")
           .nodeLabel((node) => `${node.label} (${node.type})`)
           .nodeVal((node) => {
@@ -229,6 +221,7 @@
             const isHighlighted = highlightNodeIds.has(node.id);
             const isDimmed =
               !state.isolatedMode && state.selectedNodeId && !isHighlighted;
+
             const radius = isSelected ? 5.2 : isHighlighted ? 4.2 : 2.8;
             ctx.beginPath();
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
@@ -300,17 +293,15 @@
         }
 
         // Фильтры типов
-        controlsEl
-          .querySelectorAll("input[type=checkbox]")
-          .forEach((input) => {
-            input.addEventListener("change", (e) => {
-              const type = e.target.dataset.type;
-              state.types[type] = e.target.checked;
-              state.selectedNodeId = null;
-              rebuildHighlights();
-              render();
-            });
+        controlsEl.querySelectorAll("input[type=checkbox]").forEach((input) => {
+          input.addEventListener("change", (e) => {
+            const type = e.target.dataset.type;
+            state.types[type] = e.target.checked;
+            state.selectedNodeId = null;
+            rebuildHighlights();
+            render();
           });
+        });
 
         // Поиск
         if (searchEl) {
@@ -340,37 +331,6 @@
         });
 
         render();
-
-        // === полноэкранный режим ===
-        const fullBtn = document.getElementById("network-fullscreen-btn");
-        if (fullBtn) {
-          fullBtn.addEventListener("click", () => {
-            // если уже в полноэкранном режиме — ничего не делаем
-            if (document.fullscreenElement) return;
-            // запрашиваем полноэкранный режим для контейнера графа
-            graphEl.requestFullscreen().then(() => {
-              // растягиваем граф на весь экран
-              graphEl.style.width = "100vw";
-              graphEl.style.height = "100vh";
-              setTimeout(() => {
-                graph.width(graphEl.clientWidth);
-                graph.height(graphEl.clientHeight);
-                graph.zoomToFit(200, 100);
-              }, 100);
-            });
-          });
-        }
-        // при выходе из полноэкранного режима возвращаем размеры
-        document.addEventListener("fullscreenchange", () => {
-          if (!document.fullscreenElement) {
-            graphEl.style.width = "";
-            graphEl.style.height = "";
-            graph.width(graphEl.clientWidth);
-            graph.height(graphEl.clientHeight);
-            graph.zoomToFit(200, 100);
-          }
-        });
-        // === конец полноэкранного режима ===
       })
       .catch((err) => {
         console.error("Ошибка инициализации карты связей:", err);
