@@ -12,21 +12,11 @@
 
     let graph = null;
     let userMovedNode = false;
-    let didInitialFit = false;
-    let initialFitTimer = null;
     let resizeFitTimer = null;
 
-    const INITIAL_FIT_PADDING = 20;
     const RESET_FIT_PADDING = 24;
     const RESIZE_FIT_PADDING = 26;
     const CLICK_ZOOM = 2.2;
-
-    function clearInitialFitTimer() {
-      if (initialFitTimer) {
-        clearTimeout(initialFitTimer);
-        initialFitTimer = null;
-      }
-    }
 
     function clearResizeFitTimer() {
       if (resizeFitTimer) {
@@ -276,24 +266,13 @@
           }
         }
 
-        function fitGraph(ms = 700, padding = INITIAL_FIT_PADDING) {
+        function fitGraph(ms = 700, padding = RESET_FIT_PADDING) {
           const visible = getVisibleGraph();
           if (!graph || !visible.nodes.length) return;
 
           requestAnimationFrame(() => {
             graph.zoomToFit(ms, padding);
           });
-        }
-
-        function scheduleInitialFit() {
-          if (didInitialFit) return;
-          clearInitialFitTimer();
-
-          initialFitTimer = setTimeout(() => {
-            if (didInitialFit || state.selectedNodeId || userMovedNode) return;
-            fitGraph(650, INITIAL_FIT_PADDING);
-            didInitialFit = true;
-          }, 450);
         }
 
         graph = ForceGraph()(graphEl)
@@ -360,7 +339,6 @@
           .d3AlphaDecay(0.03)
           .d3VelocityDecay(0.34)
           .onNodeClick((node) => {
-            clearInitialFitTimer();
             state.selectedNodeId = node.id;
             rebuildHighlights();
             applyForces();
@@ -372,11 +350,9 @@
             }, 50);
           })
           .onNodeDrag(() => {
-            clearInitialFitTimer();
             userMovedNode = true;
           })
           .onNodeDragEnd(() => {
-            clearInitialFitTimer();
             userMovedNode = true;
           })
           .onBackgroundClick(() => {
@@ -459,7 +435,6 @@
         });
 
         render();
-        scheduleInitialFit();
       })
       .catch((err) => {
         console.error("Ошибка инициализации карты связей:", err);
