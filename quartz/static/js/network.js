@@ -5,6 +5,7 @@
     const graphEl = document.getElementById("network-graph");
     const controlsEl = document.getElementById("network-controls");
     const searchEl = document.getElementById("network-search");
+
     if (!graphEl || !controlsEl) return;
     if (initializedFor === graphEl) return;
     initializedFor = graphEl;
@@ -12,18 +13,23 @@
     let didInitialZoom = false;
     let userMovedNode = false;
 
+    const INITIAL_FIT_PADDING = 26;
+    const RESET_FIT_PADDING = 26;
+    const RESIZE_FIT_PADDING = 26;
+    const CLICK_ZOOM = 2.35;
+
     function computeStyle() {
       const savedTheme = document.documentElement.getAttribute("saved-theme");
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const isDarkMode = savedTheme === "dark" || (!savedTheme && prefersDark);
 
       return {
-        linkNormal: isDarkMode ? "rgba(200,200,200,0.28)" : "rgba(120,120,120,0.22)",
-        linkHighlight: isDarkMode ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.82)",
+        linkNormal: isDarkMode ? "rgba(200,200,200,0.26)" : "rgba(120,120,120,0.22)",
+        linkHighlight: isDarkMode ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.78)",
         textNormal: isDarkMode ? "#f1f5f9" : "#222222",
         textDim: isDarkMode ? "#94a3af" : "#9ca3af",
         nodeSelected: isDarkMode ? "#fbbf24" : "#111111",
-        nodeDim: isDarkMode ? "rgba(255,255,255,0.35)" : "#e5e7eb",
+        nodeDim: isDarkMode ? "rgba(255,255,255,0.35)" : "#d1d5db",
       };
     }
 
@@ -116,11 +122,11 @@
             npc_dead: true,
             faction: true,
             location: true,
-            episode: false,
-            event: false,
-            season: false,
-            chronicle: false,
-            reference: false,
+            episode: true,
+            event: true,
+            season: true,
+            chronicle: true,
+            reference: true,
             index: false,
             other: false,
           },
@@ -135,11 +141,11 @@
           <label><input type="checkbox" data-type="npc_dead" checked> НПС мёртвые</label>
           <label><input type="checkbox" data-type="faction" checked> Фракции</label>
           <label><input type="checkbox" data-type="location" checked> Локации</label>
-          <label><input type="checkbox" data-type="episode"> Серии</label>
-          <label><input type="checkbox" data-type="event"> События</label>
-          <label><input type="checkbox" data-type="season"> Сезоны</label>
-          <label><input type="checkbox" data-type="chronicle"> Хроники</label>
-          <label><input type="checkbox" data-type="reference"> Справка</label>
+          <label><input type="checkbox" data-type="episode" checked> Серии</label>
+          <label><input type="checkbox" data-type="event" checked> События</label>
+          <label><input type="checkbox" data-type="season" checked> Сезоны</label>
+          <label><input type="checkbox" data-type="chronicle" checked> Хроники</label>
+          <label><input type="checkbox" data-type="reference" checked> Справка</label>
         `;
 
         let highlightNodeIds = new Set();
@@ -210,9 +216,11 @@
           };
         }
 
+        let graph = null;
+
         function applyForces() {
           const chargeForce = graph.d3Force("charge");
-          if (chargeForce) chargeForce.strength(-240);
+          if (chargeForce) chargeForce.strength(-340);
 
           const linkForce = graph.d3Force("link");
           if (linkForce) {
@@ -229,29 +237,39 @@
                 sourceNode?.type === "location" ||
                 targetNode?.type === "location";
 
-              return important ? 120 : 92;
+              return important ? 145 : 115;
             });
-            linkForce.strength(0.55);
+
+            linkForce.strength(0.5);
           }
 
           const collideForce = graph.d3Force("collide");
           if (collideForce) {
             collideForce.radius((node) => {
-              if (state.selectedNodeId === node.id) return 34;
+              if (state.selectedNodeId === node.id) return 32;
               if (highlightNodeIds.has(node.id)) return 26;
-              return 20;
+              return 22;
             });
-            collideForce.strength(0.95);
+            collideForce.strength(1);
             collideForce.iterations(2);
           }
 
           const centerForce = graph.d3Force("center");
-          if (centerForce) {
-            centerForce.strength?.(0.06);
+          if (centerForce && typeof centerForce.strength === "function") {
+            centerForce.strength(0.07);
           }
         }
 
-        const graph = ForceGraph()(graphEl)
+        function fitGraph(ms = 700, padding = INITIAL_FIT_PADDING) {
+          const visible = getVisibleGraph();
+          if (!visible.nodes.length) return;
+
+          requestAnimationFrame(() => {
+            graph.zoomToFit(ms, padding);
+          });
+        }
+
+        graph = ForceGraph()(graphEl)
           .width(graphEl.clientWidth)
           .height(graphEl.clientHeight)
           .backgroundColor(getComputedStyle(graphEl).backgroundColor || "#111827")
@@ -259,16 +277,17 @@
           .nodeLabel((node) => `${node.label} (${node.type})`)
           .nodeRelSize(4)
           .nodeVal((node) => {
-            if (state.selectedNodeId === node.id) return 6.5;
+            if (state.selectedNodeId === node.id) return 6.4;
             if (highlightNodeIds.has(node.id)) return 5.2;
-            return 3.6;
+            return 3.7;
           })
           .nodeCanvasObject((node, ctx, globalScale) => {
             const isSelected = state.selectedNodeId === node.id;
             const isHighlighted = highlightNodeIds.has(node.id);
-            const isDimmed = !state.isolatedMode && state.selectedNodeId && !isHighlighted;
+            const hasSelection = Boolean(state.selectedNodeId);
+            const isDimmed = !state.isolatedMode && hasSelection && !isHighlighted;
 
-            const radius = isSelected ? 6.5 : isHighlighted ? 5.2 : 3.6;
+            const radius = isSelected ? 6.4 : isHighlighted ? 5.2 : 3.7;
 
             ctx.beginPath();
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
@@ -282,14 +301,20 @@
             }
             ctx.fill();
 
-            const showLabel =
-              globalScale >= 1.9 ||
-              isSelected ||
-              isHighlighted ||
-              radius >= 5;
+            let showLabel = false;
+
+            if (!hasSelection) {
+              showLabel = globalScale >= 1.35;
+            } else if (isSelected) {
+              showLabel = globalScale >= 0.95;
+            } else if (isHighlighted) {
+              showLabel = globalScale >= 1.1;
+            } else {
+              showLabel = globalScale >= 1.3;
+            }
 
             if (showLabel) {
-              const fontSize = Math.max(12 / globalScale, 5.2);
+              const fontSize = Math.max(12 / globalScale, 4.8);
               ctx.font = `${fontSize}px Sans-Serif`;
               ctx.fillStyle = isDimmed ? style.textDim : style.textNormal;
               ctx.textAlign = "left";
@@ -303,10 +328,10 @@
               ? style.linkHighlight
               : style.linkNormal;
           })
-          .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.3 : 0.9))
-          .cooldownTicks(320)
-          .d3AlphaDecay(0.02)
-          .d3VelocityDecay(0.28)
+          .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.2 : 0.85))
+          .cooldownTicks(360)
+          .d3AlphaDecay(0.018)
+          .d3VelocityDecay(0.24)
           .onNodeClick((node) => {
             state.selectedNodeId = node.id;
             rebuildHighlights();
@@ -314,8 +339,8 @@
             render();
 
             setTimeout(() => {
-              graph.centerAt(node.x, node.y, 400);
-              graph.zoom(2.6, 400);
+              graph.centerAt(node.x, node.y, 450);
+              graph.zoom(CLICK_ZOOM, 450);
             }, 50);
           })
           .onNodeDrag(() => {
@@ -331,13 +356,15 @@
             render();
 
             setTimeout(() => {
-              if (!userMovedNode) graph.zoomToFit(500, 90);
+              if (!userMovedNode) {
+                fitGraph(650, RESET_FIT_PADDING);
+              }
             }, 50);
           })
           .onEngineStop(() => {
             if (!didInitialZoom && !state.selectedNodeId && !userMovedNode) {
               didInitialZoom = true;
-              graph.zoomToFit(700, 90);
+              fitGraph(800, INITIAL_FIT_PADDING);
             }
           });
 
@@ -356,7 +383,7 @@
 
           setTimeout(() => {
             if (!didInitialZoom && !state.selectedNodeId && !userMovedNode) {
-              graph.zoomToFit(700, 90);
+              fitGraph(800, INITIAL_FIT_PADDING);
               didInitialZoom = true;
             }
           }, 140);
@@ -370,6 +397,12 @@
             rebuildHighlights();
             applyForces();
             render();
+
+            setTimeout(() => {
+              if (!userMovedNode) {
+                fitGraph(650, RESET_FIT_PADDING);
+              }
+            }, 90);
           });
         });
 
@@ -380,6 +413,12 @@
             rebuildHighlights();
             applyForces();
             render();
+
+            setTimeout(() => {
+              if (!userMovedNode) {
+                fitGraph(650, RESET_FIT_PADDING);
+              }
+            }, 90);
           });
         }
 
@@ -390,7 +429,7 @@
 
           setTimeout(() => {
             if (!state.selectedNodeId && !userMovedNode) {
-              graph.zoomToFit(500, 90);
+              fitGraph(500, RESIZE_FIT_PADDING);
             }
           }, 100);
         });

@@ -4,7 +4,7 @@ title: Карта связей
 
 <style>
   .network-shell {
-    max-width: 1040px;
+    max-width: 1120px;
     margin: 0 auto;
     padding: 8px 24px 20px 24px;
     box-sizing: border-box;
@@ -54,7 +54,7 @@ title: Карта связей
   }
 
   .network-graph {
-    height: 500px;
+    height: 560px;
     width: 100%;
     border: 1px solid #ddd;
     border-radius: 12px;
