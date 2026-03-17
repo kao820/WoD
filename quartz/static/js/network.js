@@ -1,21 +1,23 @@
 (function () {
-  let initializedFor = null
+  // Чтобы не инициализировать граф дважды
+  let initializedFor = null;
 
+  // Основная функция инициализации
   function initNetworkGraph() {
-    const graphEl = document.getElementById("network-graph")
-    const controlsEl = document.getElementById("network-controls")
-    const searchEl = document.getElementById("network-search")
+    const graphEl = document.getElementById("network-graph");
+    const controlsEl = document.getElementById("network-controls");
+    const searchEl = document.getElementById("network-search");
 
-    if (!graphEl || !controlsEl) return
-    if (initializedFor === graphEl) return
-    initializedFor = graphEl
+    if (!graphEl || !controlsEl) return;
+    if (initializedFor === graphEl) return;
+    initializedFor = graphEl;
 
-    let didInitialZoom = false
-    let userMovedNode = false
+    let didInitialZoom = false;
+    let userMovedNode = false;
 
-    // Определяем, активен ли тёмный режим, по классу `dark` на html.
-    const isDarkMode = document.documentElement.classList.contains("dark")
-    // Подбор ярких/темных цветов для разных режимов. Значения можно менять на свой вкус.
+    // Определяем, активна ли тёмная тема
+    const isDarkMode = document.documentElement.classList.contains("dark");
+    // Параметры цвета для светлой и тёмной тем
     const style = {
       linkNormal: isDarkMode ? "rgba(200,200,200,0.35)" : "rgba(120,120,120,0.25)",
       linkHighlight: isDarkMode ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.8)",
@@ -23,96 +25,91 @@
       textDim: isDarkMode ? "#cbd5e1" : "#9ca3af",
       nodeSelected: isDarkMode ? "#fbbf24" : "#111111",
       nodeDim: isDarkMode ? "rgba(255,255,255,0.35)" : "#e5e7eb",
-    }
+    };
 
-    // Формируем корректный путь до contentIndex.json.
-    // На GitHub Pages используется подкаталог (например, /WoD/), поэтому берём
-    // первый сегмент пути как имя репозитория. В локальной разработке путь пустой.
-    const host = window.location.hostname
-    let basePath = ""
+    // Формируем базовый путь к статическим файлам для GitHub Pages
+    const host = window.location.hostname;
+    let basePath = "";
     if (host.endsWith("github.io")) {
-      const segments = window.location.pathname.split("/")
-      const seg = segments.find((s) => s.length > 0)
-      basePath = seg ? `/${seg}` : ""
+      const segs = window.location.pathname.split("/").filter((s) => s.length > 0);
+      basePath = segs.length > 0 ? `/${segs[0]}` : "";
     }
-    const contentIndexUrl = `${basePath}/static/contentIndex.json`
+    const contentIndexUrl = `${basePath}/static/contentIndex.json`;
 
+    // Загружаем индекс контента и строим граф
     fetch(contentIndexUrl)
       .then((res) => res.json())
       .then((index) => {
+        // Функция для определения типа узла по его slug
         function getType(slug) {
-          if (slug.startsWith("04-Персонажи/Игроки/")) return "player"
-          if (slug.startsWith("04-Персонажи/НПС/Живы/")) return "npc_alive"
-          if (slug.startsWith("04-Персонажи/НПС/Мертвы/")) return "npc_dead"
-          if (slug.startsWith("05-Фракции/")) return "faction"
-          if (slug.startsWith("06-Локации/")) return "location"
-          if (slug.startsWith("03-Серии/")) return "episode"
-          if (slug.startsWith("07-События/")) return "event"
-          if (slug.startsWith("02-Сезоны/")) return "season"
-          if (slug.startsWith("01-Хроники/")) return "chronicle"
-          if (slug.startsWith("08-Справка/")) return "reference"
-          if (slug === "index") return "index"
-          return "other"
+          if (slug.startsWith("04-Персонажи/Игроки/")) return "player";
+          if (slug.startsWith("04-Персонажи/НПС/Живы/")) return "npc_alive";
+          if (slug.startsWith("04-Персонажи/НПС/Мертвы/")) return "npc_dead";
+          if (slug.startsWith("05-Фракции/")) return "faction";
+          if (slug.startsWith("06-Локации/")) return "location";
+          if (slug.startsWith("03-Серии/")) return "episode";
+          if (slug.startsWith("07-События/")) return "event";
+          if (slug.startsWith("02-Сезоны/")) return "season";
+          if (slug.startsWith("01-Хроники/")) return "chronicle";
+          if (slug.startsWith("08-Справка/")) return "reference";
+          if (slug === "index") return "index";
+          return "other";
         }
 
+        // Цвет узла в зависимости от типа
         function getColor(type) {
           switch (type) {
-            case "player": return "#2563eb"
-            case "npc_alive": return "#60a5fa"
-            case "npc_dead": return "#9ca3af"
-            case "faction": return "#ef4444"
-            case "location": return "#22c55e"
-            case "episode": return "#f59e0b"
-            case "event": return "#a855f7"
-            case "season": return "#f97316"
-            case "chronicle": return "#06b6d4"
-            case "reference": return "#6b7280"
-            case "index": return "#111827"
-            default: return "#6b7280"
+            case "player": return "#2563eb";
+            case "npc_alive": return "#60a5fa";
+            case "npc_dead": return "#9ca3af";
+            case "faction": return "#ef4444";
+            case "location": return "#22c55e";
+            case "episode": return "#f59e0b";
+            case "event": return "#a855f7";
+            case "season": return "#f97316";
+            case "chronicle": return "#06b6d4";
+            case "reference": return "#6b7280";
+            case "index": return "#111827";
+            default: return "#6b7280";
           }
         }
 
-        // Строим список узлов
-        const rawNodes = []
-        const existingIds = new Set()
-
+        // Собираем список узлов
+        const rawNodes = [];
+        const existingIds = new Set();
         for (const [slug, page] of Object.entries(index)) {
-          existingIds.add(slug)
-          const type = getType(slug)
+          existingIds.add(slug);
+          const type = getType(slug);
           rawNodes.push({
             id: slug,
             label: page.title || slug,
             type,
             color: getColor(type),
-          })
+          });
         }
 
-        // Строим список ссылок между узлами
-        const rawLinks = []
-        const seenLinks = new Set()
-
+        // Собираем список связей
+        const rawLinks = [];
+        const seenLinks = new Set();
         for (const [slug, page] of Object.entries(index)) {
           for (const link of page.links || []) {
-            if (!existingIds.has(link)) continue
-            if (slug === link) continue
-
-            const key = `${slug}→${link}`
-            if (seenLinks.has(key)) continue
-            seenLinks.add(key)
-
-            rawLinks.push({ source: slug, target: link })
+            if (!existingIds.has(link) || slug === link) continue;
+            const key = `${slug}→${link}`;
+            if (seenLinks.has(key)) continue;
+            seenLinks.add(key);
+            rawLinks.push({ source: slug, target: link });
           }
         }
 
-        // Матрица смежности для быстрой выборки соседей
-        const adjacency = new Map()
-        rawNodes.forEach((n) => adjacency.set(n.id, new Set()))
+        // Структура смежности для поиска соседних узлов
+        const adjacency = new Map();
+        rawNodes.forEach((n) => adjacency.set(n.id, new Set()));
         rawLinks.forEach((l) => {
-          adjacency.get(l.source)?.add(l.target)
-          adjacency.get(l.target)?.add(l.source)
-        })
+          adjacency.get(l.source)?.add(l.target);
+          adjacency.get(l.target)?.add(l.source);
+        });
 
-        // Начальное состояние фильтров и выбора узлов
+        // Первоначальное состояние фильтров и выделений
         const state = {
           types: {
             player: true,
@@ -131,45 +128,43 @@
           selectedNodeId: null,
           search: "",
           isolatedMode: true,
-        }
+        };
 
-        // Заполняем панель фильтров
+        // Заполняем панель чекбоксов
         controlsEl.innerHTML = `
-          <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="player" checked> <span>Игроки</span></label>
-          <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="npc_alive" checked> <span>НПС живые</span></label>
-          <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="npc_dead" checked> <span>НПС мёртвые</span></label>
-          <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="faction" checked> <span>Фракции</span></label>
-          <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="location" checked> <span>Локации</span></label>
-          <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="episode"> <span>Серии</span></label>
-          <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="event"> <span>События</span></label>
-          <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="season"> <span>Сезоны</span></label>
-          <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="chronicle"> <span>Хроники</span></label>
-          <label style="display:flex; gap:8px; align-items:flex-start; white-space:nowrap;"><input type="checkbox" data-type="reference"> <span>Справка</span></label>
-        `
+          <label><input type="checkbox" data-type="player" checked> Игроки</label>
+          <label><input type="checkbox" data-type="npc_alive" checked> НПС живые</label>
+          <label><input type="checkbox" data-type="npc_dead" checked> НПС мёртвые</label>
+          <label><input type="checkbox" data-type="faction" checked> Фракции</label>
+          <label><input type="checkbox" data-type="location" checked> Локации</label>
+          <label><input type="checkbox" data-type="episode"> Серии</label>
+          <label><input type="checkbox" data-type="event"> События</label>
+          <label><input type="checkbox" data-type="season"> Сезоны</label>
+          <label><input type="checkbox" data-type="chronicle"> Хроники</label>
+          <label><input type="checkbox" data-type="reference"> Справка</label>
+        `;
 
-        let highlightNodeIds = new Set()
-        let highlightLinkKeys = new Set()
+        // Текущие выделенные узлы и связи
+        let highlightNodeIds = new Set();
+        let highlightLinkKeys = new Set();
 
         function linkKey(link) {
-          const s = typeof link.source === "object" ? link.source.id : link.source
-          const t = typeof link.target === "object" ? link.target.id : link.target
-          return `${s}→${t}`
+          const s = typeof link.source === "object" ? link.source.id : link.source;
+          const t = typeof link.target === "object" ? link.target.id : link.target;
+          return `${s}→${t}`;
         }
 
+        // Пересчитываем выделения при клике или поиске
         function rebuildHighlights() {
-          highlightNodeIds = new Set()
-          highlightLinkKeys = new Set()
-
-          if (!state.selectedNodeId) return
-
-          highlightNodeIds.add(state.selectedNodeId)
-
-          const neighbors = adjacency.get(state.selectedNodeId) || new Set()
-          neighbors.forEach((n) => highlightNodeIds.add(n))
-
+          highlightNodeIds = new Set();
+          highlightLinkKeys = new Set();
+          if (!state.selectedNodeId) return;
+          highlightNodeIds.add(state.selectedNodeId);
+          const neighbors = adjacency.get(state.selectedNodeId) || new Set();
+          neighbors.forEach((n) => highlightNodeIds.add(n));
           for (const l of rawLinks) {
             if (l.source === state.selectedNodeId || l.target === state.selectedNodeId) {
-              highlightLinkKeys.add(`${l.source}→${l.target}`)
+              highlightLinkKeys.add(`${l.source}→${l.target}`);
             }
           }
         }
@@ -179,45 +174,39 @@
             Object.entries(state.types)
               .filter(([, value]) => value)
               .map(([type]) => type)
-          )
-          return rawNodes.filter((n) => activeTypes.has(n.type))
+          );
+          return rawNodes.filter((n) => activeTypes.has(n.type));
         }
 
         function getVisibleGraph() {
-          let nodes = getBaseFilteredNodes()
-
+          let nodes = getBaseFilteredNodes();
           if (state.search.trim()) {
-            const q = state.search.trim().toLowerCase()
-            const foundNode = nodes.find((n) => n.label.toLowerCase().includes(q))
-
+            const q = state.search.trim().toLowerCase();
+            const foundNode = nodes.find((n) => n.label.toLowerCase().includes(q));
             if (foundNode) {
-              const neighbors = adjacency.get(foundNode.id) || new Set()
-              nodes = nodes.filter(
-                (n) => n.id === foundNode.id || neighbors.has(n.id)
-              )
+              const neighbors = adjacency.get(foundNode.id) || new Set();
+              nodes = nodes.filter((n) => n.id === foundNode.id || neighbors.has(n.id));
             } else {
-              nodes = []
+              nodes = [];
             }
           }
-
           if (state.selectedNodeId && state.isolatedMode) {
-            const neighbors = adjacency.get(state.selectedNodeId) || new Set()
+            const neighbors = adjacency.get(state.selectedNodeId) || new Set();
             nodes = nodes.filter(
               (n) => n.id === state.selectedNodeId || neighbors.has(n.id)
-            )
+            );
           }
-
-          const visibleIds = new Set(nodes.map((n) => n.id))
+          const visibleIds = new Set(nodes.map((n) => n.id));
           const links = rawLinks.filter(
             (l) => visibleIds.has(l.source) && visibleIds.has(l.target)
-          )
-
+          );
           return {
             nodes: nodes.map((n) => ({ ...n })),
             links: links.map((l) => ({ ...l })),
-          }
+          };
         }
 
+        // Создаём граф через библиотеку force-graph
         const graph = ForceGraph()(graphEl)
           .width(graphEl.clientWidth)
           .height(graphEl.clientHeight)
@@ -225,151 +214,135 @@
           .nodeId("id")
           .nodeLabel((node) => `${node.label} (${node.type})`)
           .nodeVal((node) => {
-            if (state.selectedNodeId === node.id) return 5.2
-            if (highlightNodeIds.has(node.id)) return 4.2
-            return 2.8
+            if (state.selectedNodeId === node.id) return 5.2;
+            if (highlightNodeIds.has(node.id)) return 4.2;
+            return 2.8;
           })
           .nodeCanvasObject((node, ctx, globalScale) => {
-            const isSelected = state.selectedNodeId === node.id
-            const isHighlighted = highlightNodeIds.has(node.id)
-            const isDimmed = !state.isolatedMode && state.selectedNodeId && !isHighlighted
+            const isSelected = state.selectedNodeId === node.id;
+            const isHighlighted = highlightNodeIds.has(node.id);
+            const isDimmed = !state.isolatedMode && state.selectedNodeId && !isHighlighted;
 
-            const radius = isSelected ? 5.2 : isHighlighted ? 4.2 : 2.8
+            const radius = isSelected ? 5.2 : isHighlighted ? 4.2 : 2.8;
 
-            ctx.beginPath()
-            ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false)
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
 
             if (isSelected) {
-              ctx.fillStyle = style.nodeSelected
+              ctx.fillStyle = style.nodeSelected;
             } else if (isDimmed) {
-              ctx.fillStyle = style.nodeDim
+              ctx.fillStyle = style.nodeDim;
             } else {
-              ctx.fillStyle = node.color
+              ctx.fillStyle = node.color;
             }
+            ctx.fill();
 
-            ctx.fill()
-
-            const fontSize = Math.max(10 / globalScale, 4)
+            const fontSize = Math.max(10 / globalScale, 4);
             if (globalScale >= 6 || isSelected) {
-              ctx.font = `${fontSize}px Sans-Serif`
-              ctx.fillStyle = isDimmed ? style.textDim : style.textNormal
-              ctx.fillText(node.label, node.x + 8, node.y + 3)
+              ctx.font = `${fontSize}px Sans-Serif`;
+              ctx.fillStyle = isDimmed ? style.textDim : style.textNormal;
+              ctx.fillText(node.label, node.x + 8, node.y + 3);
             }
           })
           .linkColor((link) => {
-            if (!state.selectedNodeId) return style.linkNormal
-            return highlightLinkKeys.has(linkKey(link))
-              ? style.linkHighlight
-              : style.linkNormal
+            if (!state.selectedNodeId) return style.linkNormal;
+            return highlightLinkKeys.has(linkKey(link)) ? style.linkHighlight : style.linkNormal;
           })
           .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.5 : 1))
           .cooldownTicks(320)
           .d3AlphaDecay(0.018)
           .d3VelocityDecay(0.45)
           .onNodeClick((node) => {
-            state.selectedNodeId = node.id
-            rebuildHighlights()
-            render()
+            state.selectedNodeId = node.id;
+            rebuildHighlights();
+            render();
             setTimeout(() => {
-              graph.centerAt(node.x, node.y, 400)
-              graph.zoom(2.2, 400)
-            }, 50)
+              graph.centerAt(node.x, node.y, 400);
+              graph.zoom(2.2, 400);
+            }, 50);
           })
-          .onNodeDrag(() => {
-            userMovedNode = true
-          })
-          .onNodeDragEnd(() => {
-            userMovedNode = true
-          })
+          .onNodeDrag(() => { userMovedNode = true; })
+          .onNodeDragEnd(() => { userMovedNode = true; })
           .onBackgroundClick(() => {
-            state.selectedNodeId = null
-            rebuildHighlights()
-            render()
+            state.selectedNodeId = null;
+            rebuildHighlights();
+            render();
             setTimeout(() => {
-              if (!userMovedNode) graph.zoomToFit(500, 140)
-            }, 50)
+              if (!userMovedNode) graph.zoomToFit(500, 140);
+            }, 50);
           })
           .onEngineStop(() => {
             if (!didInitialZoom && !state.selectedNodeId && !userMovedNode) {
-              didInitialZoom = true
-              graph.zoomToFit(500, 140)
+              didInitialZoom = true;
+              graph.zoomToFit(500, 140);
             }
-          })
+          });
 
         function render() {
-          rebuildHighlights()
-          const visible = getVisibleGraph()
-          graph.graphData(visible)
-
+          rebuildHighlights();
+          const visible = getVisibleGraph();
+          graph.graphData(visible);
           setTimeout(() => {
             if (!didInitialZoom && !state.selectedNodeId && !userMovedNode) {
-              graph.zoomToFit(500, 140)
-              didInitialZoom = true
+              graph.zoomToFit(500, 140);
+              didInitialZoom = true;
             }
-          }, 120)
+          }, 120);
         }
 
-        // Обработчики для фильтров
+        // Чекбоксы фильтров
         controlsEl.querySelectorAll("input[type=checkbox]").forEach((input) => {
           input.addEventListener("change", (e) => {
-            const type = e.target.dataset.type
-            state.types[type] = e.target.checked
-            state.selectedNodeId = null
-            rebuildHighlights()
-            render()
-          })
-        })
+            const type = e.target.dataset.type;
+            state.types[type] = e.target.checked;
+            state.selectedNodeId = null;
+            rebuildHighlights();
+            render();
+          });
+        });
 
-        // Обработчик поиска
+        // Поле поиска
         if (searchEl) {
           searchEl.addEventListener("input", (e) => {
-            state.search = e.target.value || ""
-            state.selectedNodeId = null
-            rebuildHighlights()
-            render()
-          })
+            state.search = e.target.value || "";
+            state.selectedNodeId = null;
+            rebuildHighlights();
+            render();
+          });
         }
 
-        // Масштабирование при изменении размера окна
+        // Изменение размеров окна
         window.addEventListener("resize", () => {
-          graph.width(graphEl.clientWidth)
-          graph.height(graphEl.clientHeight)
+          graph.width(graphEl.clientWidth);
+          graph.height(graphEl.clientHeight);
           setTimeout(() => {
             if (!state.selectedNodeId && !userMovedNode) {
-              graph.zoomToFit(500, 140)
+              graph.zoomToFit(500, 140);
             }
-          }, 100)
-        })
+          }, 100);
+        });
 
-        render()
+        render();
       })
       .catch((err) => {
-        console.error("Ошибка инициализации карты связей:", err)
-      })
+        console.error("Ошибка инициализации карты связей:", err);
+      });
   }
 
-  // Инициализируем граф, когда DOM загружен или сразу, если страница уже готова.
+  // Инициализация при различных событиях
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initNetworkGraph)
+    document.addEventListener("DOMContentLoaded", initNetworkGraph);
   } else {
-    initNetworkGraph()
+    initNetworkGraph();
   }
+  window.addEventListener("pageshow", initNetworkGraph);
+  document.addEventListener("nav", initNetworkGraph);
 
-  // На событие pageshow также нужно реагировать (например, при back/forward в браузере).
-  window.addEventListener("pageshow", initNetworkGraph)
-
-  // Слушаем пользовательское событие nav (для SPA-навигации в Quartz).
-  document.addEventListener("nav", initNetworkGraph)
-
-  // Как запасной вариант отслеживаем появление элемента #network-graph через MutationObserver.
+  // На случай динамического появления #network-graph в DOM
   const observer = new MutationObserver(() => {
     if (document.getElementById("network-graph")) {
-      initNetworkGraph()
+      initNetworkGraph();
     }
-  })
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-  })
-})()
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
