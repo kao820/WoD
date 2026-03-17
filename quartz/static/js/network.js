@@ -16,7 +16,7 @@
 
     const RESET_FIT_PADDING = 24;
     const RESIZE_FIT_PADDING = 26;
-    const CLICK_ZOOM = 2.2;
+    const CLICK_ZOOM = 2.15;
 
     function clearResizeFitTimer() {
       if (resizeFitTimer) {
@@ -32,14 +32,11 @@
 
       return {
         linkNormal: isDarkMode ? "rgba(200,200,200,0.26)" : "rgba(120,120,120,0.22)",
-        linkDim: isDarkMode ? "rgba(200,200,200,0.08)" : "rgba(120,120,120,0.08)",
-        linkHover: isDarkMode ? "rgba(255,255,255,0.9)" : "rgba(0,0,0,0.72)",
         linkSelected: isDarkMode ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.8)",
         textNormal: isDarkMode ? "#f1f5f9" : "#222222",
         textDim: isDarkMode ? "#94a3af" : "#9ca3af",
         nodeSelected: isDarkMode ? "#fbbf24" : "#111111",
-        nodeHover: isDarkMode ? "#e2e8f0" : "#111111",
-        nodeDim: isDarkMode ? "rgba(255,255,255,0.18)" : "#d1d5db",
+        nodeDim: isDarkMode ? "rgba(255,255,255,0.35)" : "#d1d5db",
       };
     }
 
@@ -56,10 +53,13 @@
     fetch(contentIndexUrl)
       .then((res) => res.json())
       .then((index) => {
-        function getType(slug) {
-          if (slug === "00-Индексы/Кампании" || slug === "00 Индексы/Кампании" || slug.endsWith("/Кампании")) {
-            return "campaign_hub";
-          }
+        function isCampaignHub(slug, page) {
+          const title = (page?.title || "").trim().toLowerCase();
+          return title === "кампании";
+        }
+
+        function getType(slug, page) {
+          if (isCampaignHub(slug, page)) return "campaign_hub";
           if (slug.startsWith("04-Персонажи/Игроки/") || slug.startsWith("04 Персонажи/Игроки/")) return "player";
           if (slug.startsWith("04-Персонажи/НПС/Живы/") || slug.startsWith("04 Персонажи/НПС/Живы/")) return "npc_alive";
           if (slug.startsWith("04-Персонажи/НПС/Мертвы/") || slug.startsWith("04 Персонажи/НПС/Мертвы/")) return "npc_dead";
@@ -97,7 +97,7 @@
 
         for (const [slug, page] of Object.entries(index)) {
           existingIds.add(slug);
-          const type = getType(slug);
+          const type = getType(slug, page);
           rawNodes.push({
             id: slug,
             label: page.title || slug,
@@ -121,6 +121,8 @@
             rawLinks.push({ source: slug, target: link });
           }
         }
+
+        const nodeById = new Map(rawNodes.map((n) => [n.id, n]));
 
         const adjacency = new Map();
         rawNodes.forEach((n) => adjacency.set(n.id, new Set()));
@@ -146,7 +148,6 @@
             campaign_hub: true,
           },
           selectedNodeId: null,
-          hoveredNodeId: null,
           search: "",
           isolatedMode: true,
         };
@@ -166,17 +167,11 @@
 
         let highlightNodeIds = new Set();
         let highlightLinkKeys = new Set();
-        let hoverNodeIds = new Set();
-        let hoverLinkKeys = new Set();
 
         function linkKey(link) {
           const s = typeof link.source === "object" ? link.source.id : link.source;
           const t = typeof link.target === "object" ? link.target.id : link.target;
           return `${s}→${t}`;
-        }
-
-        function shouldIncludeCampaignHub(activeTypes) {
-          return activeTypes.has("timeline") || activeTypes.has("season") || activeTypes.has("episode");
         }
 
         function rebuildHighlights() {
@@ -197,24 +192,6 @@
           }
         }
 
-        function rebuildHoverState() {
-          hoverNodeIds = new Set();
-          hoverLinkKeys = new Set();
-
-          if (!state.hoveredNodeId || state.selectedNodeId) return;
-
-          hoverNodeIds.add(state.hoveredNodeId);
-          const neighbors = adjacency.get(state.hoveredNodeId) || new Set();
-          neighbors.forEach((n) => hoverNodeIds.add(n));
-
-          for (const l of rawLinks) {
-            if (l.source === state.hoveredNodeId || l.target === state.hoveredNodeId) {
-              hoverLinkKeys.add(`${l.source}→${l.target}`);
-              hoverLinkKeys.add(`${l.target}→${l.source}`);
-            }
-          }
-        }
-
         function getActiveTypes() {
           return new Set(
             Object.entries(state.types)
@@ -223,15 +200,18 @@
           );
         }
 
+        function shouldIncludeCampaignHub(activeTypes) {
+          return activeTypes.has("timeline") || activeTypes.has("season") || activeTypes.has("episode");
+        }
+
         function getBaseFilteredNodes() {
           const activeTypes = getActiveTypes();
-          let nodes = rawNodes.filter((n) => activeTypes.has(n.type));
-
-          if (shouldIncludeCampaignHub(activeTypes)) {
-            nodes = rawNodes.filter((n) => activeTypes.has(n.type) || n.type === "campaign_hub");
-          }
-
-          return nodes;
+          return rawNodes.filter((n) => {
+            if (n.type === "campaign_hub") {
+              return shouldIncludeCampaignHub(activeTypes);
+            }
+            return activeTypes.has(n.type);
+          });
         }
 
         function getVisibleGraph() {
@@ -273,29 +253,39 @@
 
           if (structuralOnly) {
             return {
-              charge: -70,
-              baseDistance: 58,
-              importantDistance: 72,
-              linkStrength: 1.2,
-              collideRadius: 11,
+              charge: -22,
+              baseDistance: 34,
+              importantDistance: 42,
+              linkStrength: 1.9,
+              collideRadius: 7,
               collideStrength: 0.9,
-              centerStrength: 0.14,
+              centerStrength: 0.28,
+              velocityDecay: 0.45,
+              alphaDecay: 0.06,
+              cooldownTicks: 140,
             };
           }
 
           return {
-            charge: -220,
-            baseDistance: 90,
-            importantDistance: 118,
-            linkStrength: 0.6,
+            charge: -210,
+            baseDistance: 86,
+            importantDistance: 112,
+            linkStrength: 0.62,
             collideRadius: 18,
             collideStrength: 0.95,
             centerStrength: 0.05,
+            velocityDecay: 0.34,
+            alphaDecay: 0.03,
+            cooldownTicks: 220,
           };
         }
 
         function applyForces() {
           const profile = getForceProfile();
+
+          graph.cooldownTicks(profile.cooldownTicks);
+          graph.d3AlphaDecay(profile.alphaDecay);
+          graph.d3VelocityDecay(profile.velocityDecay);
 
           const chargeForce = graph.d3Force("charge");
           if (chargeForce) chargeForce.strength(profile.charge);
@@ -306,18 +296,18 @@
               const sourceId = typeof link.source === "object" ? link.source.id : link.source;
               const targetId = typeof link.target === "object" ? link.target.id : link.target;
 
-              const sourceNode = rawNodes.find((n) => n.id === sourceId);
-              const targetNode = rawNodes.find((n) => n.id === targetId);
+              const sourceNode = nodeById.get(sourceId);
+              const targetNode = nodeById.get(targetId);
 
               const important =
                 sourceNode?.type === "campaign_hub" ||
                 targetNode?.type === "campaign_hub" ||
-                sourceNode?.type === "episode" ||
-                targetNode?.type === "episode" ||
-                sourceNode?.type === "season" ||
-                targetNode?.type === "season" ||
                 sourceNode?.type === "timeline" ||
                 targetNode?.type === "timeline" ||
+                sourceNode?.type === "season" ||
+                targetNode?.type === "season" ||
+                sourceNode?.type === "episode" ||
+                targetNode?.type === "episode" ||
                 sourceNode?.type === "faction" ||
                 targetNode?.type === "faction" ||
                 sourceNode?.type === "location" ||
@@ -333,7 +323,7 @@
             collideForce.radius((node) => {
               if (state.selectedNodeId === node.id) return 28;
               if (highlightNodeIds.has(node.id)) return 23;
-              if (node.type === "campaign_hub") return 22;
+              if (node.type === "campaign_hub") return 14;
               return profile.collideRadius;
             });
             collideForce.strength(profile.collideStrength);
@@ -355,32 +345,6 @@
           });
         }
 
-        function isNodeDimmed(nodeId) {
-          if (state.selectedNodeId) {
-            return !highlightNodeIds.has(nodeId);
-          }
-          if (state.hoveredNodeId) {
-            return !hoverNodeIds.has(nodeId);
-          }
-          return false;
-        }
-
-        function isLinkDimmed(link) {
-          if (state.selectedNodeId) {
-            return !highlightLinkKeys.has(linkKey(link));
-          }
-          if (state.hoveredNodeId) {
-            return !hoverLinkKeys.has(linkKey(link));
-          }
-          return false;
-        }
-
-        function isNodeEmphasized(nodeId) {
-          if (state.selectedNodeId) return highlightNodeIds.has(nodeId);
-          if (state.hoveredNodeId) return hoverNodeIds.has(nodeId);
-          return false;
-        }
-
         graph = ForceGraph()(graphEl)
           .width(graphEl.clientWidth)
           .height(graphEl.clientHeight)
@@ -389,32 +353,25 @@
           .nodeLabel((node) => `${node.label}`)
           .nodeRelSize(4)
           .nodeVal((node) => {
-            if (node.type === "campaign_hub") return 5.4;
-            if (state.selectedNodeId === node.id) return 6.4;
-            if (highlightNodeIds.has(node.id)) return 5.2;
-            if (hoverNodeIds.has(node.id)) return 4.8;
+            if (node.type === "campaign_hub") return 5.2;
+            if (state.selectedNodeId === node.id) return 6.2;
+            if (highlightNodeIds.has(node.id)) return 5.1;
             return 3.5;
           })
           .nodeCanvasObject((node, ctx, globalScale) => {
             const isSelected = state.selectedNodeId === node.id;
-            const isHovered = state.hoveredNodeId === node.id && !state.selectedNodeId;
-            const emphasized = isNodeEmphasized(node.id);
-            const dimmed = isNodeDimmed(node.id);
+            const isHighlighted = highlightNodeIds.has(node.id);
+            const isDimmed = state.selectedNodeId && !isHighlighted;
             const isCampaignHub = node.type === "campaign_hub";
 
-            let radius = isCampaignHub ? 5.4 : 3.5;
-            if (isSelected) radius = 6.4;
-            else if (emphasized) radius = Math.max(radius, 5.0);
-            else if (isHovered) radius = Math.max(radius, 5.0);
+            const radius = isSelected ? 6.2 : isHighlighted ? 5.1 : isCampaignHub ? 5.2 : 3.5;
 
             ctx.beginPath();
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
 
             if (isSelected) {
               ctx.fillStyle = style.nodeSelected;
-            } else if (isHovered) {
-              ctx.fillStyle = style.nodeHover;
-            } else if (dimmed) {
+            } else if (isDimmed) {
               ctx.fillStyle = style.nodeDim;
             } else {
               ctx.fillStyle = node.color;
@@ -422,63 +379,33 @@
             ctx.fill();
 
             let showLabel = false;
+
             if (state.selectedNodeId) {
-              showLabel =
-                isSelected ||
-                emphasized ||
-                globalScale >= 1.18;
-            } else if (state.hoveredNodeId) {
-              showLabel =
-                isHovered ||
-                emphasized ||
-                globalScale >= 1.24;
+              showLabel = isSelected || isHighlighted || globalScale >= 1.22;
             } else {
-              showLabel =
-                isCampaignHub ||
-                globalScale >= 1.2;
+              showLabel = isCampaignHub || globalScale >= 1.2;
             }
 
             if (showLabel) {
               const fontSize = Math.max(12 / globalScale, 4.7);
               ctx.font = `${fontSize}px Sans-Serif`;
-              ctx.fillStyle = dimmed ? style.textDim : style.textNormal;
+              ctx.fillStyle = isDimmed ? style.textDim : style.textNormal;
               ctx.textAlign = "left";
               ctx.textBaseline = "middle";
               ctx.fillText(node.label, node.x + radius + 5, node.y);
             }
           })
           .linkColor((link) => {
-            if (state.selectedNodeId) {
-              return highlightLinkKeys.has(linkKey(link)) ? style.linkSelected : style.linkDim;
-            }
-            if (state.hoveredNodeId) {
-              return hoverLinkKeys.has(linkKey(link)) ? style.linkHover : style.linkDim;
-            }
-            return style.linkNormal;
+            if (!state.selectedNodeId) return style.linkNormal;
+            return highlightLinkKeys.has(linkKey(link)) ? style.linkSelected : style.linkNormal;
           })
-          .linkWidth((link) => {
-            if (state.selectedNodeId) {
-              return highlightLinkKeys.has(linkKey(link)) ? 2.2 : 0.65;
-            }
-            if (state.hoveredNodeId) {
-              return hoverLinkKeys.has(linkKey(link)) ? 1.8 : 0.5;
-            }
-            return 0.82;
-          })
+          .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.1 : 0.82))
           .cooldownTicks(220)
           .d3AlphaDecay(0.03)
           .d3VelocityDecay(0.34)
-          .onNodeHover((node) => {
-            const newHoveredId = node ? node.id : null;
-            if (state.hoveredNodeId === newHoveredId) return;
-            state.hoveredNodeId = newHoveredId;
-            rebuildHoverState();
-            graph.refresh();
-          })
           .onNodeClick((node) => {
             state.selectedNodeId = node.id;
             rebuildHighlights();
-            rebuildHoverState();
             applyForces();
             render();
 
@@ -495,9 +422,7 @@
           })
           .onBackgroundClick(() => {
             state.selectedNodeId = null;
-            state.hoveredNodeId = null;
             rebuildHighlights();
-            rebuildHoverState();
             applyForces();
             render();
 
@@ -517,11 +442,21 @@
 
         function render() {
           rebuildHighlights();
-          rebuildHoverState();
           const visible = getVisibleGraph();
           graph.graphData(visible);
           applyForces();
           graph.d3ReheatSimulation();
+
+          const activeTypes = getActiveTypes();
+          const structuralOnly =
+            activeTypes.size > 0 &&
+            [...activeTypes].every((type) => ["episode", "season", "timeline"].includes(type));
+
+          if (!state.selectedNodeId && !userMovedNode && structuralOnly) {
+            setTimeout(() => {
+              fitGraph(450, 18);
+            }, 120);
+          }
         }
 
         controlsEl.querySelectorAll("input[type=checkbox]").forEach((input) => {
@@ -529,9 +464,7 @@
             const type = e.target.dataset.type;
             state.types[type] = e.target.checked;
             state.selectedNodeId = null;
-            state.hoveredNodeId = null;
             rebuildHighlights();
-            rebuildHoverState();
             applyForces();
             render();
 
@@ -547,9 +480,7 @@
           searchEl.addEventListener("input", (e) => {
             state.search = e.target.value || "";
             state.selectedNodeId = null;
-            state.hoveredNodeId = null;
             rebuildHighlights();
-            rebuildHoverState();
             applyForces();
             render();
 
@@ -576,7 +507,7 @@
 
         document.addEventListener("themechange", () => {
           style = computeStyle();
-          graph.refresh();
+          render();
         });
 
         render();
