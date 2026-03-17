@@ -1,8 +1,7 @@
 ---
-title: MtA05 Костры Салема
 tags:
   - маги
-type: episode
+type: эпизод
 season:
   - "[[01 Костры Салема]]"
 ---

@@ -1,8 +1,7 @@
 ---
-title: CtD01 Эрроу-рок
 tags:
   - феи
-type: episode
+type: эпизод
 season:
   - "[[02 Грёзы]]"
 ---
