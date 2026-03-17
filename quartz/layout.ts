@@ -1,5 +1,5 @@
-import { PageLayout, SharedLayout } from "./quartz/cfg"
-import * as Component from "./quartz/components"
+import { PageLayout, SharedLayout } from "./cfg";
+import * as Component from "./components";
 
 // Note: The default layout file that shipped with Quartz was a single-line
 // minified export. To improve readability and enable site-wide custom
