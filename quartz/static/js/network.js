@@ -12,17 +12,12 @@
 
     let didInitialZoom = false;
     let userMovedNode = false;
-    let initialFitTimers = [];
+    let graph = null;
 
-    const INITIAL_FIT_PADDING = 12;
-    const RESET_FIT_PADDING = 16;
-    const RESIZE_FIT_PADDING = 18;
-    const CLICK_ZOOM = 2.3;
-
-    function clearInitialFitTimers() {
-      initialFitTimers.forEach((timer) => clearTimeout(timer));
-      initialFitTimers = [];
-    }
+    const INITIAL_FIT_PADDING = 28;
+    const RESET_FIT_PADDING = 28;
+    const RESIZE_FIT_PADDING = 30;
+    const CLICK_ZOOM = 2.25;
 
     function computeStyle() {
       const savedTheme = document.documentElement.getAttribute("saved-theme");
@@ -156,7 +151,6 @@
 
         let highlightNodeIds = new Set();
         let highlightLinkKeys = new Set();
-        let graph = null;
 
         function linkKey(link) {
           const s = typeof link.source === "object" ? link.source.id : link.source;
@@ -225,7 +219,7 @@
 
         function applyForces() {
           const chargeForce = graph.d3Force("charge");
-          if (chargeForce) chargeForce.strength(-360);
+          if (chargeForce) chargeForce.strength(-260);
 
           const linkForce = graph.d3Force("link");
           if (linkForce) {
@@ -244,25 +238,25 @@
                 sourceNode?.type === "episode" ||
                 targetNode?.type === "episode";
 
-              return important ? 150 : 118;
+              return important ? 125 : 98;
             });
-            linkForce.strength(0.48);
+            linkForce.strength(0.55);
           }
 
           const collideForce = graph.d3Force("collide");
           if (collideForce) {
             collideForce.radius((node) => {
-              if (state.selectedNodeId === node.id) return 30;
-              if (highlightNodeIds.has(node.id)) return 24;
-              return 20;
+              if (state.selectedNodeId === node.id) return 28;
+              if (highlightNodeIds.has(node.id)) return 23;
+              return 18;
             });
-            collideForce.strength(1);
+            collideForce.strength(0.95);
             collideForce.iterations(2);
           }
 
           const centerForce = graph.d3Force("center");
           if (centerForce && typeof centerForce.strength === "function") {
-            centerForce.strength(0.08);
+            centerForce.strength(0.06);
           }
         }
 
@@ -272,26 +266,6 @@
 
           requestAnimationFrame(() => {
             graph.zoomToFit(ms, padding);
-          });
-        }
-
-        function scheduleInitialFit() {
-          clearInitialFitTimers();
-
-          const steps = [
-            { delay: 120, duration: 0, padding: 14 },
-            { delay: 500, duration: 500, padding: 12 },
-            { delay: 1000, duration: 700, padding: 10 },
-            { delay: 1600, duration: 900, padding: 10 },
-          ];
-
-          steps.forEach((step) => {
-            const timer = setTimeout(() => {
-              if (state.selectedNodeId || userMovedNode) return;
-              fitGraph(step.duration, step.padding);
-            }, step.delay);
-
-            initialFitTimers.push(timer);
           });
         }
 
@@ -330,13 +304,13 @@
             let showLabel = false;
 
             if (!hasSelection) {
-              showLabel = globalScale >= 1.18;
-            } else if (isSelected) {
-              showLabel = globalScale >= 0.95;
-            } else if (isHighlighted) {
-              showLabel = globalScale >= 1.08;
-            } else {
               showLabel = globalScale >= 1.22;
+            } else if (isSelected) {
+              showLabel = globalScale >= 1.0;
+            } else if (isHighlighted) {
+              showLabel = globalScale >= 1.12;
+            } else {
+              showLabel = globalScale >= 1.24;
             }
 
             if (showLabel) {
@@ -355,11 +329,10 @@
               : style.linkNormal;
           })
           .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.15 : 0.82))
-          .cooldownTicks(420)
-          .d3AlphaDecay(0.016)
-          .d3VelocityDecay(0.22)
+          .cooldownTicks(280)
+          .d3AlphaDecay(0.025)
+          .d3VelocityDecay(0.3)
           .onNodeClick((node) => {
-            clearInitialFitTimers();
             state.selectedNodeId = node.id;
             rebuildHighlights();
             applyForces();
@@ -372,11 +345,9 @@
           })
           .onNodeDrag(() => {
             userMovedNode = true;
-            clearInitialFitTimers();
           })
           .onNodeDragEnd(() => {
             userMovedNode = true;
-            clearInitialFitTimers();
           })
           .onBackgroundClick(() => {
             state.selectedNodeId = null;
@@ -387,17 +358,13 @@
             setTimeout(() => {
               if (!userMovedNode) {
                 fitGraph(650, RESET_FIT_PADDING);
-                scheduleInitialFit();
               }
             }, 50);
           })
           .onEngineStop(() => {
-            if (!state.selectedNodeId && !userMovedNode) {
-              fitGraph(didInitialZoom ? 450 : 800, didInitialZoom ? 14 : INITIAL_FIT_PADDING);
-              if (!didInitialZoom) {
-                didInitialZoom = true;
-                scheduleInitialFit();
-              }
+            if (!didInitialZoom && !state.selectedNodeId && !userMovedNode) {
+              didInitialZoom = true;
+              fitGraph(700, INITIAL_FIT_PADDING);
             }
           });
 
@@ -414,10 +381,6 @@
           graph.graphData(visible);
           applyForces();
           graph.d3ReheatSimulation();
-
-          if (!state.selectedNodeId && !userMovedNode) {
-            scheduleInitialFit();
-          }
         }
 
         controlsEl.querySelectorAll("input[type=checkbox]").forEach((input) => {
@@ -432,7 +395,6 @@
             setTimeout(() => {
               if (!userMovedNode) {
                 fitGraph(650, RESET_FIT_PADDING);
-                scheduleInitialFit();
               }
             }, 100);
           });
@@ -449,7 +411,6 @@
             setTimeout(() => {
               if (!userMovedNode) {
                 fitGraph(650, RESET_FIT_PADDING);
-                scheduleInitialFit();
               }
             }, 100);
           });
@@ -463,7 +424,6 @@
           setTimeout(() => {
             if (!state.selectedNodeId && !userMovedNode) {
               fitGraph(500, RESIZE_FIT_PADDING);
-              scheduleInitialFit();
             }
           }, 120);
         });
