@@ -59,6 +59,7 @@
         { type: "timeline", label: "Хронология" },
         { type: "season", label: "Сезоны" },
         { type: "episode", label: "Серии" },
+        { type: "tag", label: "Теги" },
       ],
     ];
 
@@ -114,6 +115,7 @@
         timeline: true,
         season: true,
         episode: true,
+        tag: false,
         campaign_hub: true,
         index: false,
         other: false,
@@ -177,6 +179,7 @@
         timeline: neutral,
         season: neutral,
         episode: neutral,
+        tag: neutral,
         index: neutral,
         other: neutral,
       };
@@ -378,6 +381,37 @@
       return colorMap[node.type] || themeDefaultColors[node.type] || getNeutralThemeColor();
     }
 
+    function normalizeTag(tag) {
+      return String(tag || "")
+        .trim()
+        .replace(/^#/, "")
+        .replace(/^tags\//, "")
+        .replace(/\\/g, "/");
+    }
+
+    function getPageTags(page) {
+      const result = new Set();
+
+      const directTags = Array.isArray(page?.tags) ? page.tags : [];
+      directTags.forEach((tag) => {
+        const normalized = normalizeTag(tag);
+        if (normalized) result.add(normalized);
+      });
+
+      const fmTagsRaw = page?.frontmatter?.tags;
+      if (Array.isArray(fmTagsRaw)) {
+        fmTagsRaw.forEach((tag) => {
+          const normalized = normalizeTag(tag);
+          if (normalized) result.add(normalized);
+        });
+      } else if (typeof fmTagsRaw === "string") {
+        const normalized = normalizeTag(fmTagsRaw);
+        if (normalized) result.add(normalized);
+      }
+
+      return [...result];
+    }
+
     const host = window.location.hostname;
     let basePath = "";
 
@@ -464,11 +498,41 @@
           }
         }
 
-        const nodeById = new Map(rawNodes.map((n) => [n.id, n]));
+        const tagNodeMap = new Map();
+        const rawTagLinks = [];
+        const seenTagLinks = new Set();
+
+        for (const [slug, page] of Object.entries(index)) {
+          const pageTags = getPageTags(page);
+
+          pageTags.forEach((tag) => {
+            const tagId = `tag:${tag}`;
+
+            if (!tagNodeMap.has(tagId)) {
+              tagNodeMap.set(tagId, {
+                id: tagId,
+                label: `#${tag}`,
+                type: "tag",
+              });
+            }
+
+            const linkKey = `${slug}→${tagId}`;
+            if (!seenTagLinks.has(linkKey)) {
+              seenTagLinks.add(linkKey);
+              rawTagLinks.push({ source: slug, target: tagId });
+            }
+          });
+        }
+
+        const rawTagNodes = [...tagNodeMap.values()];
+        const allNodes = [...rawNodes, ...rawTagNodes];
+        const allLinks = [...rawLinks, ...rawTagLinks];
+
+        const nodeById = new Map(allNodes.map((n) => [n.id, n]));
         const adjacency = new Map();
 
-        rawNodes.forEach((n) => adjacency.set(n.id, new Set()));
-        rawLinks.forEach((l) => {
+        allNodes.forEach((n) => adjacency.set(n.id, new Set()));
+        allLinks.forEach((l) => {
           adjacency.get(l.source)?.add(l.target);
           adjacency.get(l.target)?.add(l.source);
         });
@@ -492,7 +556,7 @@
           const neighbors = adjacency.get(state.selectedNodeId) || new Set();
           neighbors.forEach((id) => highlightNodeIds.add(id));
 
-          rawLinks.forEach((l) => {
+          allLinks.forEach((l) => {
             if (l.source === state.selectedNodeId || l.target === state.selectedNodeId) {
               highlightLinkKeys.add(`${l.source}→${l.target}`);
               highlightLinkKeys.add(`${l.target}→${l.source}`);
@@ -503,7 +567,7 @@
         function getBaseFilteredNodes() {
           const activeTypes = getActiveTypes();
 
-          return rawNodes.filter((node) => {
+          return allNodes.filter((node) => {
             if (node.type === "campaign_hub") {
               return shouldIncludeCampaignHub(activeTypes);
             }
@@ -532,7 +596,7 @@
           }
 
           const visibleIds = new Set(nodes.map((n) => n.id));
-          const links = rawLinks.filter(
+          const links = allLinks.filter(
             (l) => visibleIds.has(l.source) && visibleIds.has(l.target)
           );
 
@@ -573,12 +637,32 @@
                 sourceNode?.type === "episode" ||
                 targetNode?.type === "episode";
 
+              const tagLink =
+                sourceNode?.type === "tag" || targetNode?.type === "tag";
+
+              if (tagLink) {
+                return Math.max(18, Math.round(settings.linkDistance * 0.78));
+              }
+
               return structural
                 ? Math.max(20, Math.round(settings.linkDistance * 0.82))
                 : settings.linkDistance;
             });
 
-            linkForce.strength(settings.linkStrength / 100);
+            linkForce.strength((link) => {
+              const sourceId = typeof link.source === "object" ? link.source.id : link.source;
+              const targetId = typeof link.target === "object" ? link.target.id : link.target;
+
+              const sourceNode = nodeById.get(sourceId);
+              const targetNode = nodeById.get(targetId);
+
+              const tagLink =
+                sourceNode?.type === "tag" || targetNode?.type === "tag";
+
+              return tagLink
+                ? Math.max(0.15, (settings.linkStrength / 100) * 0.9)
+                : settings.linkStrength / 100;
+            });
           }
 
           const collideForce = graph.d3Force("collide");
@@ -587,6 +671,7 @@
               if (state.selectedNodeId === node.id) return 28;
               if (highlightNodeIds.has(node.id)) return 23;
               if (node.type === "campaign_hub") return 14;
+              if (node.type === "tag") return 10;
               return 12;
             });
             collideForce.strength(0.92);
@@ -646,6 +731,7 @@
           .nodeRelSize(4)
           .nodeVal((node) => {
             if (node.type === "campaign_hub") return 5.2;
+            if (node.type === "tag") return 2.9;
             if (state.selectedNodeId === node.id) return 6.2;
             if (highlightNodeIds.has(node.id)) return 5.1;
             return 3.5;
@@ -655,8 +741,17 @@
             const isHighlighted = highlightNodeIds.has(node.id);
             const isDimmed = state.selectedNodeId && !isHighlighted;
             const isCampaignHub = node.type === "campaign_hub";
+            const isTag = node.type === "tag";
 
-            const radius = isSelected ? 6.2 : isHighlighted ? 5.1 : isCampaignHub ? 5.2 : 3.5;
+            const radius = isSelected
+              ? 6.2
+              : isHighlighted
+                ? 5.1
+                : isCampaignHub
+                  ? 5.2
+                  : isTag
+                    ? 2.9
+                    : 3.5;
 
             ctx.beginPath();
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
@@ -677,11 +772,11 @@
             if (state.selectedNodeId) {
               showLabel = isSelected || isHighlighted || globalScale >= Math.max(1.05, threshold);
             } else {
-              showLabel = isCampaignHub || globalScale >= threshold;
+              showLabel = isCampaignHub || globalScale >= threshold || (isTag && globalScale >= Math.max(1.15, threshold));
             }
 
             if (showLabel) {
-              const fontSize = Math.max(12 / globalScale, 4.7);
+              const fontSize = Math.max((isTag ? 10 : 12) / globalScale, isTag ? 4.2 : 4.7);
               ctx.font = `${fontSize}px Sans-Serif`;
               ctx.fillStyle = isDimmed ? style.textDim : style.textNormal;
               ctx.textAlign = "left";
@@ -693,7 +788,18 @@
             if (!state.selectedNodeId) return style.linkNormal;
             return highlightLinkKeys.has(linkKey(link)) ? style.linkSelected : style.linkNormal;
           })
-          .linkWidth((link) => (highlightLinkKeys.has(linkKey(link)) ? 2.1 : 0.82))
+          .linkWidth((link) => {
+            const sourceId = typeof link.source === "object" ? link.source.id : link.source;
+            const targetId = typeof link.target === "object" ? link.target.id : link.target;
+            const sourceNode = nodeById.get(sourceId);
+            const targetNode = nodeById.get(targetId);
+            const tagLink = sourceNode?.type === "tag" || targetNode?.type === "tag";
+
+            if (highlightLinkKeys.has(linkKey(link))) {
+              return tagLink ? 1.6 : 2.1;
+            }
+            return tagLink ? 0.65 : 0.82;
+          })
           .cooldownTicks(220)
           .d3AlphaDecay(0.03)
           .d3VelocityDecay(0.34)
