@@ -56,8 +56,4 @@ export {
   NetworkScript,
   HomeCampaignHub,
   ArticleInfobox,
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 9e400d8 (update wiki)
