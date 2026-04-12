@@ -1,5 +1,5 @@
-import { PageLayout, SharedLayout } from "./cfg";
-import * as Component from "./components";
+import { PageLayout, SharedLayout } from "./cfg"
+import * as Component from "./components"
 
 // Note: The default layout file that shipped with Quartz was a single-line
 // minified export. To improve readability and enable site-wide custom
@@ -29,9 +29,20 @@ export const defaultContentPageLayout: PageLayout = {
       component: Component.Breadcrumbs(),
       condition: (page) => page.fileData.slug !== "index",
     }),
-    Component.ArticleTitle(),
-    Component.ContentMeta(),
+    Component.ConditionalRender({
+      component: Component.ArticleTitle(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
+    Component.ConditionalRender({
+      component: Component.ContentMeta(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
     Component.TagList(),
+    Component.ConditionalRender({
+      component: Component.ArticleInfobox(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
+    Component.HomeCampaignHub(),
   ],
   left: [
     Component.PageTitle(),
