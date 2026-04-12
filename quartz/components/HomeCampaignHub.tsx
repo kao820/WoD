@@ -1,6 +1,6 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { classNames } from "../util/lang"
-import { resolveRelative } from "../util/path"
+import { FilePath, resolveRelative, slugifyFilePath } from "../util/path"
 
 type CampaignCardConfig = {
   notePath: string
@@ -49,15 +49,23 @@ const HomeCampaignHub: QuartzComponent = ({
   if (fileData.slug !== "index") return null
 
   const cards = CAMPAIGN_CARDS.map((card) => {
-    const file = allFiles.find((entry) => entry.filePath === card.notePath)
-    if (!file?.slug) return null
+    const file = allFiles.find((entry) => entry.filePath?.endsWith(card.notePath))
 
+    if (file?.slug) {
+      return {
+        ...card,
+        title: file.frontmatter?.title ?? file.title ?? card.notePath.replace(/\.md$/, ""),
+        href: resolveRelative(fileData.slug!, file.slug),
+      }
+    }
+
+    const fallbackSlug = slugifyFilePath(`content/${card.notePath}` as FilePath)
     return {
       ...card,
-      title: file.frontmatter?.title ?? file.title ?? card.notePath.replace(/\.md$/, ""),
-      href: resolveRelative(fileData.slug!, file.slug),
+      title: card.notePath.replace(/^[0-9]+\s/, "").replace(/\.md$/, ""),
+      href: resolveRelative(fileData.slug!, fallbackSlug),
     }
-  }).filter((item) => item !== null)
+  })
 
   return (
     <section class={classNames(displayClass, "home-campaign-hub")}>
@@ -124,7 +132,7 @@ HomeCampaignHub.css = `
 
 .home-campaign-hub__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -204,6 +212,12 @@ a.home-campaign-card {
   border: 1px solid color-mix(in srgb, var(--secondary) 35%, var(--lightgray));
   padding: 0.12rem 0.55rem;
   color: var(--secondary);
+}
+
+@media (max-width: 1200px) {
+  .home-campaign-hub__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 900px) {

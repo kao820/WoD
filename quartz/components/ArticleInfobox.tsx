@@ -146,6 +146,7 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzCompo
 
   return (
     <aside class={classNames(displayClass, "wiki-infobox")}>
+      <div class="wiki-infobox__header">Информация</div>
       {imageValue && (
         <div class="wiki-infobox__image-wrap">
           <img
@@ -171,11 +172,23 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzCompo
 
 ArticleInfobox.css = `
 .wiki-infobox {
-  border: 1px solid var(--lightgray);
+  border: 1px solid color-mix(in srgb, var(--secondary) 30%, var(--lightgray));
   border-radius: 12px;
-  background: color-mix(in srgb, var(--light) 98%, transparent);
+  background: color-mix(in srgb, var(--light) 97%, transparent);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--dark) 8%, transparent);
   overflow: hidden;
   margin-bottom: 1.2rem;
+}
+
+.wiki-infobox__header {
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--secondary) 20%, var(--lightgray));
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: var(--secondary);
+  background: color-mix(in srgb, var(--secondary) 8%, var(--light));
 }
 
 .wiki-infobox__image-wrap {
