@@ -69,6 +69,7 @@ const HomeCampaignHub: QuartzComponent = ({
 
   return (
     <section class={classNames(displayClass, "home-campaign-hub")}>
+      <h2 class="home-campaign-hub__title">Мир Тьмы LRS</h2>
       <p class="home-campaign-hub__intro">
         Вики кампаний в <strong>Мире Тьмы</strong>, которые проводились на калане LivingRoomStudio
       </p>
@@ -110,9 +111,21 @@ HomeCampaignHub.css = `
   margin: 1rem 0 2.5rem;
 }
 
+.home-campaign-hub__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+}
+
 .home-campaign-hub__intro {
   margin: 0 0 1rem;
-  color: var(--darkgray);
+  color: var(--dark);
+  font-family: var(--bodyFont);
+}
+
+.page[data-slug="index"] .article-title,
+.page[data-slug="index"] .content-meta,
+.page[data-slug="index"] article.popover-hint {
+  display: none;
 }
 
 .home-campaign-hub__grid {

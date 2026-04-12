@@ -21,25 +21,6 @@ const EXCLUDED_KEYS = new Set([
   "comments",
 ])
 
-const PRIORITY_FIELDS = [
-  "race",
-  "faction",
-  "status",
-  "season",
-  "episode",
-  "location",
-  "clan",
-  "tribe",
-]
-
-function formatLabel(key: string): string {
-  return key
-    .replace(/[_-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/(^|\s)\S/g, (char) => char.toUpperCase())
-}
-
 function resolveImage(value: string, currentSlug: string): string {
   if (
     /^https?:\/\//.test(value) ||
@@ -57,23 +38,6 @@ function resolveImage(value: string, currentSlug: string): string {
   }
 
   return value
-}
-
-function extractFirstImageFromTree(node: any): string | null {
-  if (!node || typeof node !== "object") return null
-  if (node.type === "element" && node.tagName === "img") {
-    const src = node.properties?.src
-    if (typeof src === "string" && src.length > 0) return src
-  }
-
-  if (Array.isArray(node.children)) {
-    for (const child of node.children) {
-      const src = extractFirstImageFromTree(child)
-      if (src) return src
-    }
-  }
-
-  return null
 }
 
 function parseWikiLinks(raw: string, currentSlug: string) {
@@ -135,11 +99,7 @@ function renderValue(value: unknown, currentSlug: string) {
   )
 }
 
-const ArticleInfobox: QuartzComponent = ({
-  fileData,
-  displayClass,
-  tree,
-}: QuartzComponentProps) => {
+const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzComponentProps) => {
   if (fileData.slug === "index") return null
 
   const frontmatter = fileData.frontmatter ?? {}
@@ -153,19 +113,10 @@ const ArticleInfobox: QuartzComponent = ({
         value !== undefined && value !== null && !IMAGE_KEYS.includes(key.toLowerCase()),
     )
     .filter(([key]) => !EXCLUDED_KEYS.has(key.toLowerCase()))
-    .sort(([a], [b]) => {
-      const aIdx = PRIORITY_FIELDS.indexOf(a.toLowerCase())
-      const bIdx = PRIORITY_FIELDS.indexOf(b.toLowerCase())
-      const aScore = aIdx === -1 ? Number.MAX_SAFE_INTEGER : aIdx
-      const bScore = bIdx === -1 ? Number.MAX_SAFE_INTEGER : bIdx
-      return aScore - bScore || a.localeCompare(b)
-    })
 
   if (!imageEntry && infoEntries.length === 0) return null
 
-  const imageValue = imageEntry
-    ? String(imageEntry[1]).trim()
-    : (extractFirstImageFromTree(tree) ?? "")
+  const imageValue = imageEntry ? String(imageEntry[1]).trim() : ""
   const typeValue =
     typeof frontmatter.type === "string" ? frontmatter.type.toLowerCase().trim() : ""
 
@@ -190,7 +141,7 @@ const ArticleInfobox: QuartzComponent = ({
         <dl class="wiki-infobox__meta">
           {infoEntries.map(([key, value]) => (
             <div key={key} class="wiki-infobox__row">
-              <dt>{formatLabel(key)}:</dt>
+              <dt>{`${key}`}</dt>
               <dd>{renderValue(value, fileData.slug!)}</dd>
             </div>
           ))}
@@ -202,8 +153,9 @@ const ArticleInfobox: QuartzComponent = ({
 
 ArticleInfobox.css = `
 .wiki-infobox {
-  width: min(360px, 100%);
-  margin: 0 0 1rem auto;
+  float: right;
+  width: min(360px, 42%);
+  margin: 0 0 1rem 1rem;
   border: 2px solid color-mix(in srgb, var(--secondary) 38%, var(--lightgray));
   border-radius: 12px;
   background: color-mix(in srgb, var(--light) 96%, transparent);
@@ -244,11 +196,18 @@ ArticleInfobox.css = `
   font-size: 0.68rem;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
   .wiki-infobox {
+    float: none;
     width: 100%;
     margin: 0 0 1rem;
   }
+}
+
+.page article::after {
+  content: "";
+  display: block;
+  clear: both;
 }
 
 .wiki-infobox__image-wrap {
@@ -261,7 +220,7 @@ ArticleInfobox.css = `
   width: 100%;
   height: 420px;
   object-fit: cover;
-  object-position: center top;
+  object-position: center;
   display: block;
 }
 
@@ -291,6 +250,10 @@ ArticleInfobox.css = `
 
 .wiki-infobox__row dt {
   font-weight: 700;
+}
+
+.wiki-infobox__row dt::after {
+  content: ":";
 }
 
 .wiki-infobox__row dd {
