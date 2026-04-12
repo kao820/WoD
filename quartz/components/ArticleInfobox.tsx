@@ -110,7 +110,10 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzCompo
   const infoEntries = entries
     .filter(
       ([key, value]) =>
-        value !== undefined && value !== null && !IMAGE_KEYS.includes(key.toLowerCase()),
+        value !== undefined &&
+        value !== null &&
+        !IMAGE_KEYS.includes(key.toLowerCase()) &&
+        key.toLowerCase() !== "type",
     )
     .filter(([key]) => !EXCLUDED_KEYS.has(key.toLowerCase()))
 
@@ -125,8 +128,7 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzCompo
       class={classNames(displayClass, "wiki-infobox", typeValue && `wiki-infobox--${typeValue}`)}
     >
       <div class="wiki-infobox__header">
-        <span>Информация</span>
-        {typeValue && <span class="wiki-infobox__type">{typeValue}</span>}
+        <span>{typeValue ? typeValue.toUpperCase() : "ИНФОРМАЦИЯ"}</span>
       </div>
       {imageValue && (
         <div class="wiki-infobox__image-wrap">
@@ -189,12 +191,6 @@ ArticleInfobox.css = `
   align-items: center;
 }
 
- .wiki-infobox__type {
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  padding: 0.06rem 0.45rem;
-  font-size: 0.68rem;
-}
 
 @media (max-width: 1000px) {
   .wiki-infobox {

@@ -124,7 +124,9 @@ HomeCampaignHub.css = `
 
 .page[data-slug="index"] .article-title,
 .page[data-slug="index"] .content-meta,
-.page[data-slug="index"] article.popover-hint {
+.page[data-slug="index"] article.popover-hint,
+.page[data-slug="index"] .center > hr,
+.page[data-slug="index"] .page-footer {
   display: none;
 }
 
