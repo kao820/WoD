@@ -112,7 +112,7 @@ HomeCampaignHub.css = `
 
 .home-campaign-hub__intro {
   margin: 0 0 1rem;
-  color: var(--gray);
+  color: var(--darkgray);
 }
 
 .home-campaign-hub__grid {

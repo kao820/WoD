@@ -202,13 +202,13 @@ const ArticleInfobox: QuartzComponent = ({
 
 ArticleInfobox.css = `
 .wiki-infobox {
-  width: 100%;
+  width: min(360px, 100%);
+  margin: 0 0 1rem auto;
   border: 2px solid color-mix(in srgb, var(--secondary) 38%, var(--lightgray));
   border-radius: 12px;
   background: color-mix(in srgb, var(--light) 96%, transparent);
   box-shadow: 0 8px 20px color-mix(in srgb, var(--dark) 8%, transparent);
   overflow: hidden;
-  margin-bottom: 1rem;
 }
 
 .wiki-infobox--игрок {
@@ -237,11 +237,18 @@ ArticleInfobox.css = `
   align-items: center;
 }
 
-.wiki-infobox__type {
+ .wiki-infobox__type {
   border: 1px solid currentColor;
   border-radius: 999px;
   padding: 0.06rem 0.45rem;
   font-size: 0.68rem;
+}
+
+@media (max-width: 800px) {
+  .wiki-infobox {
+    width: 100%;
+    margin: 0 0 1rem;
+  }
 }
 
 .wiki-infobox__image-wrap {
