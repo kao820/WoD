@@ -1,5 +1,5 @@
-import { PageLayout, SharedLayout } from "./cfg";
-import * as Component from "./components";
+import { PageLayout, SharedLayout } from "./cfg"
+import * as Component from "./components"
 
 // Note: The default layout file that shipped with Quartz was a single-line
 // minified export. To improve readability and enable site-wide custom
@@ -32,6 +32,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.ArticleTitle(),
     Component.ContentMeta(),
     Component.TagList(),
+    Component.HomeCampaignHub(),
   ],
   left: [
     Component.PageTitle(),
@@ -49,6 +50,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Explorer(),
   ],
   right: [
+    Component.ArticleInfobox(),
     Component.Graph(),
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
