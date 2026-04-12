@@ -215,8 +215,8 @@ ArticleInfobox.css = `
 .wiki-infobox__image-wrap img {
   width: 100%;
   height: 420px;
-  object-fit: cover;
-  object-position: center;
+  object-fit: contain;
+  object-position: center center;
   display: block;
 }
 
@@ -246,10 +246,6 @@ ArticleInfobox.css = `
 
 .wiki-infobox__row dt {
   font-weight: 700;
-}
-
-.wiki-infobox__row dt::after {
-  content: ":";
 }
 
 .wiki-infobox__row dd {
