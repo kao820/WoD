@@ -10,34 +10,34 @@ type CampaignCardConfig = {
 
 const CAMPAIGN_CARDS: CampaignCardConfig[] = [
   {
-    notePath: "01 Хронология/06 Vampire The Masquerade.md",
-    cover: "./campaign-covers/vampire-the-masquerade.jpg",
-    subtitle: "Городские интриги, кровь и маскарад",
-  },
-  {
-    notePath: "01 Хронология/05 Hunter The Reckoning.md",
-    cover: "./campaign-covers/hunter-the-reckoning.jpg",
-    subtitle: "Охотники, заговоры и грань выживания",
-  },
-  {
-    notePath: "01 Хронология/04 Werewolf The Apocalypse.md",
-    cover: "./campaign-covers/werewolf-the-apocalypse.jpg",
-    subtitle: "Ярость Гару и война за мир духов",
-  },
-  {
-    notePath: "01 Хронология/03 Demon The Fallen.md",
-    cover: "./campaign-covers/demon-the-fallen.jpg",
-    subtitle: "Падшие, клятвы и сделки во тьме",
+    notePath: "01 Хронология/01 Mage The Ascension.md",
+    cover: "./static/campaign-covers/mage-the-ascension.jpg",
+    subtitle: "Парадигмы, аватары и война за Истину",
   },
   {
     notePath: "01 Хронология/02 Changeling The dreaming.md",
-    cover: "./campaign-covers/changeling-the-dreaming.jpg",
+    cover: "./static/campaign-covers/changeling-the-dreaming.jpg",
     subtitle: "Аркадия, грёзы и жестокая реальность",
   },
   {
-    notePath: "01 Хронология/01 Mage The Ascension.md",
-    cover: "./campaign-covers/mage-the-ascension.jpg",
-    subtitle: "Парадигмы, аватары и война за Истину",
+    notePath: "01 Хронология/03 Demon The Fallen.md",
+    cover: "./static/campaign-covers/demon-the-fallen.jpg",
+    subtitle: "Падшие, клятвы и сделки во тьме",
+  },
+  {
+    notePath: "01 Хронология/04 Werewolf The Apocalypse.md",
+    cover: "./static/campaign-covers/werewolf-the-apocalypse.jpg",
+    subtitle: "Ярость Гару и война за мир духов",
+  },
+  {
+    notePath: "01 Хронология/05 Hunter The Reckoning.md",
+    cover: "./static/campaign-covers/hunter-the-reckoning.jpg",
+    subtitle: "Охотники, заговоры и грань выживания",
+  },
+  {
+    notePath: "01 Хронология/06 Vampire The Masquerade.md",
+    cover: "./static/campaign-covers/vampire-the-masquerade.jpg",
+    subtitle: "Городские интриги, кровь и маскарад",
   },
 ]
 
@@ -70,9 +70,10 @@ const HomeCampaignHub: QuartzComponent = ({
   return (
     <section class={classNames(displayClass, "home-campaign-hub")}>
       <div class="home-campaign-hub__header">
-        <p class="home-campaign-hub__eyebrow">Chronicles Hub</p>
-        <h2>Кампейны Мира Тьмы</h2>
-        <p>Кураторский вход в ключевые хроники: выбери историю и погружайся в лор.</p>
+        <h2>Мир Тьмы LRS</h2>
+        <p>
+          Вики кампаний в <strong>Мире Тьмы</strong>, которые проводились на калане LivingRoomStudio
+        </p>
       </div>
 
       <div class="home-campaign-hub__grid">
@@ -90,13 +91,19 @@ const HomeCampaignHub: QuartzComponent = ({
           </a>
         ))}
 
-        <div class="home-campaign-card home-campaign-card--coming-soon" aria-label="Coming soon">
-          <div class="home-campaign-card__content">
-            <p class="home-campaign-card__tag">Coming Soon</p>
-            <h3>Новая хроника</h3>
-            <p>Скоро здесь появится следующая кампания.</p>
+        {[1, 2].map((idx) => (
+          <div
+            key={idx}
+            class="home-campaign-card home-campaign-card--coming-soon"
+            aria-label="Coming soon"
+          >
+            <div class="home-campaign-card__content">
+              <p class="home-campaign-card__tag">Coming Soon</p>
+              <h3>Новая хроника</h3>
+              <p>Скоро здесь появится следующая кампания.</p>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     </section>
   )
@@ -109,14 +116,6 @@ HomeCampaignHub.css = `
 
 .home-campaign-hub__header {
   margin-bottom: 1.25rem;
-}
-
-.home-campaign-hub__eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.76rem;
-  color: var(--secondary);
-  margin-bottom: 0.35rem;
 }
 
 .home-campaign-hub__header h2 {
@@ -132,7 +131,7 @@ HomeCampaignHub.css = `
 
 .home-campaign-hub__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
 }
 

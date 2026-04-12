@@ -172,12 +172,28 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzCompo
 
 ArticleInfobox.css = `
 .wiki-infobox {
+  float: right;
+  width: min(360px, 46%);
+  margin: 0 0 1rem 1.2rem;
   border: 1px solid color-mix(in srgb, var(--secondary) 30%, var(--lightgray));
   border-radius: 12px;
   background: color-mix(in srgb, var(--light) 97%, transparent);
   box-shadow: 0 8px 20px color-mix(in srgb, var(--dark) 8%, transparent);
   overflow: hidden;
-  margin-bottom: 1.2rem;
+}
+
+.page article::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+@media (max-width: 1100px) {
+  .wiki-infobox {
+    float: none;
+    width: 100%;
+    margin: 0 0 1rem;
+  }
 }
 
 .wiki-infobox__header {
