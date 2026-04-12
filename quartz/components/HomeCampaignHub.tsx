@@ -69,13 +69,9 @@ const HomeCampaignHub: QuartzComponent = ({
 
   return (
     <section class={classNames(displayClass, "home-campaign-hub")}>
-      <div class="home-campaign-hub__header">
-        <h2>Мир Тьмы LRS</h2>
-        <p>
-          Вики кампаний в <strong>Мире Тьмы</strong>, которые проводились на калане LivingRoomStudio
-        </p>
-      </div>
-
+      <p class="home-campaign-hub__intro">
+        Вики кампаний в <strong>Мире Тьмы</strong>, которые проводились на калане LivingRoomStudio
+      </p>
       <div class="home-campaign-hub__grid">
         {cards.map((card) => (
           <a key={card.notePath} href={card.href} class="home-campaign-card internal">
@@ -114,19 +110,9 @@ HomeCampaignHub.css = `
   margin: 1rem 0 2.5rem;
 }
 
-.home-campaign-hub__header {
-  margin-bottom: 1.25rem;
-}
-
-.home-campaign-hub__header h2 {
-  margin: 0;
-  font-size: clamp(1.5rem, 2.3vw, 2.1rem);
-}
-
-.home-campaign-hub__header p {
-  margin: 0.55rem 0 0;
+.home-campaign-hub__intro {
+  margin: 0 0 1rem;
   color: var(--gray);
-  max-width: 70ch;
 }
 
 .home-campaign-hub__grid {

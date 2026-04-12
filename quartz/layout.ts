@@ -32,10 +32,6 @@ export const defaultContentPageLayout: PageLayout = {
     Component.ArticleTitle(),
     Component.ContentMeta(),
     Component.TagList(),
-    Component.ConditionalRender({
-      component: Component.ArticleInfobox(),
-      condition: (page) => page.fileData.slug !== "index",
-    }),
     Component.HomeCampaignHub(),
   ],
   left: [

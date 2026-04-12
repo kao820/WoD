@@ -59,6 +59,23 @@ function resolveImage(value: string, currentSlug: string): string {
   return value
 }
 
+function extractFirstImageFromTree(node: any): string | null {
+  if (!node || typeof node !== "object") return null
+  if (node.type === "element" && node.tagName === "img") {
+    const src = node.properties?.src
+    if (typeof src === "string" && src.length > 0) return src
+  }
+
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) {
+      const src = extractFirstImageFromTree(child)
+      if (src) return src
+    }
+  }
+
+  return null
+}
+
 function parseWikiLinks(raw: string, currentSlug: string) {
   const chunks: Array<string | { label: string; href: string }> = []
   const regex = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g
@@ -118,7 +135,11 @@ function renderValue(value: unknown, currentSlug: string) {
   )
 }
 
-const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzComponentProps) => {
+const ArticleInfobox: QuartzComponent = ({
+  fileData,
+  displayClass,
+  tree,
+}: QuartzComponentProps) => {
   if (fileData.slug === "index") return null
 
   const frontmatter = fileData.frontmatter ?? {}
@@ -142,11 +163,20 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzCompo
 
   if (!imageEntry && infoEntries.length === 0) return null
 
-  const imageValue = imageEntry ? String(imageEntry[1]).trim() : ""
+  const imageValue = imageEntry
+    ? String(imageEntry[1]).trim()
+    : (extractFirstImageFromTree(tree) ?? "")
+  const typeValue =
+    typeof frontmatter.type === "string" ? frontmatter.type.toLowerCase().trim() : ""
 
   return (
-    <aside class={classNames(displayClass, "wiki-infobox")}>
-      <div class="wiki-infobox__header">Информация</div>
+    <aside
+      class={classNames(displayClass, "wiki-infobox", typeValue && `wiki-infobox--${typeValue}`)}
+    >
+      <div class="wiki-infobox__header">
+        <span>Информация</span>
+        {typeValue && <span class="wiki-infobox__type">{typeValue}</span>}
+      </div>
       {imageValue && (
         <div class="wiki-infobox__image-wrap">
           <img
@@ -172,28 +202,25 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzCompo
 
 ArticleInfobox.css = `
 .wiki-infobox {
-  float: right;
-  width: min(360px, 46%);
-  margin: 0 0 1rem 1.2rem;
-  border: 1px solid color-mix(in srgb, var(--secondary) 30%, var(--lightgray));
+  width: 100%;
+  border: 2px solid color-mix(in srgb, var(--secondary) 38%, var(--lightgray));
   border-radius: 12px;
-  background: color-mix(in srgb, var(--light) 97%, transparent);
+  background: color-mix(in srgb, var(--light) 96%, transparent);
   box-shadow: 0 8px 20px color-mix(in srgb, var(--dark) 8%, transparent);
   overflow: hidden;
+  margin-bottom: 1rem;
 }
 
-.page article::after {
-  content: "";
-  display: block;
-  clear: both;
+.wiki-infobox--игрок {
+  border-color: color-mix(in srgb, #4ea8de 45%, var(--lightgray));
 }
 
-@media (max-width: 1100px) {
-  .wiki-infobox {
-    float: none;
-    width: 100%;
-    margin: 0 0 1rem;
-  }
+.wiki-infobox--локация {
+  border-color: color-mix(in srgb, #70c1b3 45%, var(--lightgray));
+}
+
+.wiki-infobox--фракция {
+  border-color: color-mix(in srgb, #a06cd5 45%, var(--lightgray));
 }
 
 .wiki-infobox__header {
@@ -205,6 +232,16 @@ ArticleInfobox.css = `
   font-weight: 700;
   color: var(--secondary);
   background: color-mix(in srgb, var(--secondary) 8%, var(--light));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wiki-infobox__type {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.06rem 0.45rem;
+  font-size: 0.68rem;
 }
 
 .wiki-infobox__image-wrap {
@@ -215,8 +252,9 @@ ArticleInfobox.css = `
 
 .wiki-infobox__image-wrap img {
   width: 100%;
-  max-height: 360px;
+  height: 420px;
   object-fit: cover;
+  object-position: center top;
   display: block;
 }
 
