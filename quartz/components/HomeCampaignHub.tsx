@@ -78,7 +78,7 @@ const HomeCampaignHub: QuartzComponent = ({
           <a key={card.notePath} href={card.href} class="home-campaign-card internal">
             <div class="home-campaign-card__cover">
               <img
-                src={`${pathToRoot(fileData.slug!)}${card.cover.replace(/^\.\//, "")}`}
+                src={`${pathToRoot(fileData.slug!)}/${card.cover.replace(/^\.\//, "")}`}
                 alt={String(card.title)}
               />
             </div>

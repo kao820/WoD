@@ -102,12 +102,7 @@ function renderValue(value: unknown, currentSlug: string) {
 const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzComponentProps) => {
   if (fileData.slug === "index") return null
   const displayTokens = (displayClass ?? "").split(/\s+/).filter(Boolean)
-  if (
-    displayTokens.includes("popover-hint") ||
-    displayTokens.includes("left") ||
-    displayTokens.includes("right") ||
-    displayTokens.includes("sidebar")
-  ) {
+  if (displayTokens.includes("popover-hint")) {
     return null
   }
 
