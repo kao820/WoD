@@ -1,6 +1,6 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { classNames } from "../util/lang"
-import { FilePath, pathToRoot, resolveRelative, slugifyFilePath } from "../util/path"
+import { FilePath, resolveRelative, slugifyFilePath } from "../util/path"
 
 type CampaignCardConfig = {
   notePath: string
@@ -76,12 +76,9 @@ const HomeCampaignHub: QuartzComponent = ({
       <div class="home-campaign-hub__grid">
         {cards.map((card) => (
           <a key={card.notePath} href={card.href} class="home-campaign-card internal">
-            <div
-              class="home-campaign-card__cover"
-              style={{
-                backgroundImage: `url('${pathToRoot(fileData.slug!)}/${card.cover.replace(/^\.\//, "")}')`,
-              }}
-            ></div>
+            <div class="home-campaign-card__cover">
+              <img src={card.cover} alt={String(card.title)} />
+            </div>
             <div class="home-campaign-card__overlay"></div>
             <div class="home-campaign-card__content">
               <h3>{card.title}</h3>
@@ -163,6 +160,17 @@ a.home-campaign-card {
   background-size: cover;
   background-position: center;
   opacity: 0.94;
+  overflow: hidden;
+}
+
+.home-campaign-card__cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
   transform: scale(1.01);
 }
 
