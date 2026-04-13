@@ -1,7 +1,7 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import breadcrumbsStyle from "./styles/breadcrumbs.scss"
 import { FullSlug, SimpleSlug, resolveRelative, simplifySlug } from "../util/path"
-import { classNames } from "../util/lang"
+import { classNames, stripOrderingPrefix } from "../util/lang"
 import { trieFromAllFiles } from "../util/ctx"
 
 type CrumbData = {

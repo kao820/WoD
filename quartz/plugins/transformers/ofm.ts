@@ -25,7 +25,7 @@ import mermaidStyle from "../../components/styles/mermaid.inline.scss"
 import { FilePath, pathToRoot, slugTag, slugifyFilePath } from "../../util/path"
 import { toHast } from "mdast-util-to-hast"
 import { toHtml } from "hast-util-to-html"
-import { capitalize } from "../../util/lang"
+import { capitalize, stripOrderingPrefix } from "../../util/lang"
 import { PluggableList } from "unified"
 
 export interface Options {
@@ -284,7 +284,7 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
                   if (!exists) {
                     return {
                       type: "html",
-                      value: `<a class=\"internal broken\">${alias ?? fp}</a>`,
+                      value: `<a class=\"internal broken\">${stripOrderingPrefix(alias ?? fp)}</a>`,
                     }
                   }
                 }
@@ -298,7 +298,7 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
                   children: [
                     {
                       type: "text",
-                      value: alias ?? fp,
+                      value: stripOrderingPrefix(alias ?? fp),
                     },
                   ],
                 }
