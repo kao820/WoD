@@ -55,7 +55,7 @@ const HomeCampaignHub: QuartzComponent = ({
       return {
         ...card,
         title: String(file.frontmatter?.title ?? file.title ?? card.notePath.replace(/\.md$/, "")).replace(
-          /^[0-9]+\s*[-._]?\s*/,
+          /^(?:[0-9]+|[A-Za-zА-Яа-я]{2,}[0-9]+)\s*[-._]?\s*/,
           "",
         ),
         href: resolveRelative(fileData.slug!, file.slug),
@@ -65,7 +65,9 @@ const HomeCampaignHub: QuartzComponent = ({
     const fallbackSlug = slugifyFilePath(`content/${card.notePath}` as FilePath)
     return {
       ...card,
-      title: card.notePath.replace(/^[0-9]+\s*[-._]?\s*/, "").replace(/\.md$/, ""),
+      title: card.notePath
+        .replace(/^(?:[0-9]+|[A-Za-zА-Яа-я]{2,}[0-9]+)\s*[-._]?\s*/, "")
+        .replace(/\.md$/, ""),
       href: resolveRelative(fileData.slug!, fallbackSlug),
     }
   })
