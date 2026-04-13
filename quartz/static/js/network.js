@@ -476,7 +476,7 @@
           existingIds.add(slug);
           rawNodes.push({
             id: slug,
-            label: page.title || slug,
+            label: stripOrderingPrefix(page.title || slug),
             type: getType(slug, page),
           });
         }
@@ -986,3 +986,6 @@
     mutationObserverStarted = true;
   }
 })();
+    function stripOrderingPrefix(label) {
+      return String(label || "").replace(/^(?:[0-9]+|[A-Za-zА-Яа-я]{2,}[0-9]+)\s*[-._]?\s*/, "");
+    }
