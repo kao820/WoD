@@ -1,5 +1,5 @@
-import { PageLayout, SharedLayout } from "./cfg";
-import * as Component from "./components";
+import { PageLayout, SharedLayout } from "./cfg"
+import * as Component from "./components"
 
 // Note: The default layout file that shipped with Quartz was a single-line
 // minified export. To improve readability and enable site-wide custom
@@ -14,24 +14,26 @@ export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
   afterBody: [Component.NetworkScript()],
-  footer: Component.Footer({
-    links: {
-      GitHub: "https://github.com/jackyzha0/quartz",
-      "Discord Community": "https://discord.gg/cRFFHYye7t",
-    },
-  }),
+  footer: Component.ConditionalRender({ component: Component.Footer({ links: {} }), condition: () => false }),
 }
 
 // components for pages that display a single page (e.g. a single note)
 export const defaultContentPageLayout: PageLayout = {
   beforeBody: [
     Component.ConditionalRender({
-      component: Component.Breadcrumbs(),
+      component: Component.Breadcrumbs({ rootName: "Мир Тьмы" }),
       condition: (page) => page.fileData.slug !== "index",
     }),
-    Component.ArticleTitle(),
-    Component.ContentMeta(),
+    Component.ConditionalRender({
+      component: Component.ArticleTitle(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
+    Component.ConditionalRender({
+      component: Component.ContentMeta({ showDate: false }),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
     Component.TagList(),
+    Component.HomeCampaignHub(),
   ],
   left: [
     Component.PageTitle(),
@@ -46,7 +48,13 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer({
+      title: "Содержание",
+      folderClickBehavior: "collapse",
+      mapFn: (node) => {
+        node.displayName = node.displayName.replace(/^[0-9]+\s*[-._]?\s*/, "")
+      },
+    }),
   ],
   right: [
     Component.Graph(),
@@ -57,7 +65,11 @@ export const defaultContentPageLayout: PageLayout = {
 
 // components for pages that display lists of pages  (e.g. tags or folders)
 export const defaultListPageLayout: PageLayout = {
-  beforeBody: [Component.Breadcrumbs(), Component.ArticleTitle(), Component.ContentMeta()],
+  beforeBody: [
+    Component.Breadcrumbs({ rootName: "Мир Тьмы" }),
+    Component.ArticleTitle(),
+    Component.ContentMeta({ showDate: false }),
+  ],
   left: [
     Component.PageTitle(),
     Component.MobileOnly(Component.Spacer()),
@@ -70,7 +82,13 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer({
+      title: "Содержание",
+      folderClickBehavior: "collapse",
+      mapFn: (node) => {
+        node.displayName = node.displayName.replace(/^[0-9]+\s*[-._]?\s*/, "")
+      },
+    }),
   ],
   right: [],
 }
