@@ -157,8 +157,6 @@ a.home-campaign-card {
 }
 
 .home-campaign-card__cover {
-  background-size: cover;
-  background-position: center;
   opacity: 0.94;
   overflow: hidden;
 }
@@ -171,7 +169,6 @@ a.home-campaign-card {
   object-fit: cover;
   object-position: center;
   display: block;
-  transform: scale(1.01);
 }
 
 .home-campaign-card__overlay {
