@@ -24,6 +24,8 @@ import Comments from "./Comments"
 import Flex from "./Flex"
 import ConditionalRender from "./ConditionalRender"
 import NetworkScript from "./NetworkScript"
+import HomeCampaignHub from "./HomeCampaignHub"
+import ArticleInfobox from "./ArticleInfobox"
 
 export {
   ArticleTitle,
@@ -52,4 +54,6 @@ export {
   Flex,
   ConditionalRender,
   NetworkScript,
+  HomeCampaignHub,
+  ArticleInfobox,
 }
