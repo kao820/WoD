@@ -42,8 +42,12 @@ function resolveImage(value: string, currentSlug: string): string {
   }
 
   if (normalized) {
-    const slug = slugifyFilePath(`${normalized}.md` as FilePath)
-    return resolveRelative(currentSlug as FullSlug, slug)
+    const encodedAsJpg = normalized
+      .split("/")
+      .filter(Boolean)
+      .map((segment) => encodeURIComponent(segment))
+      .join("/")
+    return `${pathToRoot(currentSlug as FullSlug)}/assets/${encodedAsJpg}.jpg`
   }
 
   return value
