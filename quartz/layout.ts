@@ -52,7 +52,14 @@ export const defaultContentPageLayout: PageLayout = {
       title: "Содержание",
       folderClickBehavior: "collapse",
       mapFn: (node) => {
-        node.displayName = node.displayName.replace(/^[0-9]+\s*[-._]?\s*/, "")
+        if (node.isFolder && /^\d+$/.test(node.displayName) && node.slug.includes("03-Серии/04-Оборотни/")) {
+          node.displayName = `Сезон ${Number(node.displayName)}`
+          return
+        }
+        node.displayName = node.displayName.replace(
+          /^(?:[0-9]+|[A-Za-zА-Яа-я]{2,}[0-9]+)\s*[-._]?\s*/,
+          "",
+        )
       },
       order: ["filter", "sort", "map"],
     }),
@@ -88,7 +95,14 @@ export const defaultListPageLayout: PageLayout = {
       title: "Содержание",
       folderClickBehavior: "collapse",
       mapFn: (node) => {
-        node.displayName = node.displayName.replace(/^[0-9]+\s*[-._]?\s*/, "")
+        if (node.isFolder && /^\d+$/.test(node.displayName) && node.slug.includes("03-Серии/04-Оборотни/")) {
+          node.displayName = `Сезон ${Number(node.displayName)}`
+          return
+        }
+        node.displayName = node.displayName.replace(
+          /^(?:[0-9]+|[A-Za-zА-Яа-я]{2,}[0-9]+)\s*[-._]?\s*/,
+          "",
+        )
       },
       order: ["filter", "sort", "map"],
     }),

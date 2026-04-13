@@ -6,7 +6,7 @@ const ArticleTitle: QuartzComponent = ({ fileData, displayClass }: QuartzCompone
   if (title) {
     return (
       <h1 class={classNames(displayClass, "article-title")}>
-        {String(title).replace(/^[0-9]+\s*[-._]?\s*/, "")}
+        {String(title).replace(/^(?:[0-9]+|[A-Za-zА-Яа-я]{2,}[0-9]+)\s*[-._]?\s*/, "")}
       </h1>
     )
   } else {
