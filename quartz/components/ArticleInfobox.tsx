@@ -101,9 +101,17 @@ function renderValue(value: unknown, currentSlug: string) {
 
 const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzComponentProps) => {
   if (fileData.slug === "index") return null
-  if (displayClass?.includes("popover-hint")) return null
+  const displayTokens = (displayClass ?? "").split(/\s+/).filter(Boolean)
+  if (
+    displayTokens.includes("popover-hint") ||
+    displayTokens.includes("left") ||
+    displayTokens.includes("right") ||
+    displayTokens.includes("sidebar")
+  ) {
+    return null
+  }
 
-  const frontmatter = fileData.frontmatter ?? {}
+  const frontmatter = (fileData.frontmatter ?? {}) as Record<string, unknown>
   const entries = Object.entries(frontmatter)
 
   const imageEntry = entries.find(([key, value]) => IMAGE_KEYS.includes(key.toLowerCase()) && value)
@@ -168,13 +176,6 @@ ArticleInfobox.css = `
 
 .popover-hint .wiki-infobox,
 .wiki-infobox.popover-hint {
-  display: none !important;
-}
-
-.page > .left.sidebar .wiki-infobox,
-.page > .right.sidebar .wiki-infobox,
-.sidebar.left .wiki-infobox,
-.sidebar.right .wiki-infobox {
   display: none !important;
 }
 
