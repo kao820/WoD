@@ -23,8 +23,9 @@ export interface Options {
 }
 
 const defaultOptions: Options = {
+  title: "Содержание",
   folderDefaultState: "collapsed",
-  folderClickBehavior: "link",
+  folderClickBehavior: "collapse",
   useSavedState: true,
   mapFn: (node) => {
     return node
@@ -47,7 +48,7 @@ const defaultOptions: Options = {
     }
   },
   filterFn: (node) => node.slugSegment !== "tags",
-  order: ["filter", "map", "sort"],
+  order: ["filter", "sort", "map"],
 }
 
 export type FolderState = {
