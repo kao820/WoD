@@ -4,7 +4,11 @@ import { classNames } from "../util/lang"
 const ArticleTitle: QuartzComponent = ({ fileData, displayClass }: QuartzComponentProps) => {
   const title = fileData.frontmatter?.title
   if (title) {
-    return <h1 class={classNames(displayClass, "article-title")}>{title}</h1>
+    return (
+      <h1 class={classNames(displayClass, "article-title")}>
+        {String(title).replace(/^[0-9]+\s*[-._]?\s*/, "")}
+      </h1>
+    )
   } else {
     return null
   }
