@@ -101,6 +101,7 @@ function renderValue(value: unknown, currentSlug: string) {
 
 const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzComponentProps) => {
   if (fileData.slug === "index") return null
+  if (displayClass?.includes("popover-hint")) return null
 
   const frontmatter = fileData.frontmatter ?? {}
   const entries = Object.entries(frontmatter)
@@ -165,6 +166,16 @@ ArticleInfobox.css = `
   overflow: hidden;
 }
 
+.popover-hint .wiki-infobox,
+.wiki-infobox.popover-hint {
+  display: none !important;
+}
+
+.page .left .wiki-infobox,
+.page .right .wiki-infobox {
+  display: none !important;
+}
+
 .wiki-infobox--игрок {
   border-color: color-mix(in srgb, #4ea8de 45%, var(--lightgray));
 }
@@ -214,9 +225,8 @@ ArticleInfobox.css = `
 
 .wiki-infobox__image-wrap img {
   width: 100%;
-  height: 420px;
-  object-fit: contain;
-  object-position: center center;
+  height: auto;
+  max-height: 420px;
   display: block;
 }
 
