@@ -176,6 +176,10 @@ ArticleInfobox.css = `
   overflow: hidden;
 }
 
+.wiki-infobox:not(.wiki-infobox-inline) {
+  display: none !important;
+}
+
 .wiki-infobox--игрок {
   border-color: color-mix(in srgb, #4ea8de 45%, var(--lightgray));
 }
@@ -229,6 +233,7 @@ ArticleInfobox.css = `
   object-fit: cover;
   object-position: center;
   display: block;
+  margin: 0 !important;
 }
 
 .wiki-infobox__meta {

@@ -169,6 +169,7 @@ a.home-campaign-card {
   object-fit: cover;
   object-position: center;
   display: block;
+  margin: 0 !important;
 }
 
 .home-campaign-card__overlay {
