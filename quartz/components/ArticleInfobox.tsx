@@ -21,7 +21,7 @@ const EXCLUDED_KEYS = new Set([
   "comments",
 ])
 
-function resolveImage(value: string, currentSlug: string): string {
+function resolveImage(value: string, currentSlug: string): string | null {
   if (
     /^https?:\/\//.test(value) ||
     value.startsWith("./") ||
@@ -31,7 +31,10 @@ function resolveImage(value: string, currentSlug: string): string {
     return value
   }
 
-  const normalized = value.replace(/^\[\[|\]\]$/g, "").trim()
+  const normalized = value
+    .replace(/^\[\[|\]\]$/g, "")
+    .split("|")[0]
+    .trim()
   if (/\.(png|jpe?g|webp|gif|svg|avif)$/i.test(normalized)) {
     const encoded = normalized
       .split("/")
@@ -41,16 +44,7 @@ function resolveImage(value: string, currentSlug: string): string {
     return `${pathToRoot(currentSlug as FullSlug)}/assets/${encoded}`
   }
 
-  if (normalized) {
-    const encodedAsJpg = normalized
-      .split("/")
-      .filter(Boolean)
-      .map((segment) => encodeURIComponent(segment))
-      .join("/")
-    return `${pathToRoot(currentSlug as FullSlug)}/assets/${encodedAsJpg}.jpg`
-  }
-
-  return value
+  return null
 }
 
 function parseWikiLinks(raw: string, currentSlug: string) {
@@ -144,6 +138,7 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzCompo
   if (!imageEntry && infoEntries.length === 0) return null
 
   const imageValue = imageEntry ? String(imageEntry[1]).trim() : ""
+  const resolvedImage = imageValue ? resolveImage(imageValue, fileData.slug!) : null
   const typeValue =
     typeof frontmatter.type === "string" ? frontmatter.type.toLowerCase().trim() : ""
 
@@ -154,10 +149,10 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzCompo
       <div class="wiki-infobox__header">
         <span>{typeValue ? typeValue.toUpperCase() : "ИНФОРМАЦИЯ"}</span>
       </div>
-      {imageValue && (
+      {resolvedImage && (
         <div class="wiki-infobox__image-wrap">
           <img
-            src={resolveImage(imageValue, fileData.slug!)}
+            src={resolvedImage}
             alt={String(fileData.frontmatter?.title ?? fileData.title ?? "Infobox image")}
           />
         </div>
