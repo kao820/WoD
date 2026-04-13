@@ -47,7 +47,26 @@ function resolveImage(value: string, currentSlug: string): string | null {
   return null
 }
 
-function parseWikiLinks(raw: string, currentSlug: string) {
+function resolveWikiHref(rawTarget: string, currentSlug: string, allFiles: QuartzComponentProps["allFiles"]) {
+  const target = rawTarget.trim()
+  const targetLower = target.toLowerCase()
+
+  const direct = allFiles.find((entry) => {
+    if (!entry.slug) return false
+    const fromTitle = String(entry.frontmatter?.title ?? entry.title ?? "").toLowerCase()
+    const slugTail = entry.slug.split("/").pop()?.toLowerCase() ?? ""
+    return fromTitle === targetLower || slugTail === targetLower.replace(/\s+/g, "-")
+  })
+
+  if (direct?.slug) {
+    return resolveRelative(currentSlug as FullSlug, direct.slug)
+  }
+
+  const slug = slugifyFilePath(`${target}.md` as FilePath)
+  return resolveRelative(currentSlug as FullSlug, slug)
+}
+
+function parseWikiLinks(raw: string, currentSlug: string, allFiles: QuartzComponentProps["allFiles"]) {
   const chunks: Array<string | { label: string; href: string }> = []
   const regex = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g
 
@@ -62,8 +81,7 @@ function parseWikiLinks(raw: string, currentSlug: string) {
     const label = (match[2] ?? target).trim()
 
     try {
-      const slug = slugifyFilePath(`${target}.md` as FilePath)
-      const href = resolveRelative(currentSlug as FullSlug, slug)
+      const href = resolveWikiHref(target, currentSlug, allFiles)
       chunks.push({ label, href })
     } catch {
       chunks.push(label)
@@ -79,18 +97,18 @@ function parseWikiLinks(raw: string, currentSlug: string) {
   return chunks
 }
 
-function renderValue(value: unknown, currentSlug: string) {
+function renderValue(value: unknown, currentSlug: string, allFiles: QuartzComponentProps["allFiles"]) {
   if (Array.isArray(value)) {
     const rendered = value
       .map((entry) => (typeof entry === "string" ? entry : String(entry)))
       .join(", ")
-    return renderValue(rendered, currentSlug)
+    return renderValue(rendered, currentSlug, allFiles)
   }
 
   const raw = String(value ?? "").trim()
   if (!raw) return null
 
-  const parts = parseWikiLinks(raw, currentSlug)
+  const parts = parseWikiLinks(raw, currentSlug, allFiles)
   return (
     <span>
       {parts.map((part, idx) =>
@@ -106,7 +124,7 @@ function renderValue(value: unknown, currentSlug: string) {
   )
 }
 
-const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzComponentProps) => {
+const ArticleInfobox: QuartzComponent = ({ fileData, displayClass, allFiles }: QuartzComponentProps) => {
   if (fileData.slug === "index") return null
   const displayTokens = (displayClass ?? "").split(/\s+/).filter(Boolean)
   if (
@@ -163,7 +181,7 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzCompo
           {infoEntries.map(([key, value]) => (
             <div key={key} class="wiki-infobox__row">
               <dt>{`${key}`}</dt>
-              <dd>{renderValue(value, fileData.slug!)}</dd>
+                  <dd>{renderValue(value, fileData.slug!, allFiles)}</dd>
             </div>
           ))}
         </dl>
