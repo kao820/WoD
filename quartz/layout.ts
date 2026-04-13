@@ -54,6 +54,7 @@ export const defaultContentPageLayout: PageLayout = {
       mapFn: (node) => {
         node.displayName = node.displayName.replace(/^[0-9]+\s*[-._]?\s*/, "")
       },
+      order: ["filter", "sort", "map"],
     }),
   ],
   right: [
@@ -89,6 +90,7 @@ export const defaultListPageLayout: PageLayout = {
       mapFn: (node) => {
         node.displayName = node.displayName.replace(/^[0-9]+\s*[-._]?\s*/, "")
       },
+      order: ["filter", "sort", "map"],
     }),
   ],
   right: [],
