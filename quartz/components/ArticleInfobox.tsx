@@ -171,8 +171,10 @@ ArticleInfobox.css = `
   display: none !important;
 }
 
-.page .left .wiki-infobox,
-.page .right .wiki-infobox {
+.page > .left.sidebar .wiki-infobox,
+.page > .right.sidebar .wiki-infobox,
+.sidebar.left .wiki-infobox,
+.sidebar.right .wiki-infobox {
   display: none !important;
 }
 
