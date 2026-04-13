@@ -157,6 +157,8 @@ a.home-campaign-card {
 }
 
 .home-campaign-card__cover {
+  background-size: cover;
+  background-position: center;
   opacity: 0.94;
   overflow: hidden;
 }
