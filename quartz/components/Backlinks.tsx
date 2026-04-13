@@ -2,7 +2,7 @@ import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } fro
 import style from "./styles/backlinks.scss"
 import { resolveRelative, simplifySlug } from "../util/path"
 import { i18n } from "../i18n"
-import { classNames } from "../util/lang"
+import { classNames, stripOrderingPrefix } from "../util/lang"
 import OverflowListFactory from "./OverflowList"
 
 interface BacklinksOptions {
@@ -36,7 +36,7 @@ export default ((opts?: Partial<BacklinksOptions>) => {
             backlinkFiles.map((f) => (
               <li>
                 <a href={resolveRelative(fileData.slug!, f.slug!)} class="internal">
-                  {f.frontmatter?.title}
+                  {stripOrderingPrefix(String(f.frontmatter?.title ?? f.title ?? ""))}
                 </a>
               </li>
             ))
