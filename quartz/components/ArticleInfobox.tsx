@@ -1,6 +1,6 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { classNames } from "../util/lang"
-import { FilePath, FullSlug, resolveRelative, slugifyFilePath } from "../util/path"
+import { FilePath, FullSlug, pathToRoot, resolveRelative, slugifyFilePath } from "../util/path"
 
 const IMAGE_KEYS = ["image", "cover", "portrait", "avatar", "art", "illustration"]
 const EXCLUDED_KEYS = new Set([
@@ -32,6 +32,15 @@ function resolveImage(value: string, currentSlug: string): string {
   }
 
   const normalized = value.replace(/^\[\[|\]\]$/g, "").trim()
+  if (/\.(png|jpe?g|webp|gif|svg|avif)$/i.test(normalized)) {
+    const encoded = normalized
+      .split("/")
+      .filter(Boolean)
+      .map((segment) => encodeURIComponent(segment))
+      .join("/")
+    return `${pathToRoot(currentSlug as FullSlug)}/assets/${encoded}`
+  }
+
   if (normalized) {
     const slug = slugifyFilePath(`${normalized}.md` as FilePath)
     return resolveRelative(currentSlug as FullSlug, slug)
