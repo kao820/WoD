@@ -1,7 +1,5 @@
 import { QuartzConfig } from "./quartz/cfg"
 import * as Plugin from "./quartz/plugins"
-import NetworkGraph from "./components/NetworkGraph"
-
 /**
  * Quartz 4 Configuration
  *
@@ -9,7 +7,7 @@ import NetworkGraph from "./components/NetworkGraph"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Quartz 4",
+    pageTitle: "Мир Тьмы",
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
@@ -89,8 +87,8 @@ const config: QuartzConfig = {
       Plugin.Static(),
       Plugin.Favicon(),
       Plugin.NotFoundPage(),
-      // Comment out CustomOgImages to speed up build time
-      Plugin.CustomOgImages(),
+      // Disabled to avoid build failures in restricted/offline environments
+      // Plugin.CustomOgImages(),
     ],
   },
 }

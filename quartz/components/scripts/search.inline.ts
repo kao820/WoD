@@ -2,6 +2,7 @@ import FlexSearch, { DefaultDocumentSearchResults } from "flexsearch"
 import { ContentDetails } from "../../plugins/emitters/contentIndex"
 import { registerEscapeHandler, removeAllChildren } from "./util"
 import { FullSlug, normalizeRelativeURLs, resolveRelative } from "../../util/path"
+import { stripOrderingPrefix } from "../../util/lang"
 
 interface Item {
   id: number
@@ -309,10 +310,11 @@ async function setupSearch(searchElement: Element, currentSlug: FullSlug, data: 
 
   const formatForDisplay = (term: string, id: number) => {
     const slug = idDataMap[id]
+    const displayTitle = stripOrderingPrefix(data[slug].title ?? "")
     return {
       id,
       slug,
-      title: searchType === "tags" ? data[slug].title : highlight(term, data[slug].title ?? ""),
+      title: searchType === "tags" ? displayTitle : highlight(term, displayTitle),
       content: highlight(term, data[slug].content ?? "", true),
       tags: highlightTags(term.substring(1), data[slug].tags),
     }
@@ -519,7 +521,7 @@ async function fillDocument(data: ContentIndex) {
       index.addAsync(id++, {
         id,
         slug: slug as FullSlug,
-        title: fileData.title,
+        title: stripOrderingPrefix(fileData.title),
         content: fileData.content,
         tags: fileData.tags,
       }),
