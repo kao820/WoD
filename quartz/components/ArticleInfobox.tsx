@@ -169,11 +169,6 @@ ArticleInfobox.css = `
   overflow: hidden;
 }
 
-.popover-hint .wiki-infobox,
-.wiki-infobox.popover-hint {
-  display: none !important;
-}
-
 .wiki-infobox--игрок {
   border-color: color-mix(in srgb, #4ea8de 45%, var(--lightgray));
 }
