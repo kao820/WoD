@@ -19,6 +19,7 @@ import { Group as TweenGroup, Tween as Tweened } from "@tweenjs/tween.js"
 import { registerEscapeHandler, removeAllChildren } from "./util"
 import { FullSlug, SimpleSlug, getFullSlug, resolveRelative, simplifySlug } from "../../util/path"
 import { D3Config } from "../Graph"
+import { stripOrderingPrefix } from "../../util/lang"
 
 type GraphicsInfo = {
   color: string
@@ -151,7 +152,9 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   }
 
   const nodes = [...neighbourhood].map((url) => {
-    const text = url.startsWith("tags/") ? "#" + url.substring(5) : (data.get(url)?.title ?? url)
+    const text = url.startsWith("tags/")
+      ? "#" + stripOrderingPrefix(url.substring(5))
+      : stripOrderingPrefix(data.get(url)?.title ?? url)
     return {
       id: url,
       text,

@@ -1,5 +1,5 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
-import { classNames } from "../util/lang"
+import { classNames, stripOrderingPrefix } from "../util/lang"
 import { FilePath, FullSlug, pathToRoot, resolveRelative, slugifyFilePath } from "../util/path"
 
 const IMAGE_KEYS = ["image", "cover", "portrait", "avatar", "art", "illustration"]
@@ -116,7 +116,7 @@ function renderValue(value: unknown, currentSlug: string, allFiles: QuartzCompon
           <span key={idx}>{part}</span>
         ) : (
           <a key={idx} href={part.href} class="internal">
-            {part.label}
+            {stripOrderingPrefix(part.label)}
           </a>
         ),
       )}
