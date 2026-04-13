@@ -3,6 +3,8 @@ import { htmlToJsx } from "../../util/jsx"
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "../types"
 import ArticleInfobox from "../ArticleInfobox"
 
+const InlineInfobox = ArticleInfobox()
+
 const Content: QuartzComponent = (props: QuartzComponentProps) => {
   const { fileData, tree } = props
   const content = htmlToJsx(fileData.filePath!, tree) as ComponentChildren
@@ -10,7 +12,7 @@ const Content: QuartzComponent = (props: QuartzComponentProps) => {
   const classString = ["popover-hint", ...classes].join(" ")
   return (
     <article class={classString}>
-      <ArticleInfobox {...props} />
+      <InlineInfobox {...props} displayClass="wiki-infobox-inline" />
       {content}
     </article>
   )

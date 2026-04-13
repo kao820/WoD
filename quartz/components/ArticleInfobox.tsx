@@ -102,6 +102,13 @@ function renderValue(value: unknown, currentSlug: string) {
 const ArticleInfobox: QuartzComponent = ({ fileData, displayClass }: QuartzComponentProps) => {
   if (fileData.slug === "index") return null
   const displayTokens = (displayClass ?? "").split(/\s+/).filter(Boolean)
+  if (
+    displayTokens.length > 0 &&
+    !displayTokens.includes("wiki-infobox-inline") &&
+    !displayTokens.includes("popover-hint")
+  ) {
+    return null
+  }
   if (displayTokens.includes("popover-hint")) {
     return null
   }
@@ -218,8 +225,9 @@ ArticleInfobox.css = `
 
 .wiki-infobox__image-wrap img {
   width: 100%;
-  height: auto;
-  max-height: 420px;
+  height: 340px;
+  object-fit: cover;
+  object-position: center;
   display: block;
 }
 
