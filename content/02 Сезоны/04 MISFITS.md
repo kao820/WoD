@@ -5,6 +5,8 @@ tags:
 type: сезон
 image: MISFITS.jpg
 ---
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?si=AlejAw8a8Q1sssqA&amp;list=PLZxOmO9ckd--4-l60jZCTBfUizi18po29" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 ## Кратко
 
 Первый сезон посвящён становлению стаи после смерти [[Грегори Пирс]], хранителя каэрна в [[Окленд-Гарденс]].
