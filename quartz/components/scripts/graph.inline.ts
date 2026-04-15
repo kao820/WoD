@@ -77,6 +77,22 @@ function getNodeColor(node: NodeData): string {
   return isDark ? "#94a3b8" : "#94a3af"
 }
 
+function normalizeSlug(raw: string): SimpleSlug {
+  return simplifySlug(raw as FullSlug)
+}
+
+function normalizeSlugLoose(raw: string): string {
+  return raw
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/[#?].*$/, "")
+    .replace(/^\.\//, "")
+    .replace(/\/index$/i, "")
+    .replace(/\.md$/i, "")
+    .replace(/^\/+|\/+$/g, "")
+    .toLowerCase()
+}
+
 async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const slug = simplifySlug(fullSlug)
   const visited = getVisited()
@@ -107,15 +123,29 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const links: SimpleLinkData[] = []
   const tags: SimpleSlug[] = []
   const validLinks = new Set(data.keys())
+  const looseToCanonical = new Map<string, SimpleSlug>()
+
+  for (const nodeId of validLinks) {
+    const loose = normalizeSlugLoose(nodeId)
+    if (!looseToCanonical.has(loose)) {
+      looseToCanonical.set(loose, nodeId)
+    }
+  }
 
   const tweens = new Map<string, TweenNode>()
   for (const [source, details] of data.entries()) {
     const outgoing = details.links ?? []
 
-    for (const dest of outgoing) {
-      if (validLinks.has(dest)) {
-        links.push({ source: source, target: dest })
-      }
+    for (const destRaw of outgoing) {
+      const normalizedDest = normalizeSlug(destRaw)
+      const normalizedLooseDest = normalizeSlugLoose(destRaw)
+      const resolvedDest =
+        (validLinks.has(normalizedDest) ? normalizedDest : null) ||
+        looseToCanonical.get(normalizedLooseDest) ||
+        null
+
+      if (!resolvedDest || resolvedDest === source) continue
+      links.push({ source, target: resolvedDest })
     }
 
     if (showTags) {

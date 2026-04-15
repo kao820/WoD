@@ -360,6 +360,10 @@ title: Карта связей
 
   body.network-expanded .network-collapse-icon {
     display: inline-flex;
+    position: fixed;
+    right: 6vw;
+    top: 6vh;
+    z-index: 100003;
   }
 
   body.network-expanded .network-expand-icon {
