@@ -8,57 +8,59 @@
   align-items: center;
   gap: 4px;
   color: var(--darkgray);
+}
 
-  .option {
-    width: 20px;
-    height: 20px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.darkmode.site-body-left-column-site-theme-toggle .option {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    svg {
-      width: 18px;
-      height: 18px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-  }
+.darkmode.site-body-left-column-site-theme-toggle .option svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
-  .checkbox-container {
-    width: 32px;
-    height: 18px;
-    border-radius: 999px;
-    border: 1px solid var(--gray);
-    background: var(--lightgray);
-    position: relative;
-    box-sizing: border-box;
-    transition:
-      background-color 0.2s ease,
-      border-color 0.2s ease;
+.darkmode.site-body-left-column-site-theme-toggle .checkbox-container {
+  width: 32px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid var(--gray);
+  background: var(--lightgray);
+  position: relative;
+  box-sizing: border-box;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
 
-    &::after {
-      content: "";
-      position: absolute;
-      left: 2px;
-      top: 2px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--light);
-      transition: transform 0.2s ease;
-    }
-  }
+.darkmode.site-body-left-column-site-theme-toggle .checkbox-container::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--light);
+  transition: transform 0.2s ease;
+}
 
-:root[saved-theme="dark"] .darkmode.site-body-left-column-site-theme-toggle {
-  .checkbox-container {
-    background: var(--darkgray);
-    border-color: var(--gray);
-    &::after {
-      transform: translateX(14px);
-      background: var(--light);
-    }
-  }
+:root[saved-theme="dark"] .darkmode.site-body-left-column-site-theme-toggle .checkbox-container {
+  background: var(--darkgray);
+  border-color: var(--gray);
+}
+
+:root[saved-theme="dark"]
+  .darkmode.site-body-left-column-site-theme-toggle
+  .checkbox-container::after {
+  transform: translateX(14px);
+  background: var(--light);
 }
