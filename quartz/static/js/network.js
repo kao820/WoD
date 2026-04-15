@@ -922,11 +922,13 @@
             render()
           })
           .onNodeHover((node) => {
-            if (state.selectedNodeId) return
             const nextHoveredId = node?.id || null
             if (state.hoveredNodeId === nextHoveredId) return
             state.hoveredNodeId = nextHoveredId
             rebuildHighlights()
+            if (typeof graph.refresh === "function") {
+              graph.refresh()
+            }
           })
           .onNodeDrag(() => {
             userMovedNode = true
@@ -939,12 +941,6 @@
             state.hoveredNodeId = null
             rebuildHighlights()
             render()
-
-            setTimeout(() => {
-              if (!userMovedNode) {
-                fitGraph(650, RESET_FIT_PADDING)
-              }
-            }, 50)
           })
 
         applyForces()
