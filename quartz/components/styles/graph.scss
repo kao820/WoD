@@ -51,7 +51,7 @@ body.graph-expanded {
 
   & > .local-graph-outer {
     position: fixed;
-    z-index: 100000;
+    z-index: 2147483646;
     left: 0;
     top: 0;
     width: 100vw;
@@ -61,30 +61,40 @@ body.graph-expanded {
     overflow: hidden;
 
     &.active {
-      display: inline-block;
+      display: block;
+    }
+
+    & > .modal-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(4px);
     }
 
     & > .local-graph-container {
       border: 1px solid var(--lightgray);
       background-color: var(--light);
-      border-radius: 5px;
       box-sizing: border-box;
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 0;
+      left: 0;
+      transform: none;
+      width: 100vw;
+      margin-top: 4vh;
+      margin-bottom: 4vh;
       height: 92vh;
-      width: 96vw;
+      border-radius: 0;
+      z-index: 1;
 
       @media all and not ($desktop) {
-        width: 96vw;
+        width: 100vw;
       }
     }
   }
 
   & > .global-graph-outer {
     position: fixed;
-    z-index: 100001;
+    z-index: 2147483647;
     left: 0;
     top: 0;
     width: 100vw;
