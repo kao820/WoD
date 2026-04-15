@@ -4,6 +4,7 @@ title: Карта связей
 
 <style>
   .network-shell {
+    position: relative;
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
@@ -185,10 +186,11 @@ title: Карта связей
     top: 50%;
     transform: translate(-50%, -56%);
     color: #ffffff;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1;
     font-weight: 700;
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.35);
+    font-family: Arial, sans-serif;
   }
 
   .network-control-label {
@@ -297,6 +299,23 @@ title: Карта связей
     box-sizing: border-box;
   }
 
+  .network-expand-icon {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+  }
+
   .network-graph.is-expanded {
     position: fixed;
     inset: 4vh 4vw;
@@ -360,6 +379,9 @@ title: Карта связей
 
   <div id="network-top-layout" class="network-top-layout"></div>
 
+  <button id="network-expand-icon" class="network-expand-icon" type="button" aria-label="Развернуть граф">
+    ⤢
+  </button>
   <div id="network-graph" class="network-graph"></div>
 </div>
 
