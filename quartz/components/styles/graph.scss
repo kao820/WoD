@@ -73,11 +73,11 @@ body.graph-expanded {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      height: 80vh;
-      width: 80vw;
+      height: 92vh;
+      width: 96vw;
 
       @media all and not ($desktop) {
-        width: 90%;
+        width: 96vw;
       }
     }
   }

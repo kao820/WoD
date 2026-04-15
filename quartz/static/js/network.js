@@ -418,6 +418,20 @@
         .replace(/\\/g, "/")
     }
 
+    function normalizeSlug(slug) {
+      let value = String(slug || "").trim()
+      try {
+        value = decodeURIComponent(value)
+      } catch (_) {
+        // noop
+      }
+
+      return value
+        .replace(/\\/g, "/")
+        .replace(/^\/+|\/+$/g, "")
+        .replace(/\/index$/i, "/index")
+    }
+
     function getPageTags(page) {
       const result = new Set()
 
@@ -505,9 +519,11 @@
 
         const rawNodes = []
         const existingIds = new Set()
+        const canonicalByNormalized = new Map()
 
         for (const [slug, page] of Object.entries(index)) {
           existingIds.add(slug)
+          canonicalByNormalized.set(normalizeSlug(slug), slug)
           rawNodes.push({
             id: slug,
             label: stripOrderingPrefix(page.title || slug),
@@ -516,6 +532,7 @@
         }
 
         if (!existingIds.has("index")) {
+          canonicalByNormalized.set(normalizeSlug("index"), "index")
           rawNodes.push({
             id: "index",
             label: "Мир Тьмы LRS",
@@ -528,16 +545,19 @@
         const seenLinks = new Set()
 
         for (const [slug, page] of Object.entries(index)) {
+          const sourceId = canonicalByNormalized.get(normalizeSlug(slug)) || slug
           for (const link of page.links || []) {
-            if (!existingIds.has(link) || slug === link) continue
+            const normalizedLink = normalizeSlug(link)
+            const targetId = canonicalByNormalized.get(normalizedLink)
+            if (!targetId || sourceId === targetId) continue
 
-            const forward = `${slug}→${link}`
-            const reverse = `${link}→${slug}`
+            const forward = `${sourceId}→${targetId}`
+            const reverse = `${targetId}→${sourceId}`
 
             if (seenLinks.has(forward) || seenLinks.has(reverse)) continue
 
             seenLinks.add(forward)
-            rawLinks.push({ source: slug, target: link })
+            rawLinks.push({ source: sourceId, target: targetId })
           }
         }
 
