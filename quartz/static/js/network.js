@@ -8,6 +8,7 @@
     const searchEl = document.getElementById("network-search")
     const fitButton = document.getElementById("network-fit-button")
     const expandButton = document.getElementById("network-expand-button")
+    const expandIcon = document.getElementById("network-expand-icon")
     const resetButton = document.getElementById("network-reset-button")
     const resetColorsButton = document.getElementById("network-reset-colors-button")
 
@@ -17,6 +18,7 @@
       !searchEl ||
       !fitButton ||
       !expandButton ||
+      !expandIcon ||
       !resetButton ||
       !resetColorsButton
     )
@@ -429,7 +431,16 @@
       return value
         .replace(/\\/g, "/")
         .replace(/^\/+|\/+$/g, "")
+        .replace(/#.*$/, "")
         .replace(/\/index$/i, "/index")
+        .toLowerCase()
+    }
+
+    function normalizeSlugLoose(slug) {
+      return normalizeSlug(slug)
+        .split("/")
+        .map((segment) => stripOrderingPrefix(segment))
+        .join("/")
     }
 
     function getPageTags(page) {
@@ -524,6 +535,7 @@
         for (const [slug, page] of Object.entries(index)) {
           existingIds.add(slug)
           canonicalByNormalized.set(normalizeSlug(slug), slug)
+          canonicalByNormalized.set(normalizeSlugLoose(slug), slug)
           rawNodes.push({
             id: slug,
             label: stripOrderingPrefix(page.title || slug),
@@ -533,6 +545,7 @@
 
         if (!existingIds.has("index")) {
           canonicalByNormalized.set(normalizeSlug("index"), "index")
+          canonicalByNormalized.set(normalizeSlugLoose("index"), "index")
           rawNodes.push({
             id: "index",
             label: "Мир Тьмы LRS",
@@ -548,7 +561,10 @@
           const sourceId = canonicalByNormalized.get(normalizeSlug(slug)) || slug
           for (const link of page.links || []) {
             const normalizedLink = normalizeSlug(link)
-            const targetId = canonicalByNormalized.get(normalizedLink)
+            const normalizedLinkLoose = normalizeSlugLoose(link)
+            const targetId =
+              canonicalByNormalized.get(normalizedLink) ||
+              canonicalByNormalized.get(normalizedLinkLoose)
             if (!targetId || sourceId === targetId) continue
 
             const forward = `${sourceId}→${targetId}`
@@ -940,7 +956,9 @@
             state.selectedNodeId = null
             state.hoveredNodeId = null
             rebuildHighlights()
-            render()
+            const visible = getVisibleGraph()
+            graph.graphData(visible)
+            applyForces()
           })
 
         applyForces()
@@ -1014,7 +1032,7 @@
           fitGraph(600, RESET_FIT_PADDING)
         })
 
-        expandButton.addEventListener("click", () => {
+        const toggleExpandedGraph = () => {
           graphEl.classList.toggle("is-expanded")
           if (graphEl.classList.contains("is-expanded")) {
             document.body.classList.add("network-expanded")
@@ -1028,7 +1046,10 @@
             graph.width(graphEl.clientWidth)
             graph.height(graphEl.clientHeight)
           }
-        })
+        }
+
+        expandButton.addEventListener("click", toggleExpandedGraph)
+        expandIcon.addEventListener("click", toggleExpandedGraph)
 
         resetButton.addEventListener("click", () => {
           applyPresetForActiveTypes()

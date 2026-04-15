@@ -644,6 +644,11 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     const slug = getFullSlug(window)
     container.classList.add("active")
     document.body.classList.add("graph-expanded")
+    document.querySelectorAll(".sidebar").forEach((sidebar) => {
+      if (sidebar instanceof HTMLElement) {
+        sidebar.style.zIndex = "1"
+      }
+    })
 
     const graphContainer = container.querySelector(".local-graph-container") as HTMLElement
     registerEscapeHandler(container, hideExpandedLocalGraph)
@@ -658,6 +663,11 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
       container.classList.remove("active")
     }
     document.body.classList.remove("graph-expanded")
+    document.querySelectorAll(".sidebar").forEach((sidebar) => {
+      if (sidebar instanceof HTMLElement) {
+        sidebar.style.zIndex = ""
+      }
+    })
   }
 
   async function shortcutHandler(e: HTMLElementEventMap["keydown"]) {
