@@ -288,8 +288,8 @@ title: Карта связей
 
   .network-graph {
     width: 100%;
-    min-height: 720px;
-    height: 72vh;
+    min-height: 360px;
+    height: 36vh;
     border: 1px solid #ddd;
     border-radius: 12px;
     background: transparent;
@@ -299,16 +299,25 @@ title: Карта связей
 
   .network-graph.is-expanded {
     position: fixed;
-    inset: 2.5vh 2.5vw;
-    width: 95vw;
-    height: 95vh;
-    z-index: 9998;
+    inset: 4vh 4vw;
+    width: 92vw;
+    height: 92vh;
+    z-index: 100002;
     background: var(--light, #fff);
     box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
   }
 
   body.network-expanded {
     overflow: hidden;
+  }
+
+  body.network-expanded::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 100001;
+    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.15);
   }
 
   @media (max-width: 1100px) {
