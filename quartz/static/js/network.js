@@ -590,17 +590,9 @@
           }, 0)
 
           if (rootDegree === 0) {
-            const sectionRepresentatives = new Map()
-            rawNodes.forEach((node) => {
-              if (node.id === rootNodeId || node.type === "tag") return
-
-              const topSection = node.id.split("/")[0] || node.id
-              if (!sectionRepresentatives.has(topSection)) {
-                sectionRepresentatives.set(topSection, node.id)
-              }
-            })
-
-            sectionRepresentatives.forEach((targetId) => {
+            const timelineNodes = rawNodes.filter((node) => node.type === "timeline")
+            timelineNodes.forEach((targetNode) => {
+              const targetId = targetNode.id
               syntheticRootLinks.push({ source: rootNodeId, target: targetId })
             })
           }
@@ -915,7 +907,6 @@
             if (state.hoveredNodeId === nextHoveredId) return
             state.hoveredNodeId = nextHoveredId
             rebuildHighlights()
-            graph.graphData(graph.graphData())
           })
           .onNodeDrag(() => {
             userMovedNode = true

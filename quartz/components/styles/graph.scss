@@ -51,7 +51,7 @@ body.graph-expanded {
 
   & > .local-graph-outer {
     position: fixed;
-    z-index: 9998;
+    z-index: 100000;
     left: 0;
     top: 0;
     width: 100vw;
@@ -84,7 +84,7 @@ body.graph-expanded {
 
   & > .global-graph-outer {
     position: fixed;
-    z-index: 9999;
+    z-index: 100001;
     left: 0;
     top: 0;
     width: 100vw;
