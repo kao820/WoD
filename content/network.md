@@ -4,6 +4,7 @@ title: Карта связей
 
 <style>
   .network-shell {
+    position: relative;
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
@@ -13,7 +14,7 @@ title: Карта связей
 
   .network-toolbar {
     display: grid;
-    grid-template-columns: minmax(240px, 520px) repeat(3, max-content);
+    grid-template-columns: minmax(220px, 1fr) repeat(4, max-content);
     gap: 8px;
     align-items: center;
     margin: 10px 0 14px;
@@ -49,7 +50,7 @@ title: Карта связей
     display: grid;
     grid-template-columns: minmax(0, 1.8fr) minmax(300px, 0.82fr);
     gap: 16px;
-    align-items: start;
+    align-items: stretch;
     margin-bottom: 14px;
   }
 
@@ -61,6 +62,7 @@ title: Карта связей
     box-sizing: border-box;
     overflow: hidden;
     min-width: 0;
+    height: 100%;
   }
 
   .network-panel-title {
@@ -96,15 +98,28 @@ title: Карта связей
   }
 
   .network-toggle {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 14px;
     border: 1px solid #8d99a6;
-    border-radius: 6px;
-    background: transparent;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.2);
     cursor: pointer;
     position: relative;
     padding: 0;
     box-sizing: border-box;
+    transition: background-color 0.2s ease;
+  }
+
+  .network-toggle::after {
+    content: "";
+    position: absolute;
+    left: 1px;
+    top: 1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #ffffff;
+    transition: transform 0.2s ease;
   }
 
   .network-toggle.is-on {
@@ -113,15 +128,7 @@ title: Карта связей
   }
 
   .network-toggle.is-on::after {
-    content: "";
-    position: absolute;
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 9px;
-    border: solid #ffffff;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+    transform: translateX(10px);
   }
 
   .network-control-label {
@@ -181,7 +188,7 @@ title: Карта связей
   .network-settings-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 14px;
+    gap: 8px 12px;
     width: 100%;
   }
 
@@ -221,13 +228,57 @@ title: Карта связей
 
   .network-graph {
     width: 100%;
-    min-height: 720px;
-    height: 72vh;
+    min-height: 360px;
+    height: 36vh;
     border: 1px solid #ddd;
     border-radius: 12px;
     background: transparent;
     overflow: hidden;
     box-sizing: border-box;
+  }
+
+  .network-graph-wrap {
+    position: relative;
+  }
+
+  .network-expand-icon {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+  }
+
+  .network-graph.is-expanded {
+    position: fixed;
+    inset: 4vh 4vw;
+    width: 92vw;
+    height: 92vh;
+    z-index: 100002;
+    background: var(--light, #fff);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+  }
+
+  body.network-expanded {
+    overflow: hidden;
+  }
+
+  body.network-expanded::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 100001;
+    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.15);
   }
 
   @media (max-width: 1100px) {
@@ -259,13 +310,18 @@ title: Карта связей
       autocomplete="off"
     />
     <button id="network-fit-button" class="network-toolbar-button" type="button">Вписать в область</button>
+    <button id="network-expand-button" class="network-toolbar-button" type="button">Развернуть</button>
     <button id="network-reset-button" class="network-toolbar-button" type="button">Сбросить настройки</button>
     <button id="network-reset-colors-button" class="network-toolbar-button" type="button">Сбросить цвета</button>
   </div>
 
   <div id="network-top-layout" class="network-top-layout"></div>
-
-  <div id="network-graph" class="network-graph"></div>
+  <div class="network-graph-wrap">
+    <button id="network-expand-icon" class="network-expand-icon" type="button" aria-label="Развернуть граф">
+      ⤢
+    </button>
+    <div id="network-graph" class="network-graph"></div>
+  </div>
 </div>
 
 <script src="https://unpkg.com/force-graph"></script>
