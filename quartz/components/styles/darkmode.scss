@@ -1,22 +1,48 @@
 .darkmode {
   cursor: pointer;
   padding: 0;
-  position: relative;
   background: none;
   border: none;
-  width: 20px;
-  height: 32px;
   margin: 0;
   text-align: inherit;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  & svg {
+  .darkmode-switch {
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #3f3f46;
+    position: relative;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease;
+  }
+
+  .darkmode-switch-icon {
     position: absolute;
-    width: 20px;
-    height: 20px;
-    top: calc(50% - 10px);
-    fill: var(--darkgray);
-    transition: opacity 0.1s ease;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #d4d4d8;
+    font-size: 11px;
+    line-height: 1;
+    &::before {
+      content: "☾";
+    }
+  }
+
+  .darkmode-switch-thumb {
+    position: absolute;
+    left: 19px;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #f4f4f5;
+    transition: transform 0.2s ease;
   }
 }
 
@@ -28,20 +54,22 @@
   color-scheme: light;
 }
 
-:root[saved-theme="dark"] .darkmode {
-  & > .dayIcon {
-    display: none;
+:root[saved-theme="light"] .darkmode {
+  .darkmode-switch {
+    background: #d4d4d8;
+    border-color: rgba(63, 63, 70, 0.3);
   }
-  & > .nightIcon {
-    display: inline;
-  }
-}
 
-:root .darkmode {
-  & > .dayIcon {
-    display: inline;
+  .darkmode-switch-icon {
+    color: #52525b;
+    &::before {
+      content: "☀";
+    }
+    font-size: 10px;
   }
-  & > .nightIcon {
-    display: none;
+
+  .darkmode-switch-thumb {
+    transform: translateX(-17px);
+    background: #fff;
   }
 }
