@@ -481,11 +481,15 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
         })
         .on("end", function dragended(event) {
           if (!event.active) simulation.alphaTarget(0)
+          const initPos = event.subject.__initialDragPos
+          const movedDistance = initPos
+            ? Math.hypot((event.subject.x ?? 0) - initPos.x, (event.subject.y ?? 0) - initPos.y)
+            : 0
           event.subject.fx = null
           event.subject.fy = null
           dragging = false
 
-          if (Date.now() - dragStartTime < 500) {
+          if (Date.now() - dragStartTime < 500 && movedDistance < 0.8) {
             const node = graphData.nodes.find((n) => n.id === event.subject.id) as NodeData
             const targ = resolveRelative(fullSlug, node.id)
             window.spaNavigate(new URL(targ, window.location.toString()))
