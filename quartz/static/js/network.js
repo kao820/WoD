@@ -33,6 +33,8 @@
       linkDistance: 78,
       linkStrength: 105,
       labelThreshold: 120,
+      nodeScale: 100,
+      lineWidth: 100,
     }
 
     const STRUCTURAL_SETTINGS = {
@@ -40,6 +42,8 @@
       linkDistance: 34,
       linkStrength: 185,
       labelThreshold: 125,
+      nodeScale: 100,
+      lineWidth: 100,
     }
 
     const CONTROL_COLUMNS = [
@@ -95,6 +99,22 @@
         max: 220,
         step: 1,
         format: (value) => `${(value / 100).toFixed(2)}`,
+      },
+      {
+        key: "nodeScale",
+        label: "Размер узлов",
+        min: 50,
+        max: 220,
+        step: 1,
+        format: (value) => `${(value / 100).toFixed(2)}x`,
+      },
+      {
+        key: "lineWidth",
+        label: "Толщина линий",
+        min: 45,
+        max: 240,
+        step: 1,
+        format: (value) => `${(value / 100).toFixed(2)}x`,
       },
     ]
 
@@ -531,20 +551,10 @@
 
         const rawTagNodes = [...tagNodeMap.values()]
         const allNodes = [...rawNodes, ...rawTagNodes]
-        const allLinks = [...rawLinks, ...rawTagLinks]
 
         const nodeById = new Map(allNodes.map((n) => [n.id, n]))
         const adjacency = new Map()
         const nodeDegrees = new Map()
-
-        allNodes.forEach((n) => adjacency.set(n.id, new Set()))
-        allLinks.forEach((l) => {
-          adjacency.get(l.source)?.add(l.target)
-          adjacency.get(l.target)?.add(l.source)
-        })
-        allNodes.forEach((n) => {
-          nodeDegrees.set(n.id, adjacency.get(n.id)?.size || 0)
-        })
 
         const ROOT_NODE_CANDIDATES = new Set(["index", "00-index"])
         const ROOT_NODE_TITLE = "мир тьмы lrs"
@@ -554,6 +564,40 @@
             node.label.trim().toLowerCase() === ROOT_NODE_TITLE,
         )
         const rootNodeId = rootNode?.id || null
+
+        const syntheticRootLinks = []
+        if (rootNodeId) {
+          const rootDegree = rawLinks.reduce((acc, link) => {
+            return link.source === rootNodeId || link.target === rootNodeId ? acc + 1 : acc
+          }, 0)
+
+          if (rootDegree === 0) {
+            const sectionRepresentatives = new Map()
+            rawNodes.forEach((node) => {
+              if (node.id === rootNodeId || node.type === "tag") return
+
+              const topSection = node.id.split("/")[0] || node.id
+              if (!sectionRepresentatives.has(topSection)) {
+                sectionRepresentatives.set(topSection, node.id)
+              }
+            })
+
+            sectionRepresentatives.forEach((targetId) => {
+              syntheticRootLinks.push({ source: rootNodeId, target: targetId })
+            })
+          }
+        }
+
+        const allLinks = [...rawLinks, ...rawTagLinks, ...syntheticRootLinks]
+
+        allNodes.forEach((n) => adjacency.set(n.id, new Set()))
+        allLinks.forEach((l) => {
+          adjacency.get(l.source)?.add(l.target)
+          adjacency.get(l.target)?.add(l.source)
+        })
+        allNodes.forEach((n) => {
+          nodeDegrees.set(n.id, adjacency.get(n.id)?.size || 0)
+        })
 
         let highlightNodeIds = new Set()
         let highlightLinkKeys = new Set()
@@ -588,6 +632,9 @@
           const activeTypes = getActiveTypes()
 
           return allNodes.filter((node) => {
+            if (node.id === rootNodeId) {
+              return true
+            }
             if (node.type === "campaign_hub") {
               return shouldIncludeCampaignHub(activeTypes)
             }
@@ -697,7 +744,8 @@
           const collideForce = graph.d3Force("collide")
           if (collideForce) {
             collideForce.radius((node) => {
-              const degreeRadius = 5 + Math.sqrt(nodeDegrees.get(node.id) || 0) * 2
+              const scale = settings.nodeScale / 100
+              const degreeRadius = (5 + Math.sqrt(nodeDegrees.get(node.id) || 0) * 2) * scale
               const typeBonus = node.type === "campaign_hub" ? 3 : node.type === "tag" ? -1.5 : 0
               return Math.max(7, degreeRadius + typeBonus)
             })
@@ -757,7 +805,8 @@
           .nodeLabel((node) => node.label)
           .nodeRelSize(4)
           .nodeVal((node) => {
-            const degreeRadius = 3.4 + Math.sqrt(nodeDegrees.get(node.id) || 0) * 1.35
+            const scale = settings.nodeScale / 100
+            const degreeRadius = (3.4 + Math.sqrt(nodeDegrees.get(node.id) || 0) * 1.35) * scale
             if (node.type === "tag") {
               return Math.max(2.4, degreeRadius * 0.72)
             }
@@ -770,7 +819,8 @@
             const isDimmed = focusNodeId && !isHighlighted
             const isCampaignHub = node.type === "campaign_hub"
             const isTag = node.type === "tag"
-            const baseRadius = 3.4 + Math.sqrt(nodeDegrees.get(node.id) || 0) * 1.35
+            const scale = settings.nodeScale / 100
+            const baseRadius = (3.4 + Math.sqrt(nodeDegrees.get(node.id) || 0) * 1.35) * scale
 
             const radius = isTag ? Math.max(2.4, baseRadius * 0.72) : baseRadius
 
@@ -819,9 +869,9 @@
             const tagLink = sourceNode?.type === "tag" || targetNode?.type === "tag"
 
             if (highlightLinkKeys.has(linkKey(link))) {
-              return tagLink ? 0.72 : 0.92
+              return (tagLink ? 0.72 : 0.92) * (settings.lineWidth / 100)
             }
-            return tagLink ? 0.36 : 0.52
+            return (tagLink ? 0.36 : 0.52) * (settings.lineWidth / 100)
           })
           .cooldownTicks(220)
           .d3AlphaDecay(0.03)
@@ -838,7 +888,7 @@
             if (state.hoveredNodeId === nextHoveredId) return
             state.hoveredNodeId = nextHoveredId
             rebuildHighlights()
-            graph.graphData(graph.graphData())
+            graph.refresh()
           })
           .onNodeDrag(() => {
             userMovedNode = true
