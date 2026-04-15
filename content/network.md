@@ -49,7 +49,7 @@ title: Карта связей
     display: grid;
     grid-template-columns: minmax(0, 1.8fr) minmax(300px, 0.82fr);
     gap: 16px;
-    align-items: start;
+    align-items: stretch;
     margin-bottom: 14px;
   }
 
@@ -61,6 +61,7 @@ title: Карта связей
     box-sizing: border-box;
     overflow: hidden;
     min-width: 0;
+    height: 100%;
   }
 
   .network-panel-title {
@@ -113,15 +114,15 @@ title: Карта связей
   }
 
   .network-toggle.is-on::after {
-    content: "";
+    content: "✓";
     position: absolute;
-    left: 5px;
-    top: 2px;
-    width: 4px;
-    height: 9px;
-    border: solid #ffffff;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -56%);
+    color: #ffffff;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 700;
   }
 
   .network-control-label {
@@ -181,7 +182,7 @@ title: Карта связей
   .network-settings-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px 14px;
+    gap: 8px 12px;
     width: 100%;
   }
 
