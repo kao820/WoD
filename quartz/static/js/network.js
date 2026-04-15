@@ -788,6 +788,23 @@
           graph.d3ReheatSimulation()
         }
 
+        function requestGraphRedraw() {
+          if (!graph) return
+
+          if (
+            typeof graph.resumeAnimation === "function" &&
+            typeof graph.pauseAnimation === "function"
+          ) {
+            graph.resumeAnimation()
+            requestAnimationFrame(() => {
+              graph.pauseAnimation()
+            })
+            return
+          }
+
+          graph.graphData(graph.graphData())
+        }
+
         function rerenderControlsOnly() {
           buildControls()
         }
@@ -888,7 +905,7 @@
             if (state.hoveredNodeId === nextHoveredId) return
             state.hoveredNodeId = nextHoveredId
             rebuildHighlights()
-            graph.refresh()
+            requestGraphRedraw()
           })
           .onNodeDrag(() => {
             userMovedNode = true
