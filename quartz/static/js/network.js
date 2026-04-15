@@ -9,6 +9,7 @@
     const fitButton = document.getElementById("network-fit-button")
     const expandButton = document.getElementById("network-expand-button")
     const expandIcon = document.getElementById("network-expand-icon")
+    const collapseIcon = document.getElementById("network-collapse-icon")
     const resetButton = document.getElementById("network-reset-button")
     const resetColorsButton = document.getElementById("network-reset-colors-button")
 
@@ -19,6 +20,7 @@
       !fitButton ||
       !expandButton ||
       !expandIcon ||
+      !collapseIcon ||
       !resetButton ||
       !resetColorsButton
     )
@@ -915,6 +917,26 @@
           }
         }
 
+        function redrawGraphWithoutSimulationReset() {
+          if (!graph) return
+
+          if (typeof graph.refresh === "function") {
+            graph.refresh()
+            return
+          }
+
+          if (
+            typeof graph.pauseAnimation === "function" &&
+            typeof graph.resumeAnimation === "function"
+          ) {
+            graph.pauseAnimation()
+            graph.resumeAnimation()
+            return
+          }
+
+          graph.graphData(graph.graphData())
+        }
+
         function render() {
           saveNodeState()
           rebuildHighlights()
@@ -1032,14 +1054,7 @@
             if (state.hoveredNodeId === nextHoveredId) return
             state.hoveredNodeId = nextHoveredId
             rebuildHighlights()
-            if (typeof graph.refresh === "function") {
-              graph.refresh()
-            } else {
-              saveNodeState()
-              const visible = getVisibleGraph()
-              graph.graphData(visible)
-              applyForces()
-            }
+            redrawGraphWithoutSimulationReset()
           })
           .onNodeDrag(() => {
             userMovedNode = true
@@ -1052,14 +1067,7 @@
             if (!state.selectedNodeId && state.hoveredNodeId) {
               state.hoveredNodeId = null
               rebuildHighlights()
-              if (typeof graph.refresh === "function") {
-                graph.refresh()
-              } else {
-                saveNodeState()
-                const visible = getVisibleGraph()
-                graph.graphData(visible)
-                applyForces()
-              }
+              redrawGraphWithoutSimulationReset()
               return
             }
             state.selectedNodeId = null
@@ -1142,24 +1150,36 @@
           fitGraph(600, RESET_FIT_PADDING)
         })
 
+        const expandGraph = () => {
+          if (graphEl.classList.contains("is-expanded")) return
+          graphEl.classList.add("is-expanded")
+          document.body.classList.add("network-expanded")
+          expandButton.textContent = "Свернуть"
+          graph.width(graphEl.clientWidth)
+          graph.height(graphEl.clientHeight)
+          fitGraph(450, RESET_FIT_PADDING)
+        }
+
+        const collapseGraph = () => {
+          if (!graphEl.classList.contains("is-expanded")) return
+          graphEl.classList.remove("is-expanded")
+          document.body.classList.remove("network-expanded")
+          expandButton.textContent = "Развернуть"
+          graph.width(graphEl.clientWidth)
+          graph.height(graphEl.clientHeight)
+        }
+
         const toggleExpandedGraph = () => {
-          graphEl.classList.toggle("is-expanded")
           if (graphEl.classList.contains("is-expanded")) {
-            document.body.classList.add("network-expanded")
-            expandButton.textContent = "Свернуть"
-            graph.width(graphEl.clientWidth)
-            graph.height(graphEl.clientHeight)
-            fitGraph(450, RESET_FIT_PADDING)
+            collapseGraph()
           } else {
-            document.body.classList.remove("network-expanded")
-            expandButton.textContent = "Развернуть"
-            graph.width(graphEl.clientWidth)
-            graph.height(graphEl.clientHeight)
+            expandGraph()
           }
         }
 
         expandButton.addEventListener("click", toggleExpandedGraph)
-        expandIcon.addEventListener("click", toggleExpandedGraph)
+        expandIcon.addEventListener("click", expandGraph)
+        collapseIcon.addEventListener("click", collapseGraph)
 
         resetButton.addEventListener("click", () => {
           applyPresetForActiveTypes()
@@ -1211,11 +1231,7 @@
         document.addEventListener("keydown", (event) => {
           if (event.key !== "Escape") return
           if (!graphEl.classList.contains("is-expanded")) return
-          graphEl.classList.remove("is-expanded")
-          document.body.classList.remove("network-expanded")
-          expandButton.textContent = "Развернуть"
-          graph.width(graphEl.clientWidth)
-          graph.height(graphEl.clientHeight)
+          collapseGraph()
         })
 
         document.addEventListener("themechange", () => {

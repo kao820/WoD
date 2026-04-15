@@ -155,7 +155,7 @@ title: Карта связей
 
   .network-control-row {
     display: grid;
-    grid-template-columns: 18px minmax(0, 1fr) 20px;
+    grid-template-columns: 32px minmax(0, 1fr) 20px;
     align-items: center;
     gap: 8px;
     min-width: 0;
@@ -163,37 +163,39 @@ title: Карта связей
   }
 
   .network-toggle {
-    width: 24px;
-    height: 14px;
-    border: 1px solid #8d99a6;
+    width: 32px;
+    height: 18px;
+    border: 1px solid var(--gray);
     border-radius: 999px;
-    background: rgba(148, 163, 184, 0.2);
+    background: var(--lightgray);
     cursor: pointer;
     position: relative;
     padding: 0;
     box-sizing: border-box;
-    transition: background-color 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
   }
 
   .network-toggle::after {
     content: "";
     position: absolute;
-    left: 1px;
-    top: 1px;
-    width: 10px;
-    height: 10px;
+    left: 2px;
+    top: 2px;
+    width: 12px;
+    height: 12px;
     border-radius: 999px;
-    background: #ffffff;
+    background: var(--light);
     transition: transform 0.2s ease;
   }
 
   .network-toggle.is-on {
-    background: #2f5f76;
-    border-color: #2f5f76;
+    background: var(--darkgray);
+    border-color: var(--gray);
   }
 
   .network-toggle.is-on::after {
-    transform: translateX(10px);
+    transform: translateX(14px);
   }
 
   .network-control-label {
@@ -323,6 +325,25 @@ title: Карта связей
     z-index: 3;
   }
 
+  .network-collapse-icon {
+    position: absolute;
+    right: 46px;
+    top: 12px;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    color: inherit;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+    font-size: 16px;
+    line-height: 1;
+  }
+
   .network-graph.is-expanded {
     position: fixed;
     inset: 4vh 4vw;
@@ -335,6 +356,14 @@ title: Карта связей
 
   body.network-expanded {
     overflow: hidden;
+  }
+
+  body.network-expanded .network-collapse-icon {
+    display: inline-flex;
+  }
+
+  body.network-expanded .network-expand-icon {
+    display: none;
   }
 
   body.network-expanded::before {
@@ -388,6 +417,9 @@ title: Карта связей
   <div class="network-graph-wrap">
     <button id="network-expand-icon" class="network-expand-icon" type="button" aria-label="Развернуть граф">
       ⤢
+    </button>
+    <button id="network-collapse-icon" class="network-collapse-icon" type="button" aria-label="Свернуть граф">
+      ✕
     </button>
     <div id="network-graph" class="network-graph"></div>
   </div>
