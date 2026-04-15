@@ -630,6 +630,17 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
   }
 
   async function shortcutHandler(e: HTMLElementEventMap["keydown"]) {
+    if (e.key === "Escape") {
+      const expanded = document.querySelector(".graph-outer.is-expanded")
+      if (expanded) {
+        e.preventDefault()
+        expanded.classList.remove("is-expanded")
+        document.body.classList.remove("graph-expanded")
+        void renderLocalGraph()
+        return
+      }
+    }
+
     if (e.key === "g" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
       e.preventDefault()
       const anyGlobalGraphOpen = containers.some((container) =>
@@ -645,8 +656,31 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     window.addCleanup(() => icon.removeEventListener("click", renderGlobalGraph))
   })
 
+  async function toggleExpandedGraph(event: Event) {
+    const target = event.currentTarget
+    if (!(target instanceof HTMLElement)) return
+    const graphOuter = target.closest(".graph-outer")
+    if (!(graphOuter instanceof HTMLElement)) return
+    graphOuter.classList.toggle("is-expanded")
+    document.body.classList.toggle("graph-expanded", graphOuter.classList.contains("is-expanded"))
+    await renderLocalGraph()
+  }
+
+  function collapseExpandedGraphs() {
+    const expanded = document.querySelectorAll(".graph-outer.is-expanded")
+    expanded.forEach((item) => item.classList.remove("is-expanded"))
+    document.body.classList.remove("graph-expanded")
+  }
+
+  const expandIcons = document.getElementsByClassName("local-graph-expand-icon")
+  Array.from(expandIcons).forEach((icon) => {
+    icon.addEventListener("click", toggleExpandedGraph)
+    window.addCleanup(() => icon.removeEventListener("click", toggleExpandedGraph))
+  })
+
   document.addEventListener("keydown", shortcutHandler)
   window.addCleanup(() => {
+    collapseExpandedGraphs()
     document.removeEventListener("keydown", shortcutHandler)
     cleanupLocalGraphs()
     cleanupGlobalGraphs()
