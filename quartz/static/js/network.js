@@ -577,6 +577,47 @@
           }
         }
 
+        const structuralSyntheticLinks = []
+        const seasonNodes = rawNodes.filter((node) => node.type === "season")
+        const episodeNodes = rawNodes.filter((node) => node.type === "episode")
+
+        if (seasonNodes.length > 0 && episodeNodes.length > 0) {
+          const neighborsById = new Map()
+          rawNodes.forEach((node) => neighborsById.set(node.id, new Set()))
+          rawLinks.forEach((link) => {
+            neighborsById.get(link.source)?.add(link.target)
+            neighborsById.get(link.target)?.add(link.source)
+          })
+
+          episodeNodes.forEach((episode) => {
+            const episodeNeighbors = neighborsById.get(episode.id) || new Set()
+            const alreadyLinkedToSeason = [...episodeNeighbors].some((neighborId) => {
+              const neighborNode = rawNodes.find((node) => node.id === neighborId)
+              return neighborNode?.type === "season"
+            })
+            if (alreadyLinkedToSeason) return
+
+            let bestSeasonId = null
+            let bestOverlap = 0
+
+            seasonNodes.forEach((season) => {
+              const seasonNeighbors = neighborsById.get(season.id) || new Set()
+              let overlap = 0
+              episodeNeighbors.forEach((id) => {
+                if (seasonNeighbors.has(id)) overlap += 1
+              })
+              if (overlap > bestOverlap) {
+                bestOverlap = overlap
+                bestSeasonId = season.id
+              }
+            })
+
+            if (bestSeasonId && bestOverlap > 0) {
+              structuralSyntheticLinks.push({ source: episode.id, target: bestSeasonId })
+            }
+          })
+        }
+
         const tagNodeMap = new Map()
         const rawTagLinks = []
         const seenTagLinks = new Set()
@@ -634,7 +675,12 @@
           }
         }
 
-        const allLinks = [...rawLinks, ...rawTagLinks, ...syntheticRootLinks]
+        const allLinks = [
+          ...rawLinks,
+          ...structuralSyntheticLinks,
+          ...rawTagLinks,
+          ...syntheticRootLinks,
+        ]
 
         allNodes.forEach((n) => adjacency.set(n.id, new Set()))
         allLinks.forEach((l) => {
@@ -648,6 +694,7 @@
         let highlightNodeIds = new Set()
         let highlightLinkKeys = new Set()
         let activeFocusNodeId = null
+        const nodeStateById = new Map()
 
         function linkKey(link) {
           const sourceId = typeof link.source === "object" ? link.source.id : link.source
@@ -671,6 +718,22 @@
               highlightLinkKeys.add(`${l.source}→${l.target}`)
               highlightLinkKeys.add(`${l.target}→${l.source}`)
             }
+          })
+        }
+
+        function saveNodeState() {
+          if (!graph) return
+          const currentNodes = graph.graphData()?.nodes || []
+          currentNodes.forEach((node) => {
+            if (!node?.id) return
+            nodeStateById.set(node.id, {
+              x: node.x,
+              y: node.y,
+              vx: node.vx,
+              vy: node.vy,
+              fx: node.fx,
+              fy: node.fy,
+            })
           })
         }
 
@@ -725,7 +788,14 @@
           const links = allLinks.filter((l) => visibleIds.has(l.source) && visibleIds.has(l.target))
 
           return {
-            nodes: nodes.map((n) => (n.id === rootNodeId ? { ...n, fx: 0, fy: 0 } : { ...n })),
+            nodes: nodes.map((n) => {
+              const prevState = nodeStateById.get(n.id) || {}
+              const baseNode = { ...n, ...prevState }
+              if (n.id === rootNodeId) {
+                return { ...baseNode, fx: 0, fy: 0 }
+              }
+              return baseNode
+            }),
             links: links.map((l) => ({ ...l })),
           }
         }
@@ -827,6 +897,7 @@
         }
 
         function render() {
+          saveNodeState()
           rebuildHighlights()
           const visible = getVisibleGraph()
           graph.graphData(visible)
@@ -942,9 +1013,10 @@
             if (state.hoveredNodeId === nextHoveredId) return
             state.hoveredNodeId = nextHoveredId
             rebuildHighlights()
-            if (typeof graph.refresh === "function") {
-              graph.refresh()
-            }
+            saveNodeState()
+            const visible = getVisibleGraph()
+            graph.graphData(visible)
+            applyForces()
           })
           .onNodeDrag(() => {
             userMovedNode = true
@@ -953,9 +1025,11 @@
             userMovedNode = true
           })
           .onBackgroundClick(() => {
+            if (!state.selectedNodeId && !state.hoveredNodeId) return
             state.selectedNodeId = null
             state.hoveredNodeId = null
             rebuildHighlights()
+            saveNodeState()
             const visible = getVisibleGraph()
             graph.graphData(visible)
             applyForces()

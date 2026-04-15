@@ -651,7 +651,6 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     })
 
     const graphContainer = container.querySelector(".local-graph-container") as HTMLElement
-    registerEscapeHandler(container, hideExpandedLocalGraph)
     if (graphContainer) {
       expandedGraphCleanups.push(await renderGraph(graphContainer, slug))
     }
