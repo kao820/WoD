@@ -1,5 +1,9 @@
 @use "../../styles/variables.scss" as *;
 
+body.graph-expanded {
+  overflow: hidden;
+}
+
 .graph {
   & > h3 {
     font-size: 1rem;

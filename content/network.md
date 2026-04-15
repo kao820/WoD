@@ -22,17 +22,66 @@ title: Карта связей
   .network-theme-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 13px;
+    gap: 8px;
     cursor: pointer;
     user-select: none;
+    white-space: nowrap;
+    font-size: 13px;
   }
 
   .network-theme-toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .network-theme-switch {
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    background: #3f3f46;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease;
+  }
+
+  .network-theme-switch::before {
+    content: "☾";
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #d4d4d8;
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .network-theme-switch::after {
+    content: "";
+    position: absolute;
+    left: 19px;
+    top: 2px;
     width: 16px;
     height: 16px;
-    margin: 0;
-    accent-color: #2f5f76;
+    border-radius: 999px;
+    background: #f4f4f5;
+    transition: transform 0.2s ease;
+  }
+
+  .network-theme-toggle input:not(:checked) + .network-theme-switch {
+    background: #d4d4d8;
+    border-color: rgba(63, 63, 70, 0.3);
+  }
+
+  .network-theme-toggle input:not(:checked) + .network-theme-switch::before {
+    content: "☀";
+    color: #52525b;
+  }
+
+  .network-theme-toggle input:not(:checked) + .network-theme-switch::after {
+    transform: translateX(-17px);
+    background: #ffffff;
   }
 
   .network-search {
@@ -139,6 +188,7 @@ title: Карта связей
     font-size: 12px;
     line-height: 1;
     font-weight: 700;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.35);
   }
 
   .network-control-label {
@@ -257,6 +307,10 @@ title: Карта связей
     box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
   }
 
+  body.network-expanded {
+    overflow: hidden;
+  }
+
   @media (max-width: 1100px) {
     .network-toolbar {
       grid-template-columns: 1fr;
@@ -291,7 +345,7 @@ title: Карта связей
     <button id="network-reset-colors-button" class="network-toolbar-button" type="button">Сбросить цвета</button>
     <label for="network-theme-checkbox" class="network-theme-toggle">
       <input id="network-theme-checkbox" type="checkbox" checked />
-      Тёмная тема
+      <span class="network-theme-switch"></span>
     </label>
   </div>
 

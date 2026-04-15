@@ -32,6 +32,7 @@
 
     let graph = null
     let resizeFitTimer = null
+    let hoverRenderTimer = null
     let userMovedNode = false
     let style = computeStyle()
 
@@ -545,6 +546,15 @@
           })
         }
 
+        if (!existingIds.has("index")) {
+          rawNodes.push({
+            id: "index",
+            label: "Мир Тьмы LRS",
+            type: "index",
+          })
+          existingIds.add("index")
+        }
+
         const rawLinks = []
         const seenLinks = new Set()
 
@@ -927,6 +937,20 @@
             if (state.hoveredNodeId === nextHoveredId) return
             state.hoveredNodeId = nextHoveredId
             rebuildHighlights()
+
+            if (typeof graph.resumeAnimation === "function") {
+              graph.resumeAnimation()
+            }
+
+            if (hoverRenderTimer) {
+              clearTimeout(hoverRenderTimer)
+            }
+            hoverRenderTimer = setTimeout(() => {
+              if (typeof graph.pauseAnimation === "function") {
+                graph.pauseAnimation()
+              }
+              hoverRenderTimer = null
+            }, 180)
           })
           .onNodeDrag(() => {
             userMovedNode = true
@@ -1021,11 +1045,13 @@
         expandButton.addEventListener("click", () => {
           graphEl.classList.toggle("is-expanded")
           if (graphEl.classList.contains("is-expanded")) {
+            document.body.classList.add("network-expanded")
             expandButton.textContent = "Свернуть"
             graph.width(graphEl.clientWidth)
             graph.height(graphEl.clientHeight)
             fitGraph(450, RESET_FIT_PADDING)
           } else {
+            document.body.classList.remove("network-expanded")
             expandButton.textContent = "Развернуть"
             graph.width(graphEl.clientWidth)
             graph.height(graphEl.clientHeight)
@@ -1083,6 +1109,7 @@
           if (event.key !== "Escape") return
           if (!graphEl.classList.contains("is-expanded")) return
           graphEl.classList.remove("is-expanded")
+          document.body.classList.remove("network-expanded")
           expandButton.textContent = "Развернуть"
           graph.width(graphEl.clientWidth)
           graph.height(graphEl.clientHeight)
