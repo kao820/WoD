@@ -302,10 +302,14 @@ title: Карта связей
     box-sizing: border-box;
   }
 
+  .network-graph-wrap {
+    position: relative;
+  }
+
   .network-expand-icon {
     position: absolute;
-    right: 14px;
-    top: 14px;
+    right: 12px;
+    top: 12px;
     width: 28px;
     height: 28px;
     border: 1px solid #555;
@@ -381,11 +385,12 @@ title: Карта связей
   </div>
 
   <div id="network-top-layout" class="network-top-layout"></div>
-
-  <button id="network-expand-icon" class="network-expand-icon" type="button" aria-label="Развернуть граф">
-    ⤢
-  </button>
-  <div id="network-graph" class="network-graph"></div>
+  <div class="network-graph-wrap">
+    <button id="network-expand-icon" class="network-expand-icon" type="button" aria-label="Развернуть граф">
+      ⤢
+    </button>
+    <div id="network-graph" class="network-graph"></div>
+  </div>
 </div>
 
 <script src="https://unpkg.com/force-graph"></script>

@@ -557,9 +557,28 @@
         const rawLinks = []
         const seenLinks = new Set()
 
+        function collectFrontmatterLinkCandidates(value, acc = []) {
+          if (Array.isArray(value)) {
+            value.forEach((item) => collectFrontmatterLinkCandidates(item, acc))
+            return acc
+          }
+          if (value && typeof value === "object") {
+            Object.values(value).forEach((item) => collectFrontmatterLinkCandidates(item, acc))
+            return acc
+          }
+          if (typeof value === "string") {
+            acc.push(value)
+          }
+          return acc
+        }
+
         for (const [slug, page] of Object.entries(index)) {
           const sourceId = canonicalByNormalized.get(normalizeSlug(slug)) || slug
-          for (const link of page.links || []) {
+          const directLinks = Array.isArray(page.links) ? page.links : []
+          const fmLinks = collectFrontmatterLinkCandidates(page.frontmatter || {})
+          const candidateLinks = [...directLinks, ...fmLinks]
+
+          for (const link of candidateLinks) {
             const normalizedLink = normalizeSlug(link)
             const normalizedLinkLoose = normalizeSlugLoose(link)
             const targetId =
@@ -1013,10 +1032,14 @@
             if (state.hoveredNodeId === nextHoveredId) return
             state.hoveredNodeId = nextHoveredId
             rebuildHighlights()
-            saveNodeState()
-            const visible = getVisibleGraph()
-            graph.graphData(visible)
-            applyForces()
+            if (typeof graph.refresh === "function") {
+              graph.refresh()
+            } else {
+              saveNodeState()
+              const visible = getVisibleGraph()
+              graph.graphData(visible)
+              applyForces()
+            }
           })
           .onNodeDrag(() => {
             userMovedNode = true
@@ -1026,6 +1049,19 @@
           })
           .onBackgroundClick(() => {
             if (!state.selectedNodeId && !state.hoveredNodeId) return
+            if (!state.selectedNodeId && state.hoveredNodeId) {
+              state.hoveredNodeId = null
+              rebuildHighlights()
+              if (typeof graph.refresh === "function") {
+                graph.refresh()
+              } else {
+                saveNodeState()
+                const visible = getVisibleGraph()
+                graph.graphData(visible)
+                applyForces()
+              }
+              return
+            }
             state.selectedNodeId = null
             state.hoveredNodeId = null
             rebuildHighlights()
