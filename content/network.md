@@ -163,15 +163,28 @@ title: Карта связей
   }
 
   .network-toggle {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 14px;
     border: 1px solid #8d99a6;
-    border-radius: 6px;
-    background: transparent;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.2);
     cursor: pointer;
     position: relative;
     padding: 0;
     box-sizing: border-box;
+    transition: background-color 0.2s ease;
+  }
+
+  .network-toggle::after {
+    content: "";
+    position: absolute;
+    left: 1px;
+    top: 1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #ffffff;
+    transition: transform 0.2s ease;
   }
 
   .network-toggle.is-on {
@@ -180,17 +193,7 @@ title: Карта связей
   }
 
   .network-toggle.is-on::after {
-    content: "✓";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -56%);
-    color: #ffffff;
-    font-size: 13px;
-    line-height: 1;
-    font-weight: 700;
-    text-shadow: 0 0 1px rgba(0, 0, 0, 0.35);
-    font-family: Arial, sans-serif;
+    transform: translateX(10px);
   }
 
   .network-control-label {
