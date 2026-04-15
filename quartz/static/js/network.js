@@ -925,6 +925,13 @@
             return
           }
 
+          if (typeof graph.nodeCanvasObject === "function") {
+            graph.nodeCanvasObject(graph.nodeCanvasObject())
+            graph.linkColor(graph.linkColor())
+            graph.linkWidth(graph.linkWidth())
+            return
+          }
+
           if (
             typeof graph.pauseAnimation === "function" &&
             typeof graph.resumeAnimation === "function"
