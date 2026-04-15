@@ -7,10 +7,20 @@
     const topLayoutEl = document.getElementById("network-top-layout")
     const searchEl = document.getElementById("network-search")
     const fitButton = document.getElementById("network-fit-button")
+    const expandButton = document.getElementById("network-expand-button")
     const resetButton = document.getElementById("network-reset-button")
     const resetColorsButton = document.getElementById("network-reset-colors-button")
+    const themeCheckbox = document.getElementById("network-theme-checkbox")
 
-    if (!graphEl || !topLayoutEl || !searchEl || !fitButton || !resetButton || !resetColorsButton)
+    if (
+      !graphEl ||
+      !topLayoutEl ||
+      !searchEl ||
+      !fitButton ||
+      !expandButton ||
+      !resetButton ||
+      !resetColorsButton
+    )
       return
     if (initializedGraphEl === graphEl) return
     initializedGraphEl = graphEl
@@ -177,6 +187,22 @@
         nodeSelected: dark ? "#f8fafc" : "#111111",
         nodeDim: dark ? "rgba(255,255,255,0.35)" : "#d1d5db",
       }
+    }
+
+    function emitThemeChange(theme) {
+      const event = new CustomEvent("themechange", {
+        detail: { theme },
+      })
+      document.dispatchEvent(event)
+    }
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute("saved-theme", theme)
+      localStorage.setItem("theme", theme)
+      if (themeCheckbox instanceof HTMLInputElement) {
+        themeCheckbox.checked = theme === "dark"
+      }
+      emitThemeChange(theme)
     }
 
     function getNeutralThemeColor() {
@@ -441,6 +467,19 @@
     }
 
     const contentIndexUrl = `${basePath}/static/contentIndex.json`
+
+    if (themeCheckbox instanceof HTMLInputElement) {
+      const savedTheme = localStorage.getItem("theme")
+      if (!savedTheme) {
+        setTheme("dark")
+      } else {
+        themeCheckbox.checked = savedTheme === "dark"
+      }
+
+      themeCheckbox.addEventListener("change", () => {
+        setTheme(themeCheckbox.checked ? "dark" : "light")
+      })
+    }
 
     fetch(contentIndexUrl)
       .then((res) => {
@@ -788,23 +827,6 @@
           graph.d3ReheatSimulation()
         }
 
-        function requestGraphRedraw() {
-          if (!graph) return
-
-          if (
-            typeof graph.resumeAnimation === "function" &&
-            typeof graph.pauseAnimation === "function"
-          ) {
-            graph.resumeAnimation()
-            requestAnimationFrame(() => {
-              graph.pauseAnimation()
-            })
-            return
-          }
-
-          graph.graphData(graph.graphData())
-        }
-
         function rerenderControlsOnly() {
           buildControls()
         }
@@ -905,7 +927,6 @@
             if (state.hoveredNodeId === nextHoveredId) return
             state.hoveredNodeId = nextHoveredId
             rebuildHighlights()
-            requestGraphRedraw()
           })
           .onNodeDrag(() => {
             userMovedNode = true
@@ -997,6 +1018,20 @@
           fitGraph(600, RESET_FIT_PADDING)
         })
 
+        expandButton.addEventListener("click", () => {
+          graphEl.classList.toggle("is-expanded")
+          if (graphEl.classList.contains("is-expanded")) {
+            expandButton.textContent = "Свернуть"
+            graph.width(graphEl.clientWidth)
+            graph.height(graphEl.clientHeight)
+            fitGraph(450, RESET_FIT_PADDING)
+          } else {
+            expandButton.textContent = "Развернуть"
+            graph.width(graphEl.clientWidth)
+            graph.height(graphEl.clientHeight)
+          }
+        })
+
         resetButton.addEventListener("click", () => {
           applyPresetForActiveTypes()
           refreshGraphWithCurrentSettings(true)
@@ -1042,6 +1077,15 @@
               fitGraph(450, RESIZE_FIT_PADDING)
             }
           }, 180)
+        })
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key !== "Escape") return
+          if (!graphEl.classList.contains("is-expanded")) return
+          graphEl.classList.remove("is-expanded")
+          expandButton.textContent = "Развернуть"
+          graph.width(graphEl.clientWidth)
+          graph.height(graphEl.clientHeight)
         })
 
         document.addEventListener("themechange", () => {

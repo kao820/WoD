@@ -13,10 +13,26 @@ title: Карта связей
 
   .network-toolbar {
     display: grid;
-    grid-template-columns: minmax(240px, 520px) repeat(3, max-content);
+    grid-template-columns: minmax(220px, 1fr) repeat(4, max-content);
     gap: 8px;
     align-items: center;
     margin: 10px 0 14px;
+  }
+
+  .network-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .network-theme-toggle input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #2f5f76;
   }
 
   .network-search {
@@ -231,6 +247,16 @@ title: Карта связей
     box-sizing: border-box;
   }
 
+  .network-graph.is-expanded {
+    position: fixed;
+    inset: 2.5vh 2.5vw;
+    width: 95vw;
+    height: 95vh;
+    z-index: 9998;
+    background: var(--light, #fff);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+  }
+
   @media (max-width: 1100px) {
     .network-toolbar {
       grid-template-columns: 1fr;
@@ -260,8 +286,13 @@ title: Карта связей
       autocomplete="off"
     />
     <button id="network-fit-button" class="network-toolbar-button" type="button">Вписать в область</button>
+    <button id="network-expand-button" class="network-toolbar-button" type="button">Развернуть</button>
     <button id="network-reset-button" class="network-toolbar-button" type="button">Сбросить настройки</button>
     <button id="network-reset-colors-button" class="network-toolbar-button" type="button">Сбросить цвета</button>
+    <label for="network-theme-checkbox" class="network-theme-toggle">
+      <input id="network-theme-checkbox" type="checkbox" checked />
+      Тёмная тема
+    </label>
   </div>
 
   <div id="network-top-layout" class="network-top-layout"></div>

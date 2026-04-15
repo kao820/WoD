@@ -15,26 +15,43 @@
     position: relative;
     overflow: hidden;
 
+    &.is-expanded {
+      position: fixed;
+      inset: 2.5vh 2.5vw;
+      width: 95vw;
+      height: 95vh;
+      z-index: 9998;
+      background: var(--light);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    & > .local-graph-expand-icon,
     & > .global-graph-icon {
       cursor: pointer;
       background: none;
       border: none;
       color: var(--dark);
-      opacity: 0.5;
+      opacity: 0.62;
       width: 24px;
       height: 24px;
       position: absolute;
       padding: 0.2rem;
       margin: 0.3rem;
       top: 0;
-      right: 0;
       border-radius: 4px;
       background-color: transparent;
-      transition: background-color 0.5s ease;
-      cursor: pointer;
+      transition: background-color 0.25s ease;
       &:hover {
         background-color: var(--lightgray);
       }
+    }
+
+    & > .local-graph-expand-icon {
+      right: 28px;
+    }
+
+    & > .global-graph-icon {
+      right: 0;
     }
   }
 

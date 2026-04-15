@@ -68,6 +68,16 @@ export default ((opts?: Partial<GraphOptions>) => {
         <h3>{i18n(cfg.locale).components.graph.title}</h3>
         <div class="graph-outer">
           <div class="graph-container" data-cfg={JSON.stringify(localGraph)}></div>
+          <button class="local-graph-expand-icon" aria-label="Expand Graph">
+            <svg
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M4 9V4h5v2H6v3H4zm10-5h6v6h-2V6h-4V4zM4 20v-6h2v4h4v2H4zm14-6h2v6h-6v-2h4v-4z" />
+            </svg>
+          </button>
           <button class="global-graph-icon" aria-label="Global Graph">
             <svg
               version="1.1"
