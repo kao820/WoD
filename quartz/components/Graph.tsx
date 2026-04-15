@@ -105,6 +105,9 @@ export default ((opts?: Partial<GraphOptions>) => {
             </svg>
           </button>
         </div>
+        <div class="local-graph-outer">
+          <div class="local-graph-container" data-cfg={JSON.stringify(localGraph)}></div>
+        </div>
         <div class="global-graph-outer">
           <div class="global-graph-container" data-cfg={JSON.stringify(globalGraph)}></div>
         </div>

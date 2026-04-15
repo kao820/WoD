@@ -10,7 +10,6 @@
     const expandButton = document.getElementById("network-expand-button")
     const resetButton = document.getElementById("network-reset-button")
     const resetColorsButton = document.getElementById("network-reset-colors-button")
-    const themeCheckbox = document.getElementById("network-theme-checkbox")
 
     if (
       !graphEl ||
@@ -32,7 +31,6 @@
 
     let graph = null
     let resizeFitTimer = null
-    let hoverRenderTimer = null
     let userMovedNode = false
     let style = computeStyle()
 
@@ -188,22 +186,6 @@
         nodeSelected: dark ? "#f8fafc" : "#111111",
         nodeDim: dark ? "rgba(255,255,255,0.35)" : "#d1d5db",
       }
-    }
-
-    function emitThemeChange(theme) {
-      const event = new CustomEvent("themechange", {
-        detail: { theme },
-      })
-      document.dispatchEvent(event)
-    }
-
-    function setTheme(theme) {
-      document.documentElement.setAttribute("saved-theme", theme)
-      localStorage.setItem("theme", theme)
-      if (themeCheckbox instanceof HTMLInputElement) {
-        themeCheckbox.checked = theme === "dark"
-      }
-      emitThemeChange(theme)
     }
 
     function getNeutralThemeColor() {
@@ -468,19 +450,6 @@
     }
 
     const contentIndexUrl = `${basePath}/static/contentIndex.json`
-
-    if (themeCheckbox instanceof HTMLInputElement) {
-      const savedTheme = localStorage.getItem("theme")
-      if (!savedTheme) {
-        setTheme("dark")
-      } else {
-        themeCheckbox.checked = savedTheme === "dark"
-      }
-
-      themeCheckbox.addEventListener("change", () => {
-        setTheme(themeCheckbox.checked ? "dark" : "light")
-      })
-    }
 
     fetch(contentIndexUrl)
       .then((res) => {
@@ -856,6 +825,9 @@
           .nodeVal((node) => {
             const scale = settings.nodeScale / 100
             const degreeRadius = (3.4 + Math.sqrt(nodeDegrees.get(node.id) || 0) * 1.35) * scale
+            if (node.id === rootNodeId) {
+              return Math.max(7.2, degreeRadius * 1.25)
+            }
             if (node.type === "tag") {
               return Math.max(2.4, degreeRadius * 0.72)
             }
@@ -869,9 +841,14 @@
             const isCampaignHub = node.type === "campaign_hub"
             const isTag = node.type === "tag"
             const scale = settings.nodeScale / 100
+            const isRootNode = node.id === rootNodeId
             const baseRadius = (3.4 + Math.sqrt(nodeDegrees.get(node.id) || 0) * 1.35) * scale
 
-            const radius = isTag ? Math.max(2.4, baseRadius * 0.72) : baseRadius
+            const radius = isRootNode
+              ? Math.max(7.2, baseRadius * 1.25)
+              : isTag
+                ? Math.max(2.4, baseRadius * 0.72)
+                : baseRadius
 
             ctx.beginPath()
             ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false)
@@ -888,6 +865,7 @@
 
             const threshold = settings.labelThreshold / 100
             const showLabel =
+              isRootNode ||
               isCampaignHub ||
               globalScale >= threshold ||
               (isTag && globalScale >= Math.max(1.15, threshold))
@@ -937,20 +915,7 @@
             if (state.hoveredNodeId === nextHoveredId) return
             state.hoveredNodeId = nextHoveredId
             rebuildHighlights()
-
-            if (typeof graph.resumeAnimation === "function") {
-              graph.resumeAnimation()
-            }
-
-            if (hoverRenderTimer) {
-              clearTimeout(hoverRenderTimer)
-            }
-            hoverRenderTimer = setTimeout(() => {
-              if (typeof graph.pauseAnimation === "function") {
-                graph.pauseAnimation()
-              }
-              hoverRenderTimer = null
-            }, 180)
+            graph.graphData(graph.graphData())
           })
           .onNodeDrag(() => {
             userMovedNode = true
