@@ -177,8 +177,7 @@ title: Карта связей
       border-color 0.2s ease;
   }
 
-  .network-toggle::after {
-    content: "";
+  .network-toggle .network-toggle-thumb {
     position: absolute;
     left: 2px;
     top: 2px;
@@ -194,8 +193,12 @@ title: Карта связей
     border-color: var(--gray);
   }
 
-  .network-toggle.is-on::after {
+  .network-toggle.is-on .network-toggle-thumb {
     transform: translateX(14px);
+  }
+
+  .network-theme-toggle {
+    display: none !important;
   }
 
   .network-control-label {
