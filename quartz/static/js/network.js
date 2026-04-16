@@ -3,6 +3,8 @@
   let mutationObserverStarted = false
 
   function initNetworkGraph() {
+    removeLegacyThemeToggle()
+
     const graphEl = document.getElementById("network-graph")
     const topLayoutEl = document.getElementById("network-top-layout")
     const searchEl = document.getElementById("network-search")
@@ -31,6 +33,25 @@
     if (typeof ForceGraph !== "function") {
       console.error("ForceGraph не загрузился.")
       return
+    }
+
+    function removeLegacyThemeToggle() {
+      const legacyToggleSelectors = [
+        "label.network-theme-toggle",
+        "label[for='network-theme-checkbox']",
+        "#network-theme-checkbox",
+      ]
+
+      const legacyNodes = document.querySelectorAll(legacyToggleSelectors.join(","))
+      legacyNodes.forEach((node) => {
+        if (!(node instanceof HTMLElement)) return
+        const wrap = node.closest("label.network-theme-toggle")
+        if (wrap) {
+          wrap.remove()
+          return
+        }
+        node.remove()
+      })
     }
 
     let graph = null
@@ -274,6 +295,9 @@
           toggle.setAttribute("aria-label", item.label)
           toggle.setAttribute("aria-pressed", state.types[item.type] ? "true" : "false")
           toggle.title = item.label
+          const toggleThumb = document.createElement("span")
+          toggleThumb.className = "network-toggle-thumb"
+          toggle.appendChild(toggleThumb)
 
           const label = document.createElement("button")
           label.type = "button"
