@@ -50,6 +50,20 @@ function detectChronicleTone(value: string): ChronicleTone | null {
   return null
 }
 
+function firstChronicleToken(value: unknown): string {
+  if (Array.isArray(value)) {
+    return String(value[0] ?? "").trim()
+  }
+
+  const raw = String(value ?? "").trim()
+  if (!raw) return ""
+
+  const firstWiki = raw.match(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/)
+  if (firstWiki?.[1]) return firstWiki[1].trim()
+
+  return raw.split(/[,;/]/)[0].trim()
+}
+
 function resolveImage(value: string, currentSlug: string): string | null {
   if (
     /^https?:\/\//.test(value) ||
@@ -208,7 +222,9 @@ const ArticleInfobox: QuartzComponent = ({
     const normalizedKey = key.toLowerCase()
     return value && (normalizedKey === "хроника" || normalizedKey === "chronicle")
   })
-  const chronicleTone = chronicleEntry ? detectChronicleTone(String(chronicleEntry[1])) : null
+  const chronicleTone = chronicleEntry
+    ? detectChronicleTone(firstChronicleToken(chronicleEntry[1]))
+    : null
   const chronicleIconUrl = chronicleTone ? `/WoD/static/chronicle-icons/${chronicleTone}.svg` : ""
 
   return (
