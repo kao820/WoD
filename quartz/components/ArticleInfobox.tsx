@@ -312,7 +312,9 @@ ArticleInfobox.css = `
   width: 19px;
   height: 19px;
   margin-left: auto;
-  background: currentColor;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
   opacity: 0.92;
   -webkit-mask-position: center;
   -webkit-mask-repeat: no-repeat;
