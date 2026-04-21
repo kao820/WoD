@@ -207,6 +207,15 @@ const ArticleInfobox: QuartzComponent = ({
     >
       <div class="wiki-infobox__header">
         <span>{typeValue ? typeValue.toUpperCase() : "ИНФОРМАЦИЯ"}</span>
+        {chronicleTone && (
+          <span
+            class={classNames(
+              "wiki-infobox__chronicle-icon",
+              `wiki-infobox__chronicle-icon--${chronicleTone}`,
+            )}
+            aria-hidden="true"
+          ></span>
+        )}
       </div>
       {resolvedImage && (
         <div class="wiki-infobox__image-wrap">
@@ -296,6 +305,141 @@ ArticleInfobox.css = `
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.35rem;
+}
+
+.wiki-infobox__chronicle-icon {
+  width: 19px;
+  height: 19px;
+  margin-left: auto;
+  background: currentColor;
+  opacity: 0.92;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.wiki-infobox__chronicle-icon--mage {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 5h8c1.3 0 2.5.5 3.5 1.3C15.5 5.5 16.7 5 18 5h3v14h-3c-1.5 0-2.8.5-3.8 1.4L14 20l-.2.4C12.8 19.5 11.5 19 10 19H3V5zm2 2v10h5c1 0 1.9.2 2.8.6V7.8c-.8-.5-1.7-.8-2.8-.8H5zm14 0h-1c-1.1 0-2 .3-2.8.8v9.8c.9-.4 1.8-.6 2.8-.6h1V7z'/%3E%3C/svg%3E");
+}
+
+.wiki-infobox__chronicle-icon--changeling {
+  mask-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6c1.1 0 2 .9 2 2 0 .8-.5 1.5-1.2 1.8V12l1.8 2.7h-1.8L12 13l-.8 1.7H9.4L11 12V9.8A2 2 0 0 1 12 6zM5 9c2.3 0 4.2.9 5.3 2.4-.5.3-.9.8-1.2 1.3C8.2 11.4 6.7 11 5 11H3V9h2zm14 0h2v2h-2c-1.7 0-3.2.4-4.1 1.7-.3-.5-.7-1-1.2-1.3C14.8 9.9 16.7 9 19 9zM5.5 14c1.6 0 2.8.4 3.6 1.5.5.7 1.2 1.2 2 1.4v2.1c-1.6-.2-3.1-1-4.1-2.4C6.4 15.7 5.5 15.4 4 15.4H2V14h3.5zm13 0H22v1.4h-2c-1.5 0-2.4.3-3 .9-1 1.4-2.5 2.2-4.1 2.4v-2.1c.8-.2 1.5-.7 2-1.4.8-1.1 2-1.5 3.6-1.5z'/%3E%3C/svg%3E\");
+}
+
+.wiki-infobox__chronicle-icon--demon {
+  mask-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.6 5.4 6 .9-4.3 4.2 1 5.9-5.3-2.8-5.3 2.8 1-5.9L3.4 8.3l6-.9L12 2zm0 3.8L10.5 9h-3.7l2.8 2.7-.7 3.8 3.1-1.7 3.1 1.7-.7-3.8 2.8-2.7h-3.7L12 5.8z'/%3E%3C/svg%3E\");
+}
+
+.wiki-infobox__chronicle-icon--werewolf {
+  mask-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm5-2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm5 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM5.5 8.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM12 8c3.2 0 5.5 2 5.5 5 0 2.6-2 4.8-5.5 4.8S6.5 15.6 6.5 13c0-3 2.3-5 5.5-5z'/%3E%3C/svg%3E\");
+}
+
+.wiki-infobox__chronicle-icon--hunter {
+  mask-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M11 3h2v4h3v2h-3v3h4v2h-4v7h-2v-7H7v-2h4V9H8V7h3V3z'/%3E%3C/svg%3E\");
+}
+
+.wiki-infobox__chronicle-icon--vampire {
+  mask-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 8c0-2.2 1.8-4 4-4h8c2.2 0 4 1.8 4 4v2c0 3.9-3.1 7-7 7h-2c-3.9 0-7-3.1-7-7V8zm2 1v1c0 2.8 2.2 5 5 5h2c2.8 0 5-2.2 5-5V9H6zm3.2 0h2l-.6 3H9.7l-.5-3zm4.4 0h2l-.5 3h-.9l-.6-3z'/%3E%3C/svg%3E\");
+}
+
+.wiki-infobox[class*="wiki-infobox--chronicle-"] {
+  border-color: color-mix(in srgb, var(--chronicle-accent) 44%, var(--lightgray));
+}
+
+.wiki-infobox[class*="wiki-infobox--chronicle-"] .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, var(--chronicle-accent) 52%, var(--lightgray));
+  background: color-mix(in srgb, var(--chronicle-accent) 20%, var(--light));
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 78%, var(--dark));
+}
+
+.wiki-infobox[class*="wiki-infobox--chronicle-"] .wiki-infobox__row dd a.internal {
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 78%, var(--dark));
+  background: color-mix(in srgb, var(--chronicle-accent) 14%, var(--light));
+  border-radius: 6px;
+  padding: 0.02rem 0.22rem;
+}
+
+.wiki-infobox--chronicle-mage {
+  --chronicle-accent: #3a8eff;
+  --chronicle-accent-text: #3a8eff;
+}
+
+.wiki-infobox--chronicle-changeling {
+  --chronicle-accent: #ffd74a;
+  --chronicle-accent-text: #b28700;
+}
+
+.wiki-infobox--chronicle-demon {
+  --chronicle-accent: #38c772;
+  --chronicle-accent-text: #1f9a53;
+}
+
+.wiki-infobox--chronicle-werewolf {
+  --chronicle-accent: #ef5350;
+  --chronicle-accent-text: #cc2f2c;
+}
+
+.wiki-infobox--chronicle-hunter {
+  --chronicle-accent: #ff9800;
+  --chronicle-accent-text: #b66600;
+}
+
+.wiki-infobox--chronicle-vampire {
+  --chronicle-accent: #ab47bc;
+  --chronicle-accent-text: #7d1e8d;
+}
+
+body[data-chronicle-tone="mage"] {
+  --chronicle-accent: #3a8eff;
+  --chronicle-accent-text: #3a8eff;
+}
+
+body[data-chronicle-tone="changeling"] {
+  --chronicle-accent: #ffd74a;
+  --chronicle-accent-text: #b28700;
+}
+
+body[data-chronicle-tone="demon"] {
+  --chronicle-accent: #38c772;
+  --chronicle-accent-text: #1f9a53;
+}
+
+body[data-chronicle-tone="werewolf"] {
+  --chronicle-accent: #ef5350;
+  --chronicle-accent-text: #cc2f2c;
+}
+
+body[data-chronicle-tone="hunter"] {
+  --chronicle-accent: #ff9800;
+  --chronicle-accent-text: #b66600;
+}
+
+body[data-chronicle-tone="vampire"] {
+  --chronicle-accent: #ab47bc;
+  --chronicle-accent-text: #7d1e8d;
+}
+
+body[data-chronicle-tone] article a.internal,
+body[data-chronicle-tone] .backlinks a.internal,
+body[data-chronicle-tone] .toc a.internal,
+body[data-chronicle-tone] .tags a.internal.tag-link {
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 82%, var(--dark));
+}
+
+body[data-chronicle-tone] .tags a.internal.tag-link,
+body[data-chronicle-tone] article a.internal {
+  background: color-mix(in srgb, var(--chronicle-accent) 12%, var(--light));
+  border-radius: 6px;
+  padding: 0.02rem 0.24rem;
+}
+
+body[data-chronicle-tone] .backlinks ul li::marker {
+  color: color-mix(in srgb, var(--chronicle-accent) 72%, var(--secondary));
+}
+
+body[data-chronicle-tone] .toc .active {
+  border-left-color: color-mix(in srgb, var(--chronicle-accent) 82%, var(--secondary));
 }
 
 .wiki-infobox[class*="wiki-infobox--chronicle-"] {
