@@ -343,33 +343,33 @@ ArticleInfobox.css = `
 }
 
 .wiki-infobox__chronicle-icon--mage {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 4h14a2 2 0 0 1 2 2v13H6a2 2 0 0 1-2-2V4zm2 2v11h12V6H6zm2 2h8v2H8V8zm0 3h6v2H8v-2z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 4h14a2 2 0 0 1 2 2v13H6a2 2 0 0 1-2-2V4zm2 2v11h12V6H6zm2 2h8v2H8V8zm0 3h6v2H8v-2z'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("/WoD/static/chronicle-icons/mage.svg");
+  mask-image: url("/WoD/static/chronicle-icons/mage.svg");
 }
 
 .wiki-infobox__chronicle-icon--changeling {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-3 4c1.2 0 2.2.5 3 1.5.8-1 1.8-1.5 3-1.5 1.7 0 3 1.2 3 2.7 0 2.2-2.4 4.3-6 5.8-3.6-1.5-6-3.6-6-5.8C6 11.2 7.3 10 9 10zm2.4 1.8-1.6 2.4 2.2-.8 2.2.8-1.6-2.4h-1.2z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 6a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-3 4c1.2 0 2.2.5 3 1.5.8-1 1.8-1.5 3-1.5 1.7 0 3 1.2 3 2.7 0 2.2-2.4 4.3-6 5.8-3.6-1.5-6-3.6-6-5.8C6 11.2 7.3 10 9 10zm2.4 1.8-1.6 2.4 2.2-.8 2.2.8-1.6-2.4h-1.2z'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("/WoD/static/chronicle-icons/changeling.svg");
+  mask-image: url("/WoD/static/chronicle-icons/changeling.svg");
 }
 
 .wiki-infobox__chronicle-icon--demon {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3l2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8L12 3zm0 3.1-1.5 3.1-3.5.5 2.5 2.4-.6 3.4 3.1-1.6 3.1 1.6-.6-3.4 2.5-2.4-3.5-.5L12 6.1z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3l2.4 5 5.6.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.6-.8L12 3zm0 3.1-1.5 3.1-3.5.5 2.5 2.4-.6 3.4 3.1-1.6 3.1 1.6-.6-3.4 2.5-2.4-3.5-.5L12 6.1z'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("/WoD/static/chronicle-icons/demon.svg");
+  mask-image: url("/WoD/static/chronicle-icons/demon.svg");
 }
 
 .wiki-infobox__chronicle-icon--werewolf {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4-2a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4 2a2 2 0 1 1 0-4 2 2 0 0 1 0 4zM12 10c3.4 0 5.6 2.2 5.6 5.1 0 2.4-2 4.3-5.6 4.3s-5.6-1.9-5.6-4.3c0-2.9 2.2-5.1 5.6-5.1z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4-2a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4 2a2 2 0 1 1 0-4 2 2 0 0 1 0 4zM12 10c3.4 0 5.6 2.2 5.6 5.1 0 2.4-2 4.3-5.6 4.3s-5.6-1.9-5.6-4.3c0-2.9 2.2-5.1 5.6-5.1z'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("/WoD/static/chronicle-icons/werewolf.svg");
+  mask-image: url("/WoD/static/chronicle-icons/werewolf.svg");
 }
 
 .wiki-infobox__chronicle-icon--hunter {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M11 3h2v3h3v2h-3v3h4v2h-4v8h-2v-8H7v-2h4V8H8V6h3V3zm-2 13h6v2H9v-2z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M11 3h2v3h3v2h-3v3h4v2h-4v8h-2v-8H7v-2h4V8H8V6h3V3zm-2 13h6v2H9v-2z'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("/WoD/static/chronicle-icons/hunter.svg");
+  mask-image: url("/WoD/static/chronicle-icons/hunter.svg");
 }
 
 .wiki-infobox__chronicle-icon--vampire {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2.5 10c1.8-2.8 4-3.9 6.7-3.2l2.8 1.1 2.8-1.1c2.7-.7 4.9.4 6.7 3.2-1.1 2.8-3.5 4.8-7.1 6H9.6C6 14.8 3.6 12.8 2.5 10zm6.2-.9A1.8 1.8 0 1 1 8.7 12a1.8 1.8 0 0 1 0-2.9zm6.6 0a1.8 1.8 0 1 1 0 2.9 1.8 1.8 0 0 1 0-2.9zM9.6 16h2.6l-.8 2.8H9.5L9.6 16zm2.8 0H15l.1 2.8h-1.9l-.8-2.8z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2.5 10c1.8-2.8 4-3.9 6.7-3.2l2.8 1.1 2.8-1.1c2.7-.7 4.9.4 6.7 3.2-1.1 2.8-3.5 4.8-7.1 6H9.6C6 14.8 3.6 12.8 2.5 10zm6.2-.9A1.8 1.8 0 1 1 8.7 12a1.8 1.8 0 0 1 0-2.9zm6.6 0a1.8 1.8 0 1 1 0 2.9 1.8 1.8 0 0 1 0-2.9zM9.6 16h2.6l-.8 2.8H9.5L9.6 16zm2.8 0H15l.1 2.8h-1.9l-.8-2.8z'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("/WoD/static/chronicle-icons/vampire.svg");
+  mask-image: url("/WoD/static/chronicle-icons/vampire.svg");
 }
 
 .wiki-infobox[class*="wiki-infobox--chronicle-"] {
