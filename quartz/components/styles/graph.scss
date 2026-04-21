@@ -1,5 +1,9 @@
 @use "../../styles/variables.scss" as *;
 
+body.graph-expanded {
+  overflow: hidden;
+}
+
 .graph {
   & > h3 {
     font-size: 1rem;
@@ -15,32 +19,97 @@
     position: relative;
     overflow: hidden;
 
+    & > .local-graph-expand-icon,
     & > .global-graph-icon {
       cursor: pointer;
       background: none;
       border: none;
       color: var(--dark);
-      opacity: 0.5;
+      opacity: 0.62;
       width: 24px;
       height: 24px;
       position: absolute;
       padding: 0.2rem;
       margin: 0.3rem;
       top: 0;
-      right: 0;
       border-radius: 4px;
       background-color: transparent;
-      transition: background-color 0.5s ease;
-      cursor: pointer;
+      transition: background-color 0.25s ease;
       &:hover {
         background-color: var(--lightgray);
+      }
+    }
+
+    & > .local-graph-expand-icon {
+      right: 28px;
+    }
+
+    & > .global-graph-icon {
+      right: 0;
+    }
+  }
+
+  & > .local-graph-outer {
+    position: fixed;
+    z-index: 2147483646;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100%;
+    backdrop-filter: blur(4px);
+    display: none;
+    overflow: hidden;
+
+    &.active {
+      display: block;
+    }
+
+    & > .modal-bg {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(4px);
+    }
+
+    & > .local-graph-close {
+      position: fixed;
+      top: 4vh;
+      right: 4vw;
+      z-index: 3;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid color-mix(in srgb, var(--light) 20%, transparent);
+      background: color-mix(in srgb, var(--dark) 70%, transparent);
+      color: var(--light);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    & > .local-graph-container {
+      border: 1px solid var(--lightgray);
+      background-color: var(--light);
+      box-sizing: border-box;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(94vw, 1440px);
+      height: 88vh;
+      border-radius: 8px;
+      z-index: 2;
+
+      @media all and not ($desktop) {
+        width: 96vw;
+        height: 90vh;
       }
     }
   }
 
   & > .global-graph-outer {
     position: fixed;
-    z-index: 9999;
+    z-index: 2147483647;
     left: 0;
     top: 0;
     width: 100vw;
