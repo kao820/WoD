@@ -4,6 +4,7 @@ tags:
 type: эпизод
 season:
   - "[[03 Кэдбери]]"
+Хроника: "[[03 Demon The Fallen]]"
 ---
 
 ---

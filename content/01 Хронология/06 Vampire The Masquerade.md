@@ -3,6 +3,7 @@ tags:
   - вампиры
 type: хроника
 image: 6.jpg
+Хроника: "[[06 Vampire The Masquerade]]"
 ---
 [**Vampire The Masquerade**](https://wod.su/vampire/book/vampire_masquerade) — хронологически пятая линейка "Мира Тьмы", по которой проводился один из кампейнов Сергея Людантина в рамках Living Room Studio. К этой линейке относится сезон [[07 Рубикон]]. Действие происходит в XXXX году, события в основном затрагивают вампиров. 
 
