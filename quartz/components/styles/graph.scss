@@ -71,23 +71,38 @@ body.graph-expanded {
       backdrop-filter: blur(4px);
     }
 
+    & > .local-graph-close {
+      position: fixed;
+      top: 4vh;
+      right: 4vw;
+      z-index: 3;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid color-mix(in srgb, var(--light) 20%, transparent);
+      background: color-mix(in srgb, var(--dark) 70%, transparent);
+      color: var(--light);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+
     & > .local-graph-container {
       border: 1px solid var(--lightgray);
       background-color: var(--light);
       box-sizing: border-box;
       position: fixed;
-      top: 0;
-      left: 0;
-      transform: none;
-      width: 100vw;
-      margin-top: 4vh;
-      margin-bottom: 4vh;
-      height: 92vh;
-      border-radius: 0;
-      z-index: 1;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(94vw, 1440px);
+      height: 88vh;
+      border-radius: 8px;
+      z-index: 2;
 
       @media all and not ($desktop) {
-        width: 100vw;
+        width: 96vw;
+        height: 90vh;
       }
     }
   }

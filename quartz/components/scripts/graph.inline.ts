@@ -757,6 +757,22 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     window.addCleanup(() => icon.removeEventListener("click", toggleExpandedGraph))
   })
 
+  localExpandedContainers.forEach((container) => {
+    const backdrop = container.querySelector(".modal-bg")
+    const closeButton = container.querySelector(".local-graph-close")
+
+    const closeExpanded = () => {
+      hideExpandedLocalGraph()
+    }
+
+    backdrop?.addEventListener("click", closeExpanded)
+    closeButton?.addEventListener("click", closeExpanded)
+    window.addCleanup(() => {
+      backdrop?.removeEventListener("click", closeExpanded)
+      closeButton?.removeEventListener("click", closeExpanded)
+    })
+  })
+
   document.addEventListener("keydown", shortcutHandler)
   window.addCleanup(() => {
     collapseExpandedGraphs()

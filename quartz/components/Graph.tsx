@@ -107,6 +107,9 @@ export default ((opts?: Partial<GraphOptions>) => {
         </div>
         <div class="local-graph-outer modal-container">
           <div class="modal-bg"></div>
+          <button class="local-graph-close" aria-label="Close Expanded Graph">
+            ✕
+          </button>
           <div class="local-graph-container" data-cfg={JSON.stringify(localGraph)}></div>
         </div>
         <div class="global-graph-outer">
