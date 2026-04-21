@@ -23,6 +23,19 @@ const EXCLUDED_KEYS = new Set([
   "comments",
 ])
 
+type ChronicleTone = "mage" | "changeling" | "demon" | "werewolf" | "hunter" | "vampire"
+
+function detectChronicleTone(value: string): ChronicleTone | null {
+  const normalized = value.toLowerCase()
+  if (normalized.includes("mage") || normalized.includes("маг")) return "mage"
+  if (normalized.includes("changeling") || normalized.includes("фе")) return "changeling"
+  if (normalized.includes("demon") || normalized.includes("демон")) return "demon"
+  if (normalized.includes("werewolf") || normalized.includes("оборот")) return "werewolf"
+  if (normalized.includes("hunter") || normalized.includes("охот")) return "hunter"
+  if (normalized.includes("vampire") || normalized.includes("вампир")) return "vampire"
+  return null
+}
+
 function resolveImage(value: string, currentSlug: string): string | null {
   if (
     /^https?:\/\//.test(value) ||
@@ -177,10 +190,20 @@ const ArticleInfobox: QuartzComponent = ({
   const resolvedImage = imageValue ? resolveImage(imageValue, fileData.slug!) : null
   const typeValue =
     typeof frontmatter.type === "string" ? frontmatter.type.toLowerCase().trim() : ""
+  const chronicleEntry = entries.find(([key, value]) => {
+    const normalizedKey = key.toLowerCase()
+    return value && (normalizedKey === "хроника" || normalizedKey === "chronicle")
+  })
+  const chronicleTone = chronicleEntry ? detectChronicleTone(String(chronicleEntry[1])) : null
 
   return (
     <aside
-      class={classNames(displayClass, "wiki-infobox", typeValue && `wiki-infobox--${typeValue}`)}
+      class={classNames(
+        displayClass,
+        "wiki-infobox",
+        typeValue && `wiki-infobox--${typeValue}`,
+        chronicleTone && `wiki-infobox--chronicle-${chronicleTone}`,
+      )}
     >
       <div class="wiki-infobox__header">
         <span>{typeValue ? typeValue.toUpperCase() : "ИНФОРМАЦИЯ"}</span>
@@ -273,6 +296,42 @@ ArticleInfobox.css = `
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.wiki-infobox--chronicle-mage .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #3a8eff 44%, var(--lightgray));
+  background: color-mix(in srgb, #3a8eff 20%, var(--light));
+  color: color-mix(in srgb, #3a8eff 76%, var(--dark));
+}
+
+.wiki-infobox--chronicle-changeling .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #ffd74a 56%, var(--lightgray));
+  background: color-mix(in srgb, #ffd74a 24%, var(--light));
+  color: color-mix(in srgb, #b28700 78%, var(--dark));
+}
+
+.wiki-infobox--chronicle-demon .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #38c772 46%, var(--lightgray));
+  background: color-mix(in srgb, #38c772 22%, var(--light));
+  color: color-mix(in srgb, #1f9a53 78%, var(--dark));
+}
+
+.wiki-infobox--chronicle-werewolf .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #ef5350 42%, var(--lightgray));
+  background: color-mix(in srgb, #ef5350 18%, var(--light));
+  color: color-mix(in srgb, #cc2f2c 78%, var(--dark));
+}
+
+.wiki-infobox--chronicle-hunter .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #ff9800 52%, var(--lightgray));
+  background: color-mix(in srgb, #ff9800 20%, var(--light));
+  color: color-mix(in srgb, #b66600 82%, var(--dark));
+}
+
+.wiki-infobox--chronicle-vampire .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #ab47bc 44%, var(--lightgray));
+  background: color-mix(in srgb, #ab47bc 22%, var(--light));
+  color: color-mix(in srgb, #7d1e8d 82%, var(--dark));
 }
 
 
