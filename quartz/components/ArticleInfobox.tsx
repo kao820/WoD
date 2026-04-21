@@ -25,6 +25,20 @@ const EXCLUDED_KEYS = new Set([
 
 type ChronicleTone = "mage" | "changeling" | "demon" | "werewolf" | "hunter" | "vampire"
 
+const CHRONICLE_ICON_PATHS: Record<ChronicleTone, string> = {
+  mage: "M4 3h12l3 3v13H5L4 3zm2.4 2.2.6 11.6h9.6V7.1l-1.4-1.9H6.4zM12 8l1.2 2.2 2.4.4-1.7 1.6.4 2.3-2.3-1.1-2.3 1.1.4-2.3-1.7-1.6 2.4-.4L12 8z",
+  changeling:
+    "M12 6.3a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6zM7 9.5c1.8 0 3.2.7 4.1 2.2-.8.9-1.4 1.9-1.8 3C7.5 14.1 6 13 5.4 11.6c.2-1.4.8-2.1 1.6-2.1zm10 0c.8 0 1.4.7 1.6 2.1-.6 1.4-2.1 2.5-3.9 3.1-.4-1.1-1-2.1-1.8-3 .9-1.5 2.3-2.2 4.1-2.2zM9.7 14.8l2.3 3.4 2.3-3.4c1.4.2 2.5.8 3.2 1.8-.8 1.3-3 2.1-5.5 2.1s-4.7-.8-5.5-2.1c.7-1 1.8-1.6 3.2-1.8z",
+  demon:
+    "M12 2.8a9.2 9.2 0 1 1 0 18.4 9.2 9.2 0 0 1 0-18.4zm0 1.9A7.3 7.3 0 1 0 12 19.3 7.3 7.3 0 0 0 12 4.7zm0 2.7 2 3.2h3.8L16 13.8l1.8 3.2H14L12 20.2 10 17H6.2L8 13.8l-1.8-3.2H10L12 7.4zM12 1a1.3 1.3 0 1 1 0 2.6A1.3 1.3 0 0 1 12 1zm0 19.4a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6z",
+  werewolf:
+    "M12 2.6a9.4 9.4 0 0 1 7.2 3.3l-1.5 1.2A7.4 7.4 0 0 0 12 4.6c-2.8 0-5.2 1.5-6.5 3.8l2.6-1.2 1.8.7 2.2-1.6 1.5.8 1.9-.8-.6 2.1 1.8 1.2-.9 2 1.7.9-1.6 1.4.5 2-1.9-.4-1.2 1.6-1.4-1.4-1.9.6.2-2.1-1.8-.9 1.2-1.8-1.5-1.4.9-2L5 10.5A7.4 7.4 0 0 0 12 19.4c1.7 0 3.2-.6 4.4-1.5l1.3 1.5a9.3 9.3 0 0 1-5.7 2 9.4 9.4 0 0 1 0-18.8z",
+  hunter:
+    "M10.8 2h2.4v3h2.3l1.4 1.4v2.2h3v2.4h-3v2.2l-1.4 1.4h-2.3V22h-2.4v-6.4H8.5L7 14.2V12H4v-2.4h3V7.4L8.5 6h2.3V2zm-1.4 5.4v5.8h5.2V7.4H9.4zM12 0a1.4 1.4 0 1 1 0 2.8A1.4 1.4 0 0 1 12 0zm0 21.2a1.4 1.4 0 1 1 0 2.8 1.4 1.4 0 0 1 0-2.8z",
+  vampire:
+    "M2.5 7c1.8 0 3.2.8 4.1 2.4l1.2 2.2c.4.6.9.9 1.6.9h5.2c.7 0 1.2-.3 1.6-.9L17.4 9c.9-1.2 2.3-2 4.1-2-.3 3.7-2.2 6.7-5.8 8.7h-7.4C4.7 13.8 2.8 10.8 2.5 7zm3.2-.8c0 1.8 1.4 3.3 3.2 3.3S12 8 12 6.2 10.6 3 8.9 3 5.7 4.4 5.7 6.2zm9.4 0c0 1.8 1.4 3.3 3.2 3.3s3.2-1.4 3.2-3.3S20.1 3 18.3 3s-3.2 1.4-3.2 3.2zM8.8 15.7h2.8l-.8 3.3H8.5l.3-3.3zm3.8 0h2.8l.3 3.3h-2.3l-.8-3.3z",
+}
+
 function detectChronicleTone(value: string): ChronicleTone | null {
   const normalized = value.toLowerCase()
   if (normalized.includes("mage") || normalized.includes("маг")) return "mage"
@@ -209,14 +223,16 @@ const ArticleInfobox: QuartzComponent = ({
       <div class="wiki-infobox__header">
         <span>{typeValue ? typeValue.toUpperCase() : "ИНФОРМАЦИЯ"}</span>
         {chronicleTone && (
-          <span
+          <svg
             class={classNames(
               "wiki-infobox__chronicle-icon",
               `wiki-infobox__chronicle-icon--${chronicleTone}`,
             )}
             style={`--chronicle-icon-url: url('${chronicleIconUrl}');`}
             aria-hidden="true"
-          ></span>
+          >
+            <path d={CHRONICLE_ICON_PATHS[chronicleTone]} />
+          </svg>
         )}
       </div>
       {resolvedImage && (
