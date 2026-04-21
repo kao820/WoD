@@ -4,6 +4,7 @@
 
   function initNetworkGraph() {
     removeLegacyThemeToggle()
+    removeDuplicateToolbarExpandButtons()
 
     const graphEl = document.getElementById("network-graph")
     const topLayoutEl = document.getElementById("network-top-layout")
@@ -50,6 +51,19 @@
         }
         node.remove()
       })
+    }
+
+    function removeDuplicateToolbarExpandButtons() {
+      const toolbar = document.querySelector(".network-toolbar")
+      if (!(toolbar instanceof HTMLElement)) return
+
+      const toolbarButtons = Array.from(toolbar.querySelectorAll("button.network-toolbar-button"))
+      toolbarButtons
+        .filter(
+          (button) =>
+            button.id !== "network-expand-button" && button.textContent?.trim() === "Развернуть",
+        )
+        .forEach((button) => button.remove())
     }
 
     let graph = null
