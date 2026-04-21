@@ -332,16 +332,11 @@ ArticleInfobox.css = `
   width: 32px;
   height: 32px;
   margin-left: auto;
-  fill: currentColor;
+  background-image: var(--chronicle-icon-url);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
   opacity: 0.92;
-  -webkit-mask-image: var(--chronicle-icon-url);
-  mask-image: var(--chronicle-icon-url);
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  mask-size: contain;
 }
 
 .wiki-infobox[class*="wiki-infobox--chronicle-"] {
