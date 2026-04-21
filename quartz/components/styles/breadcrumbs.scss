@@ -8,6 +8,11 @@
   gap: 0.5rem;
 }
 
+body[data-chronicle-tone] .breadcrumb-container {
+  border-bottom: 1px solid color-mix(in srgb, var(--chronicle-accent) 28%, var(--lightgray));
+  padding-bottom: 0.35rem;
+}
+
 .breadcrumb-element {
   p {
     margin: 0;
@@ -19,4 +24,15 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
+}
+
+body[data-chronicle-tone] .breadcrumb-element > a {
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 78%, var(--dark));
+  background: color-mix(in srgb, var(--chronicle-accent) 10%, var(--light));
+  border-radius: 6px;
+  padding: 0.02rem 0.28rem;
+}
+
+body[data-chronicle-tone] .breadcrumb-element > p {
+  color: color-mix(in srgb, var(--chronicle-accent) 72%, var(--secondary));
 }
