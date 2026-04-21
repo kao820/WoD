@@ -4,7 +4,7 @@
 
   function initNetworkGraph() {
     removeLegacyThemeToggle()
-    removeDuplicateToolbarExpandButtons()
+    removeLegacyExpandButtons()
 
     const graphEl = document.getElementById("network-graph")
     const topLayoutEl = document.getElementById("network-top-layout")
@@ -53,17 +53,16 @@
       })
     }
 
-    function removeDuplicateToolbarExpandButtons() {
+    function removeLegacyExpandButtons() {
       const toolbar = document.querySelector(".network-toolbar")
       if (!(toolbar instanceof HTMLElement)) return
 
-      const toolbarButtons = Array.from(toolbar.querySelectorAll("button.network-toolbar-button"))
-      toolbarButtons
-        .filter(
-          (button) =>
-            button.id !== "network-expand-button" && button.textContent?.trim() === "Развернуть",
-        )
-        .forEach((button) => button.remove())
+      const legacyExpandButtons = Array.from(toolbar.querySelectorAll("button")).filter(
+        (button) =>
+          button.id === "network-expand-button" || button.textContent?.trim() === "Развернуть",
+      )
+
+      legacyExpandButtons.forEach((button) => button.remove())
     }
 
     let graph = null
@@ -948,6 +947,33 @@
               fitGraph(500, RESET_FIT_PADDING)
             }, 80)
           }
+        }
+
+        function redrawGraphWithoutSimulationReset() {
+          if (!graph) return
+
+          if (typeof graph.refresh === "function") {
+            graph.refresh()
+            return
+          }
+
+          if (typeof graph.nodeCanvasObject === "function") {
+            graph.nodeCanvasObject(graph.nodeCanvasObject())
+            graph.linkColor(graph.linkColor())
+            graph.linkWidth(graph.linkWidth())
+            return
+          }
+
+          if (
+            typeof graph.pauseAnimation === "function" &&
+            typeof graph.resumeAnimation === "function"
+          ) {
+            graph.pauseAnimation()
+            graph.resumeAnimation()
+            return
+          }
+
+          graph.graphData(graph.graphData())
         }
 
         function redrawGraphWithoutSimulationReset() {
