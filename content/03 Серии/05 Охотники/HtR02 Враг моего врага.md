@@ -4,6 +4,7 @@ tags:
 type: эпизод
 season:
   - "[[05 Операция Лазарет]]"
+Хроника: "[[05 Hunter The Reckoning]]"
 ---
 
 ## Кратко

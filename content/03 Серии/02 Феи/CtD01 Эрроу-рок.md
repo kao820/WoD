@@ -4,6 +4,7 @@ tags:
 type: эпизод
 season:
   - "[[02 Грёзы]]"
+Хроника: "[[02 Changeling The dreaming]]"
 ---
 
 ## Кратко
