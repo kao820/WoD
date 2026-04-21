@@ -332,34 +332,16 @@ ArticleInfobox.css = `
   width: 32px;
   height: 32px;
   margin-left: auto;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
+  background: currentColor;
+  -webkit-mask-image: var(--chronicle-icon-url);
+  mask-image: var(--chronicle-icon-url);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
   opacity: 0.92;
-}
-
-.wiki-infobox__chronicle-icon--mage {
-  background-image: url("/WoD/static/chronicle-icons/mage.svg");
-}
-
-.wiki-infobox__chronicle-icon--changeling {
-  background-image: url("/WoD/static/chronicle-icons/changeling.svg");
-}
-
-.wiki-infobox__chronicle-icon--demon {
-  background-image: url("/WoD/static/chronicle-icons/demon.svg");
-}
-
-.wiki-infobox__chronicle-icon--werewolf {
-  background-image: url("/WoD/static/chronicle-icons/werewolf.svg");
-}
-
-.wiki-infobox__chronicle-icon--hunter {
-  background-image: url("/WoD/static/chronicle-icons/hunter.svg");
-}
-
-.wiki-infobox__chronicle-icon--vampire {
-  background-image: url("/WoD/static/chronicle-icons/vampire.svg");
 }
 
 .wiki-infobox[class*="wiki-infobox--chronicle-"] {
