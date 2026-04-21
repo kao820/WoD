@@ -111,6 +111,14 @@ button.desktop-explorer {
   }
 }
 
+body[data-chronicle-tone] .explorer button.desktop-explorer h2 {
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 78%, var(--dark));
+}
+
+body[data-chronicle-tone] .explorer .fold {
+  color: color-mix(in srgb, var(--chronicle-accent) 68%, var(--secondary));
+}
+
 .explorer-content {
   list-style: none;
   overflow: hidden;
@@ -158,6 +166,29 @@ button.desktop-explorer {
     padding-left: 0.8rem;
     border-left: 1px solid var(--lightgray);
   }
+}
+
+body[data-chronicle-tone] .explorer-content > .explorer-ul {
+  border-top: 1px solid color-mix(in srgb, var(--chronicle-accent) 24%, var(--lightgray));
+  padding-top: 0.35rem;
+}
+
+body[data-chronicle-tone] .explorer-content ul li > a.active {
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 82%, var(--dark));
+}
+
+body[data-chronicle-tone] .explorer-content .folder-outer > ul {
+  border-left-color: color-mix(in srgb, var(--chronicle-accent) 32%, var(--lightgray));
+}
+
+body[data-chronicle-tone] .folder-icon,
+body[data-chronicle-tone] .folder-container div > button span,
+body[data-chronicle-tone] .folder-container div > a {
+  color: color-mix(
+    in srgb,
+    var(--chronicle-accent-text, var(--chronicle-accent)) 72%,
+    var(--secondary)
+  );
 }
 
 .folder-container {
@@ -279,4 +310,26 @@ li:has(> .folder-outer:not(.open)) > .folder-container > svg {
       overscroll-behavior: contain;
     }
   }
+}
+
+body[data-chronicle-tone] .explorer button.desktop-explorer h2 {
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 78%, var(--dark));
+}
+
+body[data-chronicle-tone] .explorer .folder-icon,
+body[data-chronicle-tone] .explorer .folder-container div > button span,
+body[data-chronicle-tone] .explorer .folder-container div > a {
+  color: color-mix(
+    in srgb,
+    var(--chronicle-accent-text, var(--chronicle-accent)) 66%,
+    var(--secondary)
+  );
+}
+
+body[data-chronicle-tone] .explorer .folder-outer > ul {
+  border-left-color: color-mix(in srgb, var(--chronicle-accent) 34%, var(--lightgray));
+}
+
+body[data-chronicle-tone] .explorer-content ul li > a.active {
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 84%, var(--dark));
 }
