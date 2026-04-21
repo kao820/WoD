@@ -10,7 +10,6 @@
     const topLayoutEl = document.getElementById("network-top-layout")
     const searchEl = document.getElementById("network-search")
     const fitButton = document.getElementById("network-fit-button")
-    const expandButton = document.getElementById("network-expand-button")
     const expandIcon = document.getElementById("network-expand-icon")
     const collapseIcon = document.getElementById("network-collapse-icon")
     const resetButton = document.getElementById("network-reset-button")
@@ -21,7 +20,6 @@
       !topLayoutEl ||
       !searchEl ||
       !fitButton ||
-      !expandButton ||
       !expandIcon ||
       !collapseIcon ||
       !resetButton ||
@@ -1196,7 +1194,6 @@
           if (graphEl.classList.contains("is-expanded")) return
           graphEl.classList.add("is-expanded")
           document.body.classList.add("network-expanded")
-          expandButton.textContent = "Свернуть"
           graph.width(graphEl.clientWidth)
           graph.height(graphEl.clientHeight)
           fitGraph(450, RESET_FIT_PADDING)
@@ -1206,20 +1203,10 @@
           if (!graphEl.classList.contains("is-expanded")) return
           graphEl.classList.remove("is-expanded")
           document.body.classList.remove("network-expanded")
-          expandButton.textContent = "Развернуть"
           graph.width(graphEl.clientWidth)
           graph.height(graphEl.clientHeight)
         }
 
-        const toggleExpandedGraph = () => {
-          if (graphEl.classList.contains("is-expanded")) {
-            collapseGraph()
-          } else {
-            expandGraph()
-          }
-        }
-
-        expandButton.addEventListener("click", toggleExpandedGraph)
         expandIcon.addEventListener("click", expandGraph)
         collapseIcon.addEventListener("click", collapseGraph)
 

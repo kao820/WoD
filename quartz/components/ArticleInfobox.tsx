@@ -328,7 +328,10 @@ ArticleInfobox.css = `
   max-width: min(96vw, 1700px);
   max-height: 96vh;
   width: fit-content;
-  position: relative;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   overflow: visible;
   background: transparent;
 }
@@ -357,11 +360,12 @@ ArticleInfobox.css = `
   height: 32px;
   border-radius: 6px;
   border: 1px solid color-mix(in srgb, var(--darkgray) 65%, transparent);
-  background: color-mix(in srgb, var(--dark) 24%, transparent);
+  background: color-mix(in srgb, var(--dark) 78%, transparent);
   color: var(--light);
   cursor: pointer;
   font-size: 18px;
   line-height: 1;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
 .wiki-infobox__meta {
