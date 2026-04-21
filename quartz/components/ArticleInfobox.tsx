@@ -318,6 +318,12 @@ ArticleInfobox.css = `
   background-repeat: no-repeat;
   background-size: contain;
   opacity: 0.92;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
 }
 
 .wiki-infobox__chronicle-icon--mage {
