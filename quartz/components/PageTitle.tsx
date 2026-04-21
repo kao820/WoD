@@ -19,6 +19,11 @@ PageTitle.css = `
   margin: 0;
   font-family: var(--titleFont);
 }
+
+body[data-chronicle-tone] .page-title > a {
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 78%, var(--dark));
+  text-decoration: none;
+}
 `
 
 export default (() => PageTitle) satisfies QuartzComponentConstructor

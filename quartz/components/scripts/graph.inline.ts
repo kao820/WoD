@@ -77,6 +77,22 @@ function getNodeColor(node: NodeData): string {
   return isDark ? "#94a3b8" : "#94a3af"
 }
 
+function normalizeSlug(raw: string): SimpleSlug {
+  return simplifySlug(raw as FullSlug)
+}
+
+function normalizeSlugLoose(raw: string): string {
+  return raw
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/[#?].*$/, "")
+    .replace(/^\.\//, "")
+    .replace(/\/index$/i, "")
+    .replace(/\.md$/i, "")
+    .replace(/^\/+|\/+$/g, "")
+    .toLowerCase()
+}
+
 async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const slug = simplifySlug(fullSlug)
   const visited = getVisited()
@@ -107,15 +123,29 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   const links: SimpleLinkData[] = []
   const tags: SimpleSlug[] = []
   const validLinks = new Set(data.keys())
+  const looseToCanonical = new Map<string, SimpleSlug>()
+
+  for (const nodeId of validLinks) {
+    const loose = normalizeSlugLoose(nodeId)
+    if (!looseToCanonical.has(loose)) {
+      looseToCanonical.set(loose, nodeId)
+    }
+  }
 
   const tweens = new Map<string, TweenNode>()
   for (const [source, details] of data.entries()) {
     const outgoing = details.links ?? []
 
-    for (const dest of outgoing) {
-      if (validLinks.has(dest)) {
-        links.push({ source: source, target: dest })
-      }
+    for (const destRaw of outgoing) {
+      const normalizedDest = normalizeSlug(destRaw)
+      const normalizedLooseDest = normalizeSlugLoose(destRaw)
+      const resolvedDest =
+        (validLinks.has(normalizedDest) ? normalizedDest : null) ||
+        looseToCanonical.get(normalizedLooseDest) ||
+        null
+
+      if (!resolvedDest || resolvedDest === source) continue
+      links.push({ source, target: resolvedDest })
     }
 
     if (showTags) {
@@ -481,11 +511,15 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
         })
         .on("end", function dragended(event) {
           if (!event.active) simulation.alphaTarget(0)
+          const initPos = event.subject.__initialDragPos
+          const movedDistance = initPos
+            ? Math.hypot((event.subject.x ?? 0) - initPos.x, (event.subject.y ?? 0) - initPos.y)
+            : 0
           event.subject.fx = null
           event.subject.fy = null
           dragging = false
 
-          if (Date.now() - dragStartTime < 500) {
+          if (Date.now() - dragStartTime < 500 && movedDistance < 0.8) {
             const node = graphData.nodes.find((n) => n.id === event.subject.id) as NodeData
             const targ = resolveRelative(fullSlug, node.id)
             window.spaNavigate(new URL(targ, window.location.toString()))
@@ -563,6 +597,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
 
 let localGraphCleanups: (() => void)[] = []
 let globalGraphCleanups: (() => void)[] = []
+let expandedGraphCleanups: (() => void)[] = []
 
 function cleanupLocalGraphs() {
   for (const cleanup of localGraphCleanups) {
@@ -576,6 +611,13 @@ function cleanupGlobalGraphs() {
     cleanup()
   }
   globalGraphCleanups = []
+}
+
+function cleanupExpandedGraphs() {
+  for (const cleanup of expandedGraphCleanups) {
+    cleanup()
+  }
+  expandedGraphCleanups = []
 }
 
 document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
@@ -601,6 +643,9 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
   })
 
   const containers = [...document.getElementsByClassName("global-graph-outer")] as HTMLElement[]
+  const localExpandedContainers = [
+    ...document.getElementsByClassName("local-graph-outer"),
+  ] as HTMLElement[]
   async function renderGlobalGraph() {
     const slug = getFullSlug(window)
     for (const container of containers) {
@@ -629,7 +674,47 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     }
   }
 
+  async function showExpandedLocalGraph(container: HTMLElement) {
+    const slug = getFullSlug(window)
+    container.classList.add("active")
+    document.body.classList.add("graph-expanded")
+    document.querySelectorAll(".sidebar").forEach((sidebar) => {
+      if (sidebar instanceof HTMLElement) {
+        sidebar.style.zIndex = "1"
+      }
+    })
+
+    const graphContainer = container.querySelector(".local-graph-container") as HTMLElement
+    if (graphContainer) {
+      expandedGraphCleanups.push(await renderGraph(graphContainer, slug))
+    }
+  }
+
+  function hideExpandedLocalGraph() {
+    cleanupExpandedGraphs()
+    for (const container of localExpandedContainers) {
+      container.classList.remove("active")
+    }
+    document.body.classList.remove("graph-expanded")
+    document.querySelectorAll(".sidebar").forEach((sidebar) => {
+      if (sidebar instanceof HTMLElement) {
+        sidebar.style.zIndex = ""
+      }
+    })
+  }
+
   async function shortcutHandler(e: HTMLElementEventMap["keydown"]) {
+    if (e.key === "Escape") {
+      const anyExpandedOpen = localExpandedContainers.some((container) =>
+        container.classList.contains("active"),
+      )
+      if (anyExpandedOpen) {
+        e.preventDefault()
+        hideExpandedLocalGraph()
+        return
+      }
+    }
+
     if (e.key === "g" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
       e.preventDefault()
       const anyGlobalGraphOpen = containers.some((container) =>
@@ -645,10 +730,55 @@ document.addEventListener("nav", async (e: CustomEventMap["nav"]) => {
     window.addCleanup(() => icon.removeEventListener("click", renderGlobalGraph))
   })
 
+  async function toggleExpandedGraph(event: Event) {
+    const target = event.currentTarget
+    if (!(target instanceof HTMLElement)) return
+    const graphBlock = target.closest(".graph")
+    if (!(graphBlock instanceof HTMLElement)) return
+    const localExpandedOuter = graphBlock.querySelector(".local-graph-outer")
+    if (!(localExpandedOuter instanceof HTMLElement)) return
+
+    if (localExpandedOuter.classList.contains("active")) {
+      hideExpandedLocalGraph()
+      return
+    }
+
+    hideExpandedLocalGraph()
+    await showExpandedLocalGraph(localExpandedOuter)
+  }
+
+  function collapseExpandedGraphs() {
+    hideExpandedLocalGraph()
+  }
+
+  const expandIcons = document.getElementsByClassName("local-graph-expand-icon")
+  Array.from(expandIcons).forEach((icon) => {
+    icon.addEventListener("click", toggleExpandedGraph)
+    window.addCleanup(() => icon.removeEventListener("click", toggleExpandedGraph))
+  })
+
+  localExpandedContainers.forEach((container) => {
+    const backdrop = container.querySelector(".modal-bg")
+    const closeButton = container.querySelector(".local-graph-close")
+
+    const closeExpanded = () => {
+      hideExpandedLocalGraph()
+    }
+
+    backdrop?.addEventListener("click", closeExpanded)
+    closeButton?.addEventListener("click", closeExpanded)
+    window.addCleanup(() => {
+      backdrop?.removeEventListener("click", closeExpanded)
+      closeButton?.removeEventListener("click", closeExpanded)
+    })
+  })
+
   document.addEventListener("keydown", shortcutHandler)
   window.addCleanup(() => {
+    collapseExpandedGraphs()
     document.removeEventListener("keydown", shortcutHandler)
     cleanupLocalGraphs()
     cleanupGlobalGraphs()
+    cleanupExpandedGraphs()
   })
 })
