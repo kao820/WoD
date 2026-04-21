@@ -1,6 +1,8 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { classNames, stripOrderingPrefix } from "../util/lang"
 import { FilePath, FullSlug, pathToRoot, resolveRelative, slugifyFilePath } from "../util/path"
+// @ts-ignore
+import infoboxImageExpandScript from "./scripts/infobox-image-expand.inline"
 
 const IMAGE_KEYS = ["image", "cover", "portrait", "avatar", "art", "illustration"]
 const EXCLUDED_KEYS = new Set([
@@ -20,6 +22,19 @@ const EXCLUDED_KEYS = new Set([
   "socialimage",
   "comments",
 ])
+
+type ChronicleTone = "mage" | "changeling" | "demon" | "werewolf" | "hunter" | "vampire"
+
+function detectChronicleTone(value: string): ChronicleTone | null {
+  const normalized = value.toLowerCase()
+  if (normalized.includes("mage") || normalized.includes("маг")) return "mage"
+  if (normalized.includes("changeling") || normalized.includes("фе")) return "changeling"
+  if (normalized.includes("demon") || normalized.includes("демон")) return "demon"
+  if (normalized.includes("werewolf") || normalized.includes("оборот")) return "werewolf"
+  if (normalized.includes("hunter") || normalized.includes("охот")) return "hunter"
+  if (normalized.includes("vampire") || normalized.includes("вампир")) return "vampire"
+  return null
+}
 
 function resolveImage(value: string, currentSlug: string): string | null {
   if (
@@ -47,7 +62,11 @@ function resolveImage(value: string, currentSlug: string): string | null {
   return null
 }
 
-function resolveWikiHref(rawTarget: string, currentSlug: string, allFiles: QuartzComponentProps["allFiles"]) {
+function resolveWikiHref(
+  rawTarget: string,
+  currentSlug: string,
+  allFiles: QuartzComponentProps["allFiles"],
+) {
   const target = rawTarget.trim()
   const targetLower = target.toLowerCase()
 
@@ -66,7 +85,11 @@ function resolveWikiHref(rawTarget: string, currentSlug: string, allFiles: Quart
   return resolveRelative(currentSlug as FullSlug, slug)
 }
 
-function parseWikiLinks(raw: string, currentSlug: string, allFiles: QuartzComponentProps["allFiles"]) {
+function parseWikiLinks(
+  raw: string,
+  currentSlug: string,
+  allFiles: QuartzComponentProps["allFiles"],
+) {
   const chunks: Array<string | { label: string; href: string }> = []
   const regex = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g
 
@@ -97,7 +120,11 @@ function parseWikiLinks(raw: string, currentSlug: string, allFiles: QuartzCompon
   return chunks
 }
 
-function renderValue(value: unknown, currentSlug: string, allFiles: QuartzComponentProps["allFiles"]) {
+function renderValue(
+  value: unknown,
+  currentSlug: string,
+  allFiles: QuartzComponentProps["allFiles"],
+) {
   if (Array.isArray(value)) {
     const rendered = value
       .map((entry) => (typeof entry === "string" ? entry : String(entry)))
@@ -124,7 +151,11 @@ function renderValue(value: unknown, currentSlug: string, allFiles: QuartzCompon
   )
 }
 
-const ArticleInfobox: QuartzComponent = ({ fileData, displayClass, allFiles }: QuartzComponentProps) => {
+const ArticleInfobox: QuartzComponent = ({
+  fileData,
+  displayClass,
+  allFiles,
+}: QuartzComponentProps) => {
   if (fileData.slug === "index") return null
   const displayTokens = (displayClass ?? "").split(/\s+/).filter(Boolean)
   if (
@@ -159,10 +190,20 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass, allFiles }: Q
   const resolvedImage = imageValue ? resolveImage(imageValue, fileData.slug!) : null
   const typeValue =
     typeof frontmatter.type === "string" ? frontmatter.type.toLowerCase().trim() : ""
+  const chronicleEntry = entries.find(([key, value]) => {
+    const normalizedKey = key.toLowerCase()
+    return value && (normalizedKey === "хроника" || normalizedKey === "chronicle")
+  })
+  const chronicleTone = chronicleEntry ? detectChronicleTone(String(chronicleEntry[1])) : null
 
   return (
     <aside
-      class={classNames(displayClass, "wiki-infobox", typeValue && `wiki-infobox--${typeValue}`)}
+      class={classNames(
+        displayClass,
+        "wiki-infobox",
+        typeValue && `wiki-infobox--${typeValue}`,
+        chronicleTone && `wiki-infobox--chronicle-${chronicleTone}`,
+      )}
     >
       <div class="wiki-infobox__header">
         <span>{typeValue ? typeValue.toUpperCase() : "ИНФОРМАЦИЯ"}</span>
@@ -173,7 +214,32 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass, allFiles }: Q
             src={resolvedImage}
             alt={String(fileData.frontmatter?.title ?? fileData.title ?? "Infobox image")}
           />
+          <button
+            type="button"
+            class="wiki-infobox__image-expand"
+            aria-label="Развернуть изображение"
+            title="Развернуть изображение"
+          >
+            ⤢
+          </button>
         </div>
+      )}
+      {resolvedImage && (
+        <dialog class="wiki-infobox__image-modal">
+          <button
+            type="button"
+            class="wiki-infobox__image-close"
+            aria-label="Закрыть изображение"
+            title="Закрыть изображение"
+          >
+            ✕
+          </button>
+          <img
+            class="wiki-infobox__image-modal-content"
+            src={resolvedImage}
+            alt={String(fileData.frontmatter?.title ?? fileData.title ?? "Infobox image")}
+          />
+        </dialog>
       )}
 
       {infoEntries.length > 0 && (
@@ -181,7 +247,7 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass, allFiles }: Q
           {infoEntries.map(([key, value]) => (
             <div key={key} class="wiki-infobox__row">
               <dt>{`${key}`}</dt>
-                  <dd>{renderValue(value, fileData.slug!, allFiles)}</dd>
+              <dd>{renderValue(value, fileData.slug!, allFiles)}</dd>
             </div>
           ))}
         </dl>
@@ -232,6 +298,42 @@ ArticleInfobox.css = `
   align-items: center;
 }
 
+.wiki-infobox--chronicle-mage .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #3a8eff 44%, var(--lightgray));
+  background: color-mix(in srgb, #3a8eff 20%, var(--light));
+  color: color-mix(in srgb, #3a8eff 76%, var(--dark));
+}
+
+.wiki-infobox--chronicle-changeling .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #ffd74a 56%, var(--lightgray));
+  background: color-mix(in srgb, #ffd74a 24%, var(--light));
+  color: color-mix(in srgb, #b28700 78%, var(--dark));
+}
+
+.wiki-infobox--chronicle-demon .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #38c772 46%, var(--lightgray));
+  background: color-mix(in srgb, #38c772 22%, var(--light));
+  color: color-mix(in srgb, #1f9a53 78%, var(--dark));
+}
+
+.wiki-infobox--chronicle-werewolf .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #ef5350 42%, var(--lightgray));
+  background: color-mix(in srgb, #ef5350 18%, var(--light));
+  color: color-mix(in srgb, #cc2f2c 78%, var(--dark));
+}
+
+.wiki-infobox--chronicle-hunter .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #ff9800 52%, var(--lightgray));
+  background: color-mix(in srgb, #ff9800 20%, var(--light));
+  color: color-mix(in srgb, #b66600 82%, var(--dark));
+}
+
+.wiki-infobox--chronicle-vampire .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, #ab47bc 44%, var(--lightgray));
+  background: color-mix(in srgb, #ab47bc 22%, var(--light));
+  color: color-mix(in srgb, #7d1e8d 82%, var(--dark));
+}
+
 
 @media (max-width: 1000px) {
   .wiki-infobox {
@@ -248,6 +350,7 @@ ArticleInfobox.css = `
 }
 
 .wiki-infobox__image-wrap {
+  position: relative;
   line-height: 0;
   border-bottom: 1px solid var(--lightgray);
   background: color-mix(in srgb, var(--lightgray) 30%, transparent);
@@ -260,6 +363,68 @@ ArticleInfobox.css = `
   object-position: center;
   display: block;
   margin: 0 !important;
+}
+
+.wiki-infobox__image-expand {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid color-mix(in srgb, var(--darkgray) 65%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--dark) 24%, transparent);
+  color: var(--light);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.wiki-infobox__image-modal {
+  border: none;
+  padding: 0;
+  margin: 0;
+  max-width: min(96vw, 1700px);
+  max-height: 96vh;
+  width: fit-content;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+  background: transparent;
+}
+
+.wiki-infobox__image-modal::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.wiki-infobox__image-modal-content {
+  display: block;
+  max-width: min(96vw, 1700px);
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+}
+
+.wiki-infobox__image-close {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 2;
+  pointer-events: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--darkgray) 65%, transparent);
+  background: color-mix(in srgb, var(--dark) 78%, transparent);
+  color: var(--light);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
 .wiki-infobox__meta {
@@ -300,5 +465,6 @@ ArticleInfobox.css = `
   text-underline-offset: 2px;
 }
 `
+ArticleInfobox.afterDOMLoaded = infoboxImageExpandScript
 
 export default (() => ArticleInfobox) satisfies QuartzComponentConstructor

@@ -6,6 +6,7 @@ type CampaignCardConfig = {
   notePath: string
   cover: string
   subtitle?: string
+  tone: "mage" | "changeling" | "demon" | "werewolf" | "hunter" | "vampire"
 }
 
 const CAMPAIGN_CARDS: CampaignCardConfig[] = [
@@ -13,31 +14,37 @@ const CAMPAIGN_CARDS: CampaignCardConfig[] = [
     notePath: "01 Хронология/01 Mage The Ascension.md",
     cover: "./static/campaign-covers/mage-the-ascension.jpg",
     subtitle: "Парадигмы, аватары и война за Истину",
+    tone: "mage",
   },
   {
     notePath: "01 Хронология/02 Changeling The dreaming.md",
     cover: "./static/campaign-covers/changeling-the-dreaming.jpg",
     subtitle: "Аркадия, грёзы и жестокая реальность",
+    tone: "changeling",
   },
   {
     notePath: "01 Хронология/03 Demon The Fallen.md",
     cover: "./static/campaign-covers/demon-the-fallen.jpg",
     subtitle: "Падшие, клятвы и сделки во тьме",
+    tone: "demon",
   },
   {
     notePath: "01 Хронология/04 Werewolf The Apocalypse.md",
     cover: "./static/campaign-covers/werewolf-the-apocalypse.jpg",
     subtitle: "Ярость Гару и война за мир духов",
+    tone: "werewolf",
   },
   {
     notePath: "01 Хронология/05 Hunter The Reckoning.md",
     cover: "./static/campaign-covers/hunter-the-reckoning.jpg",
     subtitle: "Охотники, заговоры и грань выживания",
+    tone: "hunter",
   },
   {
     notePath: "01 Хронология/06 Vampire The Masquerade.md",
     cover: "./static/campaign-covers/vampire-the-masquerade.jpg",
     subtitle: "Городские интриги, кровь и маскарад",
+    tone: "vampire",
   },
 ]
 
@@ -54,7 +61,9 @@ const HomeCampaignHub: QuartzComponent = ({
     if (file?.slug) {
       return {
         ...card,
-        title: stripOrderingPrefix(String(file.frontmatter?.title ?? file.title ?? card.notePath.replace(/\.md$/, ""))),
+        title: stripOrderingPrefix(
+          String(file.frontmatter?.title ?? file.title ?? card.notePath.replace(/\.md$/, "")),
+        ),
         href: resolveRelative(fileData.slug!, file.slug),
       }
     }
@@ -75,7 +84,11 @@ const HomeCampaignHub: QuartzComponent = ({
       </p>
       <div class="home-campaign-hub__grid">
         {cards.map((card) => (
-          <a key={card.notePath} href={card.href} class="home-campaign-card internal">
+          <a
+            key={card.notePath}
+            href={card.href}
+            class={`home-campaign-card home-campaign-card--${card.tone} internal`}
+          >
             <div class="home-campaign-card__cover">
               <img src={card.cover} alt={String(card.title)} />
             </div>
@@ -197,6 +210,30 @@ a.home-campaign-card {
 .home-campaign-card:hover {
   transform: translateY(-2px);
   transition: transform 0.15s ease;
+}
+
+.home-campaign-card--mage:hover {
+  box-shadow: 0 0 0 1px rgba(58, 142, 255, 0.66), 0 0 28px rgba(58, 142, 255, 0.44);
+}
+
+.home-campaign-card--changeling:hover {
+  box-shadow: 0 0 0 1px rgba(255, 215, 74, 0.66), 0 0 28px rgba(255, 215, 74, 0.44);
+}
+
+.home-campaign-card--demon:hover {
+  box-shadow: 0 0 0 1px rgba(56, 199, 114, 0.66), 0 0 28px rgba(56, 199, 114, 0.44);
+}
+
+.home-campaign-card--werewolf:hover {
+  box-shadow: 0 0 0 1px rgba(239, 83, 80, 0.66), 0 0 28px rgba(239, 83, 80, 0.44);
+}
+
+.home-campaign-card--hunter:hover {
+  box-shadow: 0 0 0 1px rgba(255, 152, 0, 0.66), 0 0 28px rgba(255, 152, 0, 0.44);
+}
+
+.home-campaign-card--vampire:hover {
+  box-shadow: 0 0 0 1px rgba(171, 71, 188, 0.66), 0 0 28px rgba(171, 71, 188, 0.44);
 }
 
 .home-campaign-card--coming-soon {
