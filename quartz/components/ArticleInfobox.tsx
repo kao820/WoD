@@ -332,44 +332,34 @@ ArticleInfobox.css = `
   width: 32px;
   height: 32px;
   margin-left: auto;
-  background: currentColor;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  mask-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
   opacity: 0.92;
 }
 
 .wiki-infobox__chronicle-icon--mage {
-  -webkit-mask-image: url("/WoD/static/chronicle-icons/mage.svg");
-  mask-image: url("/WoD/static/chronicle-icons/mage.svg");
+  background-image: url("/WoD/static/chronicle-icons/mage.svg");
 }
 
 .wiki-infobox__chronicle-icon--changeling {
-  -webkit-mask-image: url("/WoD/static/chronicle-icons/changeling.svg");
-  mask-image: url("/WoD/static/chronicle-icons/changeling.svg");
+  background-image: url("/WoD/static/chronicle-icons/changeling.svg");
 }
 
 .wiki-infobox__chronicle-icon--demon {
-  -webkit-mask-image: url("/WoD/static/chronicle-icons/demon.svg");
-  mask-image: url("/WoD/static/chronicle-icons/demon.svg");
+  background-image: url("/WoD/static/chronicle-icons/demon.svg");
 }
 
 .wiki-infobox__chronicle-icon--werewolf {
-  -webkit-mask-image: url("/WoD/static/chronicle-icons/werewolf.svg");
-  mask-image: url("/WoD/static/chronicle-icons/werewolf.svg");
+  background-image: url("/WoD/static/chronicle-icons/werewolf.svg");
 }
 
 .wiki-infobox__chronicle-icon--hunter {
-  -webkit-mask-image: url("/WoD/static/chronicle-icons/hunter.svg");
-  mask-image: url("/WoD/static/chronicle-icons/hunter.svg");
+  background-image: url("/WoD/static/chronicle-icons/hunter.svg");
 }
 
 .wiki-infobox__chronicle-icon--vampire {
-  -webkit-mask-image: url("/WoD/static/chronicle-icons/vampire.svg");
-  mask-image: url("/WoD/static/chronicle-icons/vampire.svg");
+  background-image: url("/WoD/static/chronicle-icons/vampire.svg");
 }
 
 .wiki-infobox[class*="wiki-infobox--chronicle-"] {
