@@ -324,9 +324,12 @@ ArticleInfobox.css = `
 .wiki-infobox__image-modal {
   border: none;
   padding: 0;
+  margin: 0;
   max-width: min(96vw, 1700px);
   max-height: 96vh;
   width: fit-content;
+  position: relative;
+  overflow: visible;
   background: transparent;
 }
 
@@ -348,6 +351,8 @@ ArticleInfobox.css = `
   position: absolute;
   right: 10px;
   top: 10px;
+  z-index: 2;
+  pointer-events: auto;
   width: 32px;
   height: 32px;
   border-radius: 6px;
