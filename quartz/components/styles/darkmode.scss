@@ -1,47 +1,66 @@
-.darkmode {
+.darkmode.site-body-left-column-site-theme-toggle {
   cursor: pointer;
   padding: 0;
-  position: relative;
-  background: none;
-  border: none;
-  width: 20px;
-  height: 32px;
   margin: 0;
-  text-align: inherit;
-  flex-shrink: 0;
-
-  & svg {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    top: calc(50% - 10px);
-    fill: var(--darkgray);
-    transition: opacity 0.1s ease;
-  }
+  border: none;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--darkgray);
 }
 
-:root[saved-theme="dark"] {
-  color-scheme: dark;
+.darkmode.site-body-left-column-site-theme-toggle .option {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-:root[saved-theme="light"] {
-  color-scheme: light;
+.darkmode.site-body-left-column-site-theme-toggle .option svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-:root[saved-theme="dark"] .darkmode {
-  & > .dayIcon {
-    display: none;
-  }
-  & > .nightIcon {
-    display: inline;
-  }
+.darkmode.site-body-left-column-site-theme-toggle .checkbox-container {
+  width: 32px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid var(--gray);
+  background: var(--lightgray);
+  position: relative;
+  box-sizing: border-box;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
-:root .darkmode {
-  & > .dayIcon {
-    display: inline;
-  }
-  & > .nightIcon {
-    display: none;
-  }
+.darkmode.site-body-left-column-site-theme-toggle .checkbox-container::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--light);
+  transition: transform 0.2s ease;
+}
+
+:root[saved-theme="dark"] .darkmode.site-body-left-column-site-theme-toggle .checkbox-container {
+  background: var(--darkgray);
+  border-color: var(--gray);
+}
+
+:root[saved-theme="dark"]
+  .darkmode.site-body-left-column-site-theme-toggle
+  .checkbox-container::after {
+  transform: translateX(14px);
+  background: var(--light);
 }
