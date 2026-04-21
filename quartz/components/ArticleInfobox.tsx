@@ -328,8 +328,8 @@ ArticleInfobox.css = `
 .wiki-infobox__chronicle-icon {
   display: inline-block;
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 32px;
+  height: 32px;
   margin-left: auto;
   fill: currentColor;
   opacity: 0.92;
