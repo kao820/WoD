@@ -20,6 +20,71 @@ title: Карта связей
     margin: 10px 0 14px;
   }
 
+  .network-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+
+  .network-theme-toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .network-theme-switch {
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    background: #3f3f46;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease;
+  }
+
+  .network-theme-switch::before {
+    content: "☾";
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #d4d4d8;
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .network-theme-switch::after {
+    content: "";
+    position: absolute;
+    left: 19px;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #f4f4f5;
+    transition: transform 0.2s ease;
+  }
+
+  .network-theme-toggle input:not(:checked) + .network-theme-switch {
+    background: #d4d4d8;
+    border-color: rgba(63, 63, 70, 0.3);
+  }
+
+  .network-theme-toggle input:not(:checked) + .network-theme-switch::before {
+    content: "☀";
+    color: #52525b;
+  }
+
+  .network-theme-toggle input:not(:checked) + .network-theme-switch::after {
+    transform: translateX(-17px);
+    background: #ffffff;
+  }
+
   .network-search {
     display: block;
     width: 100%;
@@ -346,8 +411,10 @@ title: Карта связей
       autocomplete="off"
     />
     <button id="network-fit-button" class="network-toolbar-button" type="button">Вписать в область</button>
+    <button id="network-expand-button" class="network-toolbar-button" type="button">Развернуть</button>
     <button id="network-reset-button" class="network-toolbar-button" type="button">Сбросить настройки</button>
     <button id="network-reset-colors-button" class="network-toolbar-button" type="button">Сбросить цвета</button>
+    <button id="network-expand-button" class="network-toolbar-button" type="button">Развернуть</button>
   </div>
 
   <div id="network-top-layout" class="network-top-layout"></div>
