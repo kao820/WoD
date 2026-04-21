@@ -298,40 +298,51 @@ ArticleInfobox.css = `
   align-items: center;
 }
 
-.wiki-infobox--chronicle-mage .wiki-infobox__header {
-  border-bottom-color: color-mix(in srgb, #3a8eff 44%, var(--lightgray));
-  background: color-mix(in srgb, #3a8eff 20%, var(--light));
-  color: color-mix(in srgb, #3a8eff 76%, var(--dark));
+.wiki-infobox[class*="wiki-infobox--chronicle-"] {
+  border-color: color-mix(in srgb, var(--chronicle-accent) 44%, var(--lightgray));
 }
 
-.wiki-infobox--chronicle-changeling .wiki-infobox__header {
-  border-bottom-color: color-mix(in srgb, #ffd74a 56%, var(--lightgray));
-  background: color-mix(in srgb, #ffd74a 24%, var(--light));
-  color: color-mix(in srgb, #b28700 78%, var(--dark));
+.wiki-infobox[class*="wiki-infobox--chronicle-"] .wiki-infobox__header {
+  border-bottom-color: color-mix(in srgb, var(--chronicle-accent) 52%, var(--lightgray));
+  background: color-mix(in srgb, var(--chronicle-accent) 20%, var(--light));
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 78%, var(--dark));
 }
 
-.wiki-infobox--chronicle-demon .wiki-infobox__header {
-  border-bottom-color: color-mix(in srgb, #38c772 46%, var(--lightgray));
-  background: color-mix(in srgb, #38c772 22%, var(--light));
-  color: color-mix(in srgb, #1f9a53 78%, var(--dark));
+.wiki-infobox[class*="wiki-infobox--chronicle-"] .wiki-infobox__row dd a.internal {
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 78%, var(--dark));
+  background: color-mix(in srgb, var(--chronicle-accent) 14%, var(--light));
+  border-radius: 6px;
+  padding: 0.02rem 0.22rem;
 }
 
-.wiki-infobox--chronicle-werewolf .wiki-infobox__header {
-  border-bottom-color: color-mix(in srgb, #ef5350 42%, var(--lightgray));
-  background: color-mix(in srgb, #ef5350 18%, var(--light));
-  color: color-mix(in srgb, #cc2f2c 78%, var(--dark));
+.wiki-infobox--chronicle-mage {
+  --chronicle-accent: #3a8eff;
+  --chronicle-accent-text: #3a8eff;
 }
 
-.wiki-infobox--chronicle-hunter .wiki-infobox__header {
-  border-bottom-color: color-mix(in srgb, #ff9800 52%, var(--lightgray));
-  background: color-mix(in srgb, #ff9800 20%, var(--light));
-  color: color-mix(in srgb, #b66600 82%, var(--dark));
+.wiki-infobox--chronicle-changeling {
+  --chronicle-accent: #ffd74a;
+  --chronicle-accent-text: #b28700;
 }
 
-.wiki-infobox--chronicle-vampire .wiki-infobox__header {
-  border-bottom-color: color-mix(in srgb, #ab47bc 44%, var(--lightgray));
-  background: color-mix(in srgb, #ab47bc 22%, var(--light));
-  color: color-mix(in srgb, #7d1e8d 82%, var(--dark));
+.wiki-infobox--chronicle-demon {
+  --chronicle-accent: #38c772;
+  --chronicle-accent-text: #1f9a53;
+}
+
+.wiki-infobox--chronicle-werewolf {
+  --chronicle-accent: #ef5350;
+  --chronicle-accent-text: #cc2f2c;
+}
+
+.wiki-infobox--chronicle-hunter {
+  --chronicle-accent: #ff9800;
+  --chronicle-accent-text: #b66600;
+}
+
+.wiki-infobox--chronicle-vampire {
+  --chronicle-accent: #ab47bc;
+  --chronicle-accent-text: #7d1e8d;
 }
 
 
@@ -374,7 +385,7 @@ ArticleInfobox.css = `
   border: 1px solid color-mix(in srgb, var(--darkgray) 65%, transparent);
   border-radius: 6px;
   background: color-mix(in srgb, var(--dark) 24%, transparent);
-  color: var(--light);
+  color: #fff;
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
@@ -420,7 +431,7 @@ ArticleInfobox.css = `
   border-radius: 6px;
   border: 1px solid color-mix(in srgb, var(--darkgray) 65%, transparent);
   background: color-mix(in srgb, var(--dark) 78%, transparent);
-  color: var(--light);
+  color: #fff;
   cursor: pointer;
   font-size: 18px;
   line-height: 1;
