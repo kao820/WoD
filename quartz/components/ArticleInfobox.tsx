@@ -309,6 +309,8 @@ ArticleInfobox.css = `
 }
 
 .wiki-infobox__chronicle-icon {
+  display: inline-block;
+  flex-shrink: 0;
   width: 19px;
   height: 19px;
   margin-left: auto;
