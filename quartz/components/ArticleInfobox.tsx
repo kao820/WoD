@@ -209,6 +209,11 @@ const ArticleInfobox: QuartzComponent = ({
     return value && (normalizedKey === "хроника" || normalizedKey === "chronicle")
   })
   const chronicleTone = chronicleEntry ? detectChronicleTone(String(chronicleEntry[1])) : null
+  const chronicleIconUrl = chronicleTone
+    ? [pathToRoot(fileData.slug as FullSlug), `static/chronicle-icons/${chronicleTone}.svg`]
+        .filter(Boolean)
+        .join("/")
+    : ""
 
   return (
     <aside
@@ -227,7 +232,7 @@ const ArticleInfobox: QuartzComponent = ({
               "wiki-infobox__chronicle-icon",
               `wiki-infobox__chronicle-icon--${chronicleTone}`,
             )}
-            style={`--chronicle-icon-url: url('${pathToRoot(fileData.slug as FullSlug)}/static/chronicle-icons/${chronicleTone}.svg');`}
+            style={`--chronicle-icon-url: url('${chronicleIconUrl}');`}
             aria-hidden="true"
           >
             <path d={CHRONICLE_ICON_PATHS[chronicleTone]} />
