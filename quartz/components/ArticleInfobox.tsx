@@ -209,10 +209,11 @@ const ArticleInfobox: QuartzComponent = ({
     return value && (normalizedKey === "хроника" || normalizedKey === "chronicle")
   })
   const chronicleTone = chronicleEntry ? detectChronicleTone(String(chronicleEntry[1])) : null
+  const chronicleRoot = pathToRoot(fileData.slug as FullSlug)
+  const normalizedChronicleRoot =
+    !chronicleRoot || chronicleRoot === "/" ? "." : chronicleRoot.replace(/\/+$/, "")
   const chronicleIconUrl = chronicleTone
-    ? [pathToRoot(fileData.slug as FullSlug), `static/chronicle-icons/${chronicleTone}.svg`]
-        .filter(Boolean)
-        .join("/")
+    ? `${normalizedChronicleRoot}/static/chronicle-icons/${chronicleTone}.svg`
     : ""
 
   return (
