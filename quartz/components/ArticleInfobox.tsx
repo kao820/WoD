@@ -229,10 +229,9 @@ const ArticleInfobox: QuartzComponent = ({
               `wiki-infobox__chronicle-icon--${chronicleTone}`,
             )}
             style={`--chronicle-icon-url: url('${chronicleIconUrl}');`}
+            viewBox="0 0 24 24"
             aria-hidden="true"
-          >
-            <path d={CHRONICLE_ICON_PATHS[chronicleTone]} />
-          </svg>
+          ></svg>
         )}
       </div>
       {resolvedImage && (
