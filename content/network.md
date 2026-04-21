@@ -414,10 +414,7 @@ title: Карта связей
     <button id="network-expand-button" class="network-toolbar-button" type="button">Развернуть</button>
     <button id="network-reset-button" class="network-toolbar-button" type="button">Сбросить настройки</button>
     <button id="network-reset-colors-button" class="network-toolbar-button" type="button">Сбросить цвета</button>
-    <label for="network-theme-checkbox" class="network-theme-toggle">
-      <input id="network-theme-checkbox" type="checkbox" checked />
-      <span class="network-theme-switch"></span>
-    </label>
+    <button id="network-expand-button" class="network-toolbar-button" type="button">Развернуть</button>
   </div>
 
   <div id="network-top-layout" class="network-top-layout"></div>

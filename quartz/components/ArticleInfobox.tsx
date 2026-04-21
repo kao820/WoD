@@ -1,6 +1,8 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { classNames, stripOrderingPrefix } from "../util/lang"
 import { FilePath, FullSlug, pathToRoot, resolveRelative, slugifyFilePath } from "../util/path"
+// @ts-ignore
+import infoboxImageExpandScript from "./scripts/infobox-image-expand.inline"
 
 const IMAGE_KEYS = ["image", "cover", "portrait", "avatar", "art", "illustration"]
 const EXCLUDED_KEYS = new Set([
@@ -47,7 +49,11 @@ function resolveImage(value: string, currentSlug: string): string | null {
   return null
 }
 
-function resolveWikiHref(rawTarget: string, currentSlug: string, allFiles: QuartzComponentProps["allFiles"]) {
+function resolveWikiHref(
+  rawTarget: string,
+  currentSlug: string,
+  allFiles: QuartzComponentProps["allFiles"],
+) {
   const target = rawTarget.trim()
   const targetLower = target.toLowerCase()
 
@@ -66,7 +72,11 @@ function resolveWikiHref(rawTarget: string, currentSlug: string, allFiles: Quart
   return resolveRelative(currentSlug as FullSlug, slug)
 }
 
-function parseWikiLinks(raw: string, currentSlug: string, allFiles: QuartzComponentProps["allFiles"]) {
+function parseWikiLinks(
+  raw: string,
+  currentSlug: string,
+  allFiles: QuartzComponentProps["allFiles"],
+) {
   const chunks: Array<string | { label: string; href: string }> = []
   const regex = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g
 
@@ -97,7 +107,11 @@ function parseWikiLinks(raw: string, currentSlug: string, allFiles: QuartzCompon
   return chunks
 }
 
-function renderValue(value: unknown, currentSlug: string, allFiles: QuartzComponentProps["allFiles"]) {
+function renderValue(
+  value: unknown,
+  currentSlug: string,
+  allFiles: QuartzComponentProps["allFiles"],
+) {
   if (Array.isArray(value)) {
     const rendered = value
       .map((entry) => (typeof entry === "string" ? entry : String(entry)))
@@ -124,7 +138,11 @@ function renderValue(value: unknown, currentSlug: string, allFiles: QuartzCompon
   )
 }
 
-const ArticleInfobox: QuartzComponent = ({ fileData, displayClass, allFiles }: QuartzComponentProps) => {
+const ArticleInfobox: QuartzComponent = ({
+  fileData,
+  displayClass,
+  allFiles,
+}: QuartzComponentProps) => {
   if (fileData.slug === "index") return null
   const displayTokens = (displayClass ?? "").split(/\s+/).filter(Boolean)
   if (
@@ -173,7 +191,32 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass, allFiles }: Q
             src={resolvedImage}
             alt={String(fileData.frontmatter?.title ?? fileData.title ?? "Infobox image")}
           />
+          <button
+            type="button"
+            class="wiki-infobox__image-expand"
+            aria-label="Развернуть изображение"
+            title="Развернуть изображение"
+          >
+            ⤢
+          </button>
         </div>
+      )}
+      {resolvedImage && (
+        <dialog class="wiki-infobox__image-modal">
+          <button
+            type="button"
+            class="wiki-infobox__image-close"
+            aria-label="Закрыть изображение"
+            title="Закрыть изображение"
+          >
+            ✕
+          </button>
+          <img
+            class="wiki-infobox__image-modal-content"
+            src={resolvedImage}
+            alt={String(fileData.frontmatter?.title ?? fileData.title ?? "Infobox image")}
+          />
+        </dialog>
       )}
 
       {infoEntries.length > 0 && (
@@ -181,7 +224,7 @@ const ArticleInfobox: QuartzComponent = ({ fileData, displayClass, allFiles }: Q
           {infoEntries.map(([key, value]) => (
             <div key={key} class="wiki-infobox__row">
               <dt>{`${key}`}</dt>
-                  <dd>{renderValue(value, fileData.slug!, allFiles)}</dd>
+              <dd>{renderValue(value, fileData.slug!, allFiles)}</dd>
             </div>
           ))}
         </dl>
@@ -248,6 +291,7 @@ ArticleInfobox.css = `
 }
 
 .wiki-infobox__image-wrap {
+  position: relative;
   line-height: 0;
   border-bottom: 1px solid var(--lightgray);
   background: color-mix(in srgb, var(--lightgray) 30%, transparent);
@@ -260,6 +304,59 @@ ArticleInfobox.css = `
   object-position: center;
   display: block;
   margin: 0 !important;
+}
+
+.wiki-infobox__image-expand {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid color-mix(in srgb, var(--darkgray) 65%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--dark) 24%, transparent);
+  color: var(--light);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.wiki-infobox__image-modal {
+  border: none;
+  padding: 0;
+  max-width: min(96vw, 1700px);
+  max-height: 96vh;
+  width: fit-content;
+  background: transparent;
+}
+
+.wiki-infobox__image-modal::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.wiki-infobox__image-modal-content {
+  display: block;
+  max-width: min(96vw, 1700px);
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+}
+
+.wiki-infobox__image-close {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--darkgray) 65%, transparent);
+  background: color-mix(in srgb, var(--dark) 24%, transparent);
+  color: var(--light);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
 }
 
 .wiki-infobox__meta {
@@ -300,5 +397,6 @@ ArticleInfobox.css = `
   text-underline-offset: 2px;
 }
 `
+ArticleInfobox.afterDOMLoaded = infoboxImageExpandScript
 
 export default (() => ArticleInfobox) satisfies QuartzComponentConstructor

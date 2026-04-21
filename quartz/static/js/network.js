@@ -90,7 +90,6 @@
       [
         { type: "faction", label: "Фракции" },
         { type: "location", label: "Локации" },
-        { type: "event", label: "События" },
         { type: "reference", label: "Справка" },
       ],
       [
@@ -164,7 +163,6 @@
         npc_dead: true,
         faction: true,
         location: true,
-        event: true,
         reference: true,
         timeline: true,
         season: true,
@@ -228,7 +226,6 @@
         npc_dead: neutral,
         faction: neutral,
         location: neutral,
-        event: neutral,
         reference: neutral,
         timeline: neutral,
         season: neutral,
