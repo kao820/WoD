@@ -345,6 +345,58 @@ ArticleInfobox.css = `
   --chronicle-accent-text: #7d1e8d;
 }
 
+body[data-chronicle-tone="mage"] {
+  --chronicle-accent: #3a8eff;
+  --chronicle-accent-text: #3a8eff;
+}
+
+body[data-chronicle-tone="changeling"] {
+  --chronicle-accent: #ffd74a;
+  --chronicle-accent-text: #b28700;
+}
+
+body[data-chronicle-tone="demon"] {
+  --chronicle-accent: #38c772;
+  --chronicle-accent-text: #1f9a53;
+}
+
+body[data-chronicle-tone="werewolf"] {
+  --chronicle-accent: #ef5350;
+  --chronicle-accent-text: #cc2f2c;
+}
+
+body[data-chronicle-tone="hunter"] {
+  --chronicle-accent: #ff9800;
+  --chronicle-accent-text: #b66600;
+}
+
+body[data-chronicle-tone="vampire"] {
+  --chronicle-accent: #ab47bc;
+  --chronicle-accent-text: #7d1e8d;
+}
+
+body[data-chronicle-tone] article a.internal,
+body[data-chronicle-tone] .backlinks a.internal,
+body[data-chronicle-tone] .toc a.internal,
+body[data-chronicle-tone] .tags a.internal.tag-link {
+  color: color-mix(in srgb, var(--chronicle-accent-text, var(--chronicle-accent)) 82%, var(--dark));
+}
+
+body[data-chronicle-tone] .tags a.internal.tag-link,
+body[data-chronicle-tone] article a.internal {
+  background: color-mix(in srgb, var(--chronicle-accent) 12%, var(--light));
+  border-radius: 6px;
+  padding: 0.02rem 0.24rem;
+}
+
+body[data-chronicle-tone] .backlinks ul li::marker {
+  color: color-mix(in srgb, var(--chronicle-accent) 72%, var(--secondary));
+}
+
+body[data-chronicle-tone] .toc .active {
+  border-left-color: color-mix(in srgb, var(--chronicle-accent) 82%, var(--secondary));
+}
+
 
 @media (max-width: 1000px) {
   .wiki-infobox {

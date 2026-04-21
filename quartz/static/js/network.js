@@ -976,33 +976,6 @@
           graph.graphData(graph.graphData())
         }
 
-        function redrawGraphWithoutSimulationReset() {
-          if (!graph) return
-
-          if (typeof graph.refresh === "function") {
-            graph.refresh()
-            return
-          }
-
-          if (typeof graph.nodeCanvasObject === "function") {
-            graph.nodeCanvasObject(graph.nodeCanvasObject())
-            graph.linkColor(graph.linkColor())
-            graph.linkWidth(graph.linkWidth())
-            return
-          }
-
-          if (
-            typeof graph.pauseAnimation === "function" &&
-            typeof graph.resumeAnimation === "function"
-          ) {
-            graph.pauseAnimation()
-            graph.resumeAnimation()
-            return
-          }
-
-          graph.graphData(graph.graphData())
-        }
-
         function render() {
           saveNodeState()
           rebuildHighlights()
